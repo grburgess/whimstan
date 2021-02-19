@@ -135,7 +135,7 @@ def extract_xrt_data(plugin):
                   )
 
 
-def build_stan_data(*grbs: str, catalog=None):
+def build_stan_data(*grbs: str, catalog=None, cat_path="data"):
 
     
     N_grbs = len(grbs)
@@ -163,7 +163,8 @@ def build_stan_data(*grbs: str, catalog=None):
         z.append(catalog.catalog[grb].z)
         nH_mw.append(catalog.catalog[grb].nH_mw)
 
-        bpath = Path(f"data/grb{grb}")
+        cat_path = Path(cat_path)
+        bpath =  cat_path / f"/grb{grb}"
 
         o = OGIPLike("xrt",
                      observation=bpath / "apc.pi",
