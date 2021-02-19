@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
-
+import h5py
 import astropy.io.fits as fits
 import numpy as np
 import pandas as pd
@@ -12,6 +12,62 @@ silence_warnings()
 update_logging_level("WARNING")
 
 
+@dataclass
+class XRTCatalogEntry:
+
+    name: str
+    ra: float
+    dec: float
+    nH_mw: float
+    z: float
+
+
+class XRTCatalog(object):
+
+    def __init__(self, *grbs):
+
+        self._catalog = {}
+        
+        for grb in grbs:
+
+            self._catalog[grb.name] = grb
+
+    @property
+    def catalog(self):
+
+        return self._catalog
+
+    def to_file(self, file_name):
+
+
+        with h5py.File(file_name, "w") as f:
+
+            for k,v in self._catalog:
+
+                grp = f.create_group(k)
+                grp.attrs[ra] = v.ra
+                grp.attrs[dec] = v.dec
+                grp.attrs[z] = v.z
+                grp.attrs[nH_mw] = v.nH_mw
+    
+
+    @classmethod
+    def from_file(cls, file_name):
+
+        with h5py.File(file_name, "r") as f:
+
+            grbs = []
+            
+            for k, v in f.items():
+
+                tmp =XRTCatalogEntry(name=k, ra=v.ra, dec=v.dec, z=v.z, nH_mw=v.nH_mw)
+
+                grbs.append(tmp)
+
+
+        return cls(*grbs)
+
+    
 def build_tbabs_arg(ene):
 
     file_name = _get_data_file_path(Path("xsect/xsect_tbabs_wilm.fits"))
@@ -79,10 +135,9 @@ def extract_xrt_data(plugin):
                   )
 
 
-def build_stan_data(*grbs: str):
+def build_stan_data(*grbs: str, catalog=None):
 
-    initial_data = pd.read_json('new_data.json')
-
+    
     N_grbs = len(grbs)
     z = []
     nH_mw = []
@@ -105,8 +160,8 @@ def build_stan_data(*grbs: str):
 
         row = initial_data.loc[grb]
 
-        z.append(row["z"])
-        nH_mw.append(row["nh_gal"])
+        z.append(catalog.catalog[grb].z)
+        nH_mw.append(catalog.catalog[grb].nH_mw)
 
         bpath = Path(f"data/grb{grb}")
 
@@ -136,7 +191,7 @@ def build_stan_data(*grbs: str):
         ene_width.append(x.ene_width.tolist())
 
         p = build_tbabs_arg(x.ene_avg).tolist()
-        pz = build_tbabs_arg(x.ene_avg * (1 + float(row["z"])))
+        pz = build_tbabs_arg(x.ene_avg * (1 + catalog.catalog[grb].z))
         pca.append(p)
         pcaz.append(pz.tolist())
 
