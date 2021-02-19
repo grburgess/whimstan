@@ -42,13 +42,13 @@ class XRTCatalog(object):
 
         with h5py.File(file_name, "w") as f:
 
-            for k,v in self._catalog:
+            for k,v in self._catalog.items():
 
                 grp = f.create_group(k)
-                grp.attrs[ra] = v.ra
-                grp.attrs[dec] = v.dec
-                grp.attrs[z] = v.z
-                grp.attrs[nH_mw] = v.nH_mw
+                grp.attrs["ra"] = v.ra
+                grp.attrs["dec"] = v.dec
+                grp.attrs["z"] = v.z
+                grp.attrs["nH_mw"] = v.nH_mw
     
 
     @classmethod
@@ -60,7 +60,7 @@ class XRTCatalog(object):
             
             for k, v in f.items():
 
-                tmp =XRTCatalogEntry(name=k, ra=v.ra, dec=v.dec, z=v.z, nH_mw=v.nH_mw)
+                tmp =XRTCatalogEntry(name=k, ra=v.attrs["ra"], dec=v.attrs["dec"], z=v.attrs["z"], nH_mw=v.attrs["nH_mw"])
 
                 grbs.append(tmp)
 
