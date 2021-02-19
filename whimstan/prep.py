@@ -163,7 +163,7 @@ def build_stan_data(*grbs: str, catalog=None, cat_path="data"):
         nH_mw.append(catalog.catalog[grb].nH_mw)
 
         cat_path = Path(cat_path)
-        bpath =  cat_path / f"/grb{grb}"
+        bpath =  cat_path / f"grb{grb}"
 
         o = OGIPLike("xrt",
                      observation=bpath / "apc.pi",
