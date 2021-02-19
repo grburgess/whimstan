@@ -158,7 +158,6 @@ def build_stan_data(*grbs: str, catalog=None, cat_path="data"):
     exposure = []
     for grb in grbs:
 
-        row = initial_data.loc[grb]
 
         z.append(catalog.catalog[grb].z)
         nH_mw.append(catalog.catalog[grb].nH_mw)
