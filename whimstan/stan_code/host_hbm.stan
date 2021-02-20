@@ -62,7 +62,7 @@ transformed parameters{
   vector[N_grbs] log_nH_host;
   vector<lower=0>[N_grbs] nH_host;
 
-  log_nH_host = log_nH_host_mu + log_nH_host_raw * log_nH_host_sigma
+  log_nH_host = log_nH_host_mu + log_nH_host_raw * log_nH_host_sigma;
 
   
   K =  exp(log_K);
