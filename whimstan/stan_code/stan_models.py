@@ -4,7 +4,7 @@ import os
 _available_models = {}
 
 _available_models["simple_xrt"] = "simple_xrt.stan"
-_available_models["hbm_xrt"] = "hbm_xrt.stan"
+_available_models["hbm_xrt"] = "host_hbm.stan"
 
 
 class StanModel(object):
