@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
+from tqdm.auto import tqdm
 import h5py
 import astropy.io.fits as fits
 import numpy as np
@@ -101,12 +102,12 @@ def extract_xrt_data(plugin):
 
     n_chans_used = sum(plugin.mask)
 
-    print(n_chans_used)
+    
 
     mask = np.zeros(len(plugin.mask))
 
     mask[:n_chans_used] = np.where(plugin.mask)[0] + 1  # plus one for Stan
-    print(len(mask))
+    
 
     n_ene = len(plugin.response.monte_carlo_energies) - 1
     n_chan = len(plugin.response.ebounds) - 1
@@ -156,7 +157,7 @@ def build_stan_data(*grbs: str, catalog=None, cat_path="data"):
     ene_avg = []
     ene_width = []
     exposure = []
-    for grb in grbs:
+    for grb in tqdm(grbs, colour="#3DFF6C", desc="building GRBs"):
 
 
         z.append(catalog.catalog[grb].z)
@@ -165,12 +166,30 @@ def build_stan_data(*grbs: str, catalog=None, cat_path="data"):
         cat_path = Path(cat_path)
         bpath =  cat_path / f"grb{grb}"
 
-        o = OGIPLike("xrt",
-                     observation=bpath / "apc.pi",
-                     background=bpath / "apcback.pi",
-                     response=bpath / "apc.rmf",
-                     arf_file=bpath / "apc.arf"
-                     )
+        options = [f"{x}pc" for x in ["a","b", "c"]]
+        options.extend([f"{x}wt" for x in ["a","b", "c"]])
+
+
+        for opt in options:
+
+            try:
+            
+                o = OGIPLike("xrt",
+                             observation=bpath / f"{opt}.pi",
+                             background=bpath / f"{opt}back.pi",
+                             response=bpath / f"{opt}.rmf",
+                             arf_file=bpath / f"{opt}.arf"
+                             )
+                print(f"GRB {grb} using {opt}")
+                
+                break
+
+            except:
+
+                pass
+        else:
+
+            raise RuntimeError(f"No data for GRB {grb}")
 
         x = extract_xrt_data(o)
 
