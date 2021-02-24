@@ -50,9 +50,11 @@ def display_posterior_model_counts(plugin,
 
     for params in samples:
 
-        for i, (k, v) in enumerate(model.free_parameters.items()):
+        model.set_free_parameters(params)
+        
+        # for i, (k, v) in enumerate(model.free_parameters.items()):
 
-            v.value = params[i]
+        #     v.value = params[i]
 
         # first with no data
         if shade:
