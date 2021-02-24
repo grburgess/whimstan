@@ -44,29 +44,30 @@ transformed data{
 parameters{
 
   vector<upper=0>[N_grbs] index;
-  vector[N_grbs] log_K;
+  vector[N_grbs] log_K_raw;
 
   real log_nH_host_mu;
   real<lower=0> log_nH_host_sigma;
-
-  
   vector[N_grbs] log_nH_host_raw;
-  
+
   // vector<lower=0>[N_grbs] nH_mw;
 
 }
 
 
 transformed parameters{
-  vector<lower=0>[N_grbs] K;
+  vector[N_grbs] log_K;
+  vector[N_grbs] K;
   vector[N_grbs] log_nH_host;
-  vector<lower=0>[N_grbs] nH_host;
+  vector[N_grbs] nH_host;
 
   log_nH_host = log_nH_host_mu + log_nH_host_raw * log_nH_host_sigma;
 
+  log_K = log_K_raw -8;
   
-  K =  exp(log_K);
-  nH_host = exp(log_nH_host);
+
+  K =  pow(10, log_K);
+  nH_host = pow(10, log_nH_host);
 
 }
 
@@ -74,13 +75,13 @@ transformed parameters{
 model{
 
 
-  index ~ normal(-2,1);
-  log_K ~ normal( log(1e-4), 1);
+  index ~ normal(-2, 1);
+  log_K_raw ~ normal(0, 3);
   log_nH_host_raw ~ std_normal();
 
   log_nH_host_mu ~ normal(1, 1);
   log_nH_host_sigma ~ normal(0, 1);
-  
+
 
   target += reduce_sum(partial_log_like, all_N, grainsize, N_ene, host_precomputed_absorp, precomputed_absorp, ene_avg, ene_width, mask, n_chans_used, K, index, nH_host, nH_mw, rsp, exposure, exposure_ratio, counts, bkg );
 
