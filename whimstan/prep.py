@@ -123,10 +123,10 @@ def extract_xrt_data(plugin):
                   obs_count=[int(x) for x in plugin.observed_counts],
                   bkg_count=[int(x) for x in plugin.background_counts],
                   rsp=rsp,
-                  scale_factor=scale_factor,
+                  scale_factor=float(scale_factor),
                   mask=[int(x) for x in mask],
-                  n_chans_used=n_chans_used,
-                  exposure=plugin.exposure
+                  n_chans_used=int(n_chans_used),
+                  exposure=float(plugin.exposure)
 
 
                   )
@@ -200,13 +200,13 @@ def build_stan_data(*grbs: str, catalog=None, cat_path="data", is_sim=False):
             
         x = extract_xrt_data(o)
 
-        N_ene.append(x.n_ene)
-        N_chan.append(x.n_chan)
+        N_ene.append(int(x.n_ene))
+        N_chan.append(int(x.n_chan))
 
         n_chans_used.append(int(x.n_chans_used))
 
         rsp.append(x.rsp.tolist())
-        exposure_ratio.append(x.scale_factor)
+        exposure_ratio.append(float(x.scale_factor))
         counts.append(x.obs_count)
         bkg.append(x.bkg_count)
 
