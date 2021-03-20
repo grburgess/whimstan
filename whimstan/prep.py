@@ -1,13 +1,14 @@
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
-from tqdm.auto import tqdm
-import h5py
+
 import astropy.io.fits as fits
+import h5py
 import numpy as np
 import pandas as pd
 from astromodels.utils.data_files import _get_data_file_path
 from threeML import OGIPLike, silence_warnings, update_logging_level
+from tqdm.auto import tqdm
 
 silence_warnings()
 update_logging_level("WARNING")
@@ -28,7 +29,7 @@ class XRTCatalog(object):
     def __init__(self, *grbs):
 
         self._catalog = {}
-        
+
         for grb in grbs:
 
             self._catalog[grb.name] = grb
@@ -40,17 +41,15 @@ class XRTCatalog(object):
 
     def to_file(self, file_name):
 
-
         with h5py.File(file_name, "w") as f:
 
-            for k,v in self._catalog.items():
+            for k, v in self._catalog.items():
 
                 grp = f.create_group(k)
                 grp.attrs["ra"] = v.ra
                 grp.attrs["dec"] = v.dec
                 grp.attrs["z"] = v.z
                 grp.attrs["nH_mw"] = v.nH_mw
-    
 
     @classmethod
     def from_file(cls, file_name):
@@ -58,17 +57,17 @@ class XRTCatalog(object):
         with h5py.File(file_name, "r") as f:
 
             grbs = []
-            
+
             for k, v in f.items():
 
-                tmp =XRTCatalogEntry(name=k, ra=v.attrs["ra"], dec=v.attrs["dec"], z=v.attrs["z"], nH_mw=v.attrs["nH_mw"])
+                tmp = XRTCatalogEntry(
+                    name=k, ra=v.attrs["ra"], dec=v.attrs["dec"], z=v.attrs["z"], nH_mw=v.attrs["nH_mw"])
 
                 grbs.append(tmp)
 
-
         return cls(*grbs)
 
-    
+
 def build_tbabs_arg(ene):
 
     file_name = _get_data_file_path(Path("xsect/xsect_tbabs_wilm.fits"))
@@ -102,12 +101,9 @@ def extract_xrt_data(plugin):
 
     n_chans_used = sum(plugin.mask)
 
-    
-
     mask = np.zeros(len(plugin.mask))
 
     mask[:n_chans_used] = np.where(plugin.mask)[0] + 1  # plus one for Stan
-    
 
     n_ene = len(plugin.response.monte_carlo_energies) - 1
     n_chan = len(plugin.response.ebounds) - 1
@@ -136,9 +132,8 @@ def extract_xrt_data(plugin):
                   )
 
 
-def build_stan_data(*grbs: str, catalog=None, cat_path="data"):
+def build_stan_data(*grbs: str, catalog=None, cat_path="data", is_sim=False):
 
-    
     N_grbs = len(grbs)
     z = []
     nH_mw = []
@@ -157,40 +152,52 @@ def build_stan_data(*grbs: str, catalog=None, cat_path="data"):
     ene_avg = []
     ene_width = []
     exposure = []
-    for grb in tqdm(grbs, colour="#3DFF6C", desc="building GRBs"):
 
+    for grb in tqdm(grbs, colour="#3DFF6C", desc="building GRBs"):
 
         z.append(catalog.catalog[grb].z)
         nH_mw.append(catalog.catalog[grb].nH_mw)
 
         cat_path = Path(cat_path)
-        bpath =  cat_path / f"grb{grb}"
+        bpath = cat_path / f"grb{grb}"
 
-        options = [f"{x}pc" for x in ["a","b", "c"]]
-        options.extend([f"{x}wt" for x in ["a","b", "c"]])
+        if not  is_sim:
+        
+            options = [f"{x}pc" for x in ["a", "b", "c"]]
+            options.extend([f"{x}wt" for x in ["a", "b", "c"]])
 
+            for opt in options:
 
-        for opt in options:
+                try:
 
-            try:
-            
-                o = OGIPLike("xrt",
-                             observation=bpath / f"{opt}.pi",
-                             background=bpath / f"{opt}back.pi",
-                             response=bpath / f"{opt}.rmf",
-                             arf_file=bpath / f"{opt}.arf"
-                             )
-                print(f"GRB {grb} using {opt}")
-                
-                break
+                    o = OGIPLike("xrt",
+                                 observation=bpath / f"{opt}.pi",
+                                 background=bpath / f"{opt}back.pi",
+                                 response=bpath / f"{opt}.rmf",
+                                 arf_file=bpath / f"{opt}.arf"
+                                 )
+                    print(f"GRB {grb} using {opt}")
 
-            except:
+                    break
 
-                pass
+                except:
+
+                    pass
+            else:
+
+                raise RuntimeError(f"No data for GRB {grb}")
+
         else:
+            opt = "apc"
 
-            raise RuntimeError(f"No data for GRB {grb}")
-
+            o = OGIPLike("xrt",
+                         observation=bpath / f"{opt}.pha",
+                         background=bpath / f"{opt}_bak.pha",
+                         response=bpath / f"{opt}.rsp",
+                         spectrum_number=1
+                                 )
+            
+            
         x = extract_xrt_data(o)
 
         N_ene.append(x.n_ene)
