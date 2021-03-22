@@ -23,7 +23,6 @@ data{
   vector[N_chan] bkg[N_grbs];
   int mask[N_grbs,N_chan];
   vector[N_grbs] exposure;
-
 }
 
 
