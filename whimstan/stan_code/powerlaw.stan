@@ -9,7 +9,7 @@ vector powerlaw(vector ene, real K, real index) {
 }
 
 
-vector powerlaw_flux(vector ene, real K, real index) {
+vector powerlaw_flux(vector ene, real K, real index, real a, real b) {
 
 
   real norm;
@@ -20,7 +20,7 @@ vector powerlaw_flux(vector ene, real K, real index) {
 
           real dp2 = 2 + index;
 
-         intflux =  (pow(b, dp2) - pow(a, dp2)) / dp2;
+	  intflux =  (pow(b, dp2) - pow(a, dp2)) / dp2;}
      else{
 
          intflux = - log(a/b);
