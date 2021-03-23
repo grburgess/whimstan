@@ -43,7 +43,7 @@ transformed data{
 parameters{
 
   vector<upper=0>[N_grbs] index;
-  vector[N_grbs] log_K_raw;
+  vector[N_grbs] log_K_raw; // raw energy flux norm
 
   real log_nH_host_mu;
   real<lower=0> log_nH_host_sigma;
@@ -55,14 +55,14 @@ parameters{
 
 
 transformed parameters{
-  vector[N_grbs] log_K;
+  vector[N_grbs] log_K; // log eflux
   vector[N_grbs] K;
   vector[N_grbs] log_nH_host;
   vector[N_grbs] nH_host;
 
   log_nH_host = log_nH_host_mu + log_nH_host_raw * log_nH_host_sigma;
 
-  log_K = log_K_raw -8;
+  log_K = log_K_raw -12;
   
 
   K =  pow(10, log_K);

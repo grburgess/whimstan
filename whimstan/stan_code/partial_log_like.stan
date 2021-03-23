@@ -8,7 +8,7 @@ real partial_log_like(int [] n_slice, int start, int end, int N_ene, vector[] ho
     int n = n_slice[i];
 
 
-    vector[N_ene] source_spectrum = powerlaw(ene_avg[n], K[n], index[n]) .* absorption(nH_host[n], host_precomputed_absorp[n]) .* absorption(nH_mw[n], precomputed_absorp[n]);
+    vector[N_ene] source_spectrum = powerlaw_flux(ene_avg[n], K[n], index[n], 0.4, 15) .* absorption(nH_host[n], host_precomputed_absorp[n]) .* absorption(nH_mw[n], precomputed_absorp[n]);
 
 
     vector[N_ene] integral_flux = source_spectrum .* ene_width[n];
