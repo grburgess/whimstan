@@ -78,7 +78,7 @@ model{
   log_K_raw ~ normal(0, 3);
   log_nH_host_raw ~ std_normal();
 
-  log_nH_host_mu ~ normal(1, 1);
+  log_nH_host_mu ~ normal(0, 1);
   log_nH_host_sigma ~ normal(0, 1);
 
 

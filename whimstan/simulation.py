@@ -8,12 +8,12 @@ import numpy as np
 import popsynth
 from astromodels import Model, PointSource, Powerlaw_Eflux, TbAbs
 from astropy.coordinates import SkyCoord
-from astropy.cosmology import Planck18 as cosmo
+from astropy.cosmology import Planck15 as cosmo
 from gdpyc import DustMap, GasMap
 from threeML import (DataList, JointLikelihood, OGIPLike,
                      display_spectrum_model_counts, quiet_mode)
 
-from .prep import XRTCatalogEntry, XRTCatalog
+from .prep import XRTCatalog, XRTCatalogEntry
 
 
 class SpectrumGenerator(object):
@@ -30,7 +30,7 @@ class SpectrumGenerator(object):
         self._mw_nh = None
 
         self._demo_plugin = demo_plugin
-        
+
         self._get_mw_nh()
 
         self._create_plugin()
@@ -46,15 +46,15 @@ class SpectrumGenerator(object):
         quiet_mode()
 
         if self._demo_plugin is None:
-        
-            self._demo_plugin = OGIPLike("tmp",
-                            observation="data/grb050401/apcsource.pi",
-                            background="data/grb050401/apcback.pi",
-                            response="data/grb050401/apc.rmf",
-                            arf_file="data/grb050401/apc.arf",
-                            verbose=False
 
-                            )
+            self._demo_plugin = OGIPLike("tmp",
+                                         observation="data/grb050401/apcsource.pi",
+                                         background="data/grb050401/apcback.pi",
+                                         response="data/grb050401/apc.rmf",
+                                         arf_file="data/grb050401/apc.arf",
+                                         verbose=False
+
+                                         )
 
         spec = Powerlaw_Eflux(F=self._eflux, a=.4, b=15) * TbAbs(NH=self._mw_nh,
                                                                  redshift=0) * TbAbs(NH=self._host_nh, redshift=self._z)
@@ -90,7 +90,6 @@ class SpectrumFactory(object):
 
         for i in range(population.n_objects):
 
-            
             name = f"grb00{i}"
 
             sg = SpectrumGenerator(name=name,
@@ -108,7 +107,7 @@ class SpectrumFactory(object):
     def write_data(self, path="data"):
 
         cat_entries = []
-        
+
         root = Path(path)
 
         root.mkdir(parents=True, exist_ok=True)
@@ -117,7 +116,7 @@ class SpectrumFactory(object):
 
             p = root / s.name
             p.mkdir(parents=True, exist_ok=True)
-            
+
             pi: OGIPLike = s.simulated_data
             pi.write_pha(p / "apc", force_rsp_write=True)
 
@@ -126,7 +125,7 @@ class SpectrumFactory(object):
         xrt_cat = XRTCatalog(*cat_entries)
 
         xrt_cat.to_file("sim_cat.h5")
-            
+
     @property
     def spectra(self) -> List:
         return self._spectra
