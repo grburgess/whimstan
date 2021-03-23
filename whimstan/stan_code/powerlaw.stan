@@ -22,13 +22,6 @@ vector powerlaw_eflux(vector ene, real K, real index, real a, real b) {
     intflux = pow(piv, -index) * (pow(b, dp2) - pow(a, dp2)) / dp2;
 
 	  }
-  else {
-
-    intflux = -piv*piv * log(a/b);
-
-	  }
-  
-  return K * pow(ene/piv, index);
 
 
 }
