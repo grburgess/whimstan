@@ -26,7 +26,7 @@ vector powerlaw_flux(vector ene, real K, real index, real a, real b) {
          intflux = - log(a/b);
        }
 
-    norm = (K / (intflux) ) * erg2keV
+  norm = (K / (intflux) ) * erg2keV;
        
   return norm * pow(ene, index);
 
