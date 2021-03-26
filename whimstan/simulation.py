@@ -9,6 +9,7 @@ import popsynth
 from astromodels import Model, PointSource, Powerlaw_Eflux, TbAbs
 from astropy.coordinates import SkyCoord
 from astropy.cosmology import Planck15 as cosmo
+from bb_astromodels import Integrate_Absori
 from gdpyc import DustMap, GasMap
 from threeML import (DataList, JointLikelihood, OGIPLike,
                      display_spectrum_model_counts, quiet_mode)
@@ -18,7 +19,7 @@ from .prep import XRTCatalog, XRTCatalogEntry
 
 class SpectrumGenerator(object):
 
-    def __init__(self, name, eflux, index, ra, dec, z, host_nh, demo_plugin=None):
+    def __init__(self, name, eflux, index, ra, dec, z, host_nh, whim_n0=None, whim_T=None, demo_plugin=None):
 
         self._name = name
         self._eflux = eflux
@@ -28,6 +29,8 @@ class SpectrumGenerator(object):
         self._z = z
         self._host_nh = host_nh
         self._mw_nh = None
+        self._whim_n0 = whim_n0
+        self._whim_T = whim_T
 
         self._demo_plugin = demo_plugin
 
@@ -40,7 +43,7 @@ class SpectrumGenerator(object):
         coord = SkyCoord(ra=self._ra, dec=self._dec, unit="deg", frame="icrs")
 
         self._mw_nh = GasMap.nhf(
-            coord, nhmap='DL', radius=1*u.deg).value / 10e22
+            coord, nhmap='DL', radius=1*u.deg).value / 1e22
 
     def _create_plugin(self):
         quiet_mode()
@@ -56,8 +59,14 @@ class SpectrumGenerator(object):
 
                                          )
 
-        spec = Powerlaw_Eflux(F=self._eflux, a=.4, b=15) * TbAbs(NH=self._mw_nh,
-                                                                 redshift=0) * TbAbs(NH=self._host_nh, redshift=self._z)
+        spec = Powerlaw_Eflux(F=self._eflux, index=self._index, a=.4, b=15) * TbAbs(NH=self._mw_nh,
+                                                                                    redshift=0) * TbAbs(NH=self._host_nh, redshift=self._z)
+
+        if (self._whim_n0 is not None) and (self._whim_T is not None):
+
+            spec = spec * \
+                Integrate_Absori(n0=self._whim_n0,
+                                 temp=self._whim_T, redshift=self._z)
 
         ps = PointSource("tmp", self._ra, self._dec, spectral_shape=spec)
         model = Model(ps)
@@ -84,7 +93,7 @@ class SpectrumGenerator(object):
 
 class SpectrumFactory(object):
 
-    def __init__(self, population: popsynth.Population):
+    def __init__(self, population: popsynth.Population, whim_n0=None, whim_T=None):
 
         self._spectra = []
 
@@ -98,9 +107,9 @@ class SpectrumFactory(object):
                                    ra=population.ra[i],
                                    dec=population.dec[i],
                                    z=population.distances[i],
-                                   host_nh=population.host_nh[i]/1e22
-
-                                   )
+                                   host_nh=population.host_nh[i]/1.e22,
+                                   whim_n0=whim_n0,
+                                   whim_T=whim_T)
 
             self._spectra.append(sg)
 
