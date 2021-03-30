@@ -3,18 +3,14 @@ from pathlib import Path
 from typing import List
 
 import astropy.units as u
-import numba as nb
-import numpy as np
 import popsynth
 from astromodels import Model, PointSource, Powerlaw_Eflux, TbAbs
 from astropy.coordinates import SkyCoord
-from astropy.cosmology import Planck15 as cosmo
 from bb_astromodels import Integrate_Absori
-from gdpyc import DustMap, GasMap
-from threeML import (DataList, JointLikelihood, OGIPLike,
-                     display_spectrum_model_counts, quiet_mode)
+from gdpyc import GasMap
+from threeML import OGIPLike, quiet_mode
 
-from .prep import XRTCatalog, XRTCatalogEntry
+from .catalog import XRTCatalog, XRTCatalogEntry
 
 
 class SpectrumGenerator(object):
@@ -86,9 +82,21 @@ class SpectrumGenerator(object):
         return self._simulated_data
 
     @property
-    def xrt_catalof_entry(self):
+    def xrt_catalog_entry(self):
 
-        return XRTCatalogEntry(self._name.replace("grb", ""), self._ra, self._dec, self._mw_nh, self._z)
+        return XRTCatalogEntry(self._name.replace("grb", ""),
+                               self._ra,
+                               self._dec,
+                               self._mw_nh,
+                               self._z,
+                               nH_host_sim=self._host_nh,
+                               index_sim=self._index,
+                               flux_sim=self._eflux,
+                               n0_sim=self._whim_n0,
+                               temp_sim=self._whim_T
+
+
+                               )
 
 
 class SpectrumFactory(object):
@@ -129,7 +137,7 @@ class SpectrumFactory(object):
             pi: OGIPLike = s.simulated_data
             pi.write_pha(p / "apc", force_rsp_write=True)
 
-            cat_entries.append(s.xrt_catalof_entry)
+            cat_entries.append(s.xrt_catalog_entry)
 
         xrt_cat = XRTCatalog(*cat_entries)
 

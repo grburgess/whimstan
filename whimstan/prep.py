@@ -1,71 +1,16 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import astropy.io.fits as fits
 import h5py
 import numpy as np
-import pandas as pd
 from astromodels.utils.data_files import _get_data_file_path
 from threeML import OGIPLike, silence_warnings, update_logging_level
 from tqdm.auto import tqdm
 
 silence_warnings()
 update_logging_level("WARNING")
-
-
-@dataclass
-class XRTCatalogEntry:
-
-    name: str
-    ra: float
-    dec: float
-    nH_mw: float
-    z: float
-
-
-class XRTCatalog(object):
-
-    def __init__(self, *grbs):
-
-        self._catalog = {}
-
-        for grb in grbs:
-
-            self._catalog[grb.name] = grb
-
-    @property
-    def catalog(self):
-
-        return self._catalog
-
-    def to_file(self, file_name):
-
-        with h5py.File(file_name, "w") as f:
-
-            for k, v in self._catalog.items():
-
-                grp = f.create_group(k)
-                grp.attrs["ra"] = v.ra
-                grp.attrs["dec"] = v.dec
-                grp.attrs["z"] = v.z
-                grp.attrs["nH_mw"] = v.nH_mw
-
-    @classmethod
-    def from_file(cls, file_name):
-
-        with h5py.File(file_name, "r") as f:
-
-            grbs = []
-
-            for k, v in f.items():
-
-                tmp = XRTCatalogEntry(
-                    name=k, ra=v.attrs["ra"], dec=v.attrs["dec"], z=v.attrs["z"], nH_mw=v.attrs["nH_mw"])
-
-                grbs.append(tmp)
-
-        return cls(*grbs)
 
 
 def build_tbabs_arg(ene):
@@ -161,8 +106,8 @@ def build_stan_data(*grbs: str, catalog=None, cat_path="data", is_sim=False):
         cat_path = Path(cat_path)
         bpath = cat_path / f"grb{grb}"
 
-        if not  is_sim:
-        
+        if not is_sim:
+
             options = [f"{x}pc" for x in ["a", "b", "c"]]
             options.extend([f"{x}wt" for x in ["a", "b", "c"]])
 
@@ -195,9 +140,8 @@ def build_stan_data(*grbs: str, catalog=None, cat_path="data", is_sim=False):
                          background=bpath / f"{opt}_bak.pha",
                          response=bpath / f"{opt}.rsp",
                          spectrum_number=1
-                                 )
-            
-            
+                         )
+
         x = extract_xrt_data(o)
 
         N_ene.append(int(x.n_ene))
