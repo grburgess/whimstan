@@ -82,6 +82,6 @@ model{
   log_nH_host_sigma ~ normal(0, 1);
 
 
-  target += reduce_sum(partial_log_like, all_N, grainsize, N_ene, host_precomputed_absorp, precomputed_absorp, ene_avg, ene_width, mask, n_chans_used, K, index, nH_host, nH_mw, rsp, exposure, exposure_ratio, counts, bkg );
+  target += reduce_sum(partial_log_like, all_N, grainsize, N_ene, N_chan, host_precomputed_absorp, precomputed_absorp, ene_avg, ene_width, mask, n_chans_used, K, index, nH_host, nH_mw, rsp, exposure, exposure_ratio, counts, bkg );
 
 }
