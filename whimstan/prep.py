@@ -10,6 +10,9 @@ from astromodels.utils.data_files import _get_data_file_path
 from threeML import OGIPLike, silence_warnings, update_logging_level
 from tqdm.auto import tqdm
 
+from whimstan.absori_precalc import get_abundance, load_absori_base, get_spec, sum_sigma_interp_precalc
+
+
 silence_warnings()
 update_logging_level("WARNING")
 
@@ -132,7 +135,7 @@ def extract_xrt_data(plugin):
                   )
 
 
-def build_stan_data(*grbs: str, catalog=None, cat_path="data", is_sim=False):
+def build_stan_data(*grbs: str, catalog=None, cat_path="data", is_sim=False, use_absori=False):
 
     N_grbs = len(grbs)
     z = []
@@ -152,7 +155,7 @@ def build_stan_data(*grbs: str, catalog=None, cat_path="data", is_sim=False):
     ene_avg = []
     ene_width = []
     exposure = []
-
+    
     for grb in tqdm(grbs, colour="#3DFF6C", desc="building GRBs"):
 
         z.append(catalog.catalog[grb].z)
@@ -221,6 +224,51 @@ def build_stan_data(*grbs: str, catalog=None, cat_path="data", is_sim=False):
         pca.append(p)
         pcaz.append(pz.tolist())
 
+        # absori stuff
+                                  
+    # absori stuff 
+    if use_absori:
+
+        ion, sigma, atomicnumber, absori_base_energy = load_absori_base()
+        abundance = get_abundance()
+        sum_sigma_interp = np.zeros((N_grbs, N_ene[0], 10, 26))
+
+        # calc ionizing spectrum - for fixed gamma=2 at the moment
+        spec = get_spec()
+
+        for i, zval in enumerate(z):
+            sum_sigma_interp[i] = sum_sigma_interp_precalc(zval, np.array(ene_avg[i]),
+                                                           absori_base_energy,
+                                                           sigma.T, 0.02)
+        return dict(
+            N_grbs=N_grbs,
+            N_chan=N_chan[0],
+            N_ene=N_ene[0],
+            rsp=rsp,
+            nH_mw=nH_mw,
+            exposure_ratio=exposure_ratio,
+            ene_avg=ene_avg,
+            ene_width=ene_width,
+            counts=counts,
+            bkg=bkg,
+            mask=mask,
+            n_chans_used=n_chans_used,
+            z=z,
+            precomputed_absorp=pca,
+            host_precomputed_absorp=pcaz,
+
+            exposure=exposure,
+
+            #absori
+            spec=spec,
+            ion=ion,
+            sigma=sigma,
+            atomicnumber=atomicnumber,
+            sum_sigma_interp=sum_sigma_interp,
+            abundance=abundance,
+            xi=1,# fixed at the moment
+        )
+            
     return dict(
         N_grbs=N_grbs,
         N_chan=N_chan[0],
