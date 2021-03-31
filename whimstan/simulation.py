@@ -3,23 +3,19 @@ from pathlib import Path
 from typing import List
 
 import astropy.units as u
-import numba as nb
-import numpy as np
 import popsynth
 from astromodels import Model, PointSource, Powerlaw_Eflux, TbAbs
 from astropy.coordinates import SkyCoord
-from astropy.cosmology import Planck15 as cosmo
 from bb_astromodels import Integrate_Absori
-from gdpyc import DustMap, GasMap
-from threeML import (DataList, JointLikelihood, OGIPLike,
-                     display_spectrum_model_counts, quiet_mode)
+from gdpyc import GasMap
+from threeML import OGIPLike, quiet_mode
 
-from .prep import XRTCatalog, XRTCatalogEntry
+from .catalog import XRTCatalog, XRTCatalogEntry
 
 
 class SpectrumGenerator(object):
 
-    def __init__(self, name, eflux, index, ra, dec, z, host_nh, whim_n0=None, whim_T=None, demo_plugin=None):
+    def __init__(self, name, eflux, index, ra, dec, z, host_nh, mw_nh , whim_n0=None, whim_T=None, demo_plugin=None):
 
         self._name = name
         self._eflux = eflux
@@ -28,13 +24,14 @@ class SpectrumGenerator(object):
         self._dec = dec
         self._z = z
         self._host_nh = host_nh
-        self._mw_nh = None
+        self._mw_nh = mw_nh
         self._whim_n0 = whim_n0
         self._whim_T = whim_T
 
         self._demo_plugin = demo_plugin
 
-        self._get_mw_nh()
+        # now this is done in pop synth
+#        self._get_mw_nh()
 
         self._create_plugin()
 
@@ -86,9 +83,21 @@ class SpectrumGenerator(object):
         return self._simulated_data
 
     @property
-    def xrt_catalof_entry(self):
+    def xrt_catalog_entry(self):
 
-        return XRTCatalogEntry(self._name.replace("grb", ""), self._ra, self._dec, self._mw_nh, self._z)
+        return XRTCatalogEntry(self._name.replace("grb", ""),
+                               self._ra,
+                               self._dec,
+                               self._mw_nh,
+                               self._z,
+                               nH_host_sim=self._host_nh,
+                               index_sim=self._index,
+                               flux_sim=self._eflux,
+                               n0_sim=self._whim_n0,
+                               temp_sim=self._whim_T
+
+
+                               )
 
 
 class SpectrumFactory(object):
@@ -108,12 +117,13 @@ class SpectrumFactory(object):
                                    dec=population.dec[i],
                                    z=population.distances[i],
                                    host_nh=population.host_nh[i]/1.e22,
+                                   mw_nh=population.mw_nh[i]/1.e22,
                                    whim_n0=whim_n0,
                                    whim_T=whim_T)
 
             self._spectra.append(sg)
 
-    def write_data(self, path="data"):
+    def write_data(self, path="data", catalog_name="sim_cat.h5"):
 
         cat_entries = []
 
@@ -129,11 +139,11 @@ class SpectrumFactory(object):
             pi: OGIPLike = s.simulated_data
             pi.write_pha(p / "apc", force_rsp_write=True)
 
-            cat_entries.append(s.xrt_catalof_entry)
+            cat_entries.append(s.xrt_catalog_entry)
 
         xrt_cat = XRTCatalog(*cat_entries)
 
-        xrt_cat.to_file("sim_cat.h5")
+        xrt_cat.to_file(catalog_name)
 
     @property
     def spectra(self) -> List:
