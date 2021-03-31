@@ -7,6 +7,7 @@ import popsynth
 import scipy.special as sf
 from astromodels import Powerlaw_Eflux, TbAbs
 from astropy.coordinates import SkyCoord
+import astropy.units as u
 from bb_astromodels import Integrate_Absori
 from gdpyc import GasMap
 from popsynth.utils.progress_bar import progress_bar
@@ -148,7 +149,7 @@ class MilkyWayGas(popsynth.AuxiliarySampler):
 
 class ObscuredFluxSampler(popsynth.DerivedLumAuxSampler):
 
-    def __init__(self, a: float = .4, b float: = 15, whim_n0: Optional[float] = None, whim_T: Optional[float] = None):
+    def __init__(self, a: float = .4, b: float = 15, whim_n0: Optional[float] = None, whim_T: Optional[float] = None):
         """
         computes the obscured flux from the GRB by integrating the spectra
 
@@ -229,8 +230,6 @@ def create_simulation(r0: float = 5,
 
     if use_clouds:
 
-
-g
         # the host galaxy gas will be
         # created by embedding GRBs in
         # clouds
@@ -249,21 +248,21 @@ g
         host_nh.mu = host_gas_mean
         host_nh.sigma = 0.5
 
-    # there are no random variables for the milky way gas 
+    # there are no random variables for the milky way gas
     mw_nh = MilkyWayGas()
 
-    # GRB spectrum 
+    # GRB spectrum
 
     # sample the spectral index
     # of the power law
-    
+
     spec_idx = popsynth.aux_samplers.NormalAuxSampler(
         name="spec_idx", observed=False)
     spec_idx.mu = spec_idx_mean
     spec_idx.sigma = spec_idx_std
 
     # sample the the intergral energy flux of
-    # the power law 
+    # the power law
     powerlaw = SchechterSampler()
     powerlaw.Lmin = Lmin
     powerlaw.alpha = alpha
@@ -271,7 +270,7 @@ g
     # now we compute the "obscured" luminosity
     # that would lead to the flux actually observed
     # by the XRT
-    
+
     ls = ObscuredFluxSampler()
 
     ls.set_secondary_sampler(spec_idx)
