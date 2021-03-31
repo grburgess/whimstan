@@ -5,7 +5,7 @@ _available_models = {}
 
 _available_models["simple_xrt"] = "simple_xrt.stan"
 _available_models["hbm_xrt"] = "host_hbm.stan"
-
+_available_models["hbm_absori_xrt"] = "host_hbm_absori.stan"
 
 class StanModel(object):
     def __init__(self, name, stan_file):
