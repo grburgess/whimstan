@@ -15,7 +15,7 @@ from .catalog import XRTCatalog, XRTCatalogEntry
 
 class SpectrumGenerator(object):
 
-    def __init__(self, name, eflux, index, ra, dec, z, host_nh, whim_n0=None, whim_T=None, demo_plugin=None):
+    def __init__(self, name, eflux, index, ra, dec, z, host_nh, mw_nh , whim_n0=None, whim_T=None, demo_plugin=None):
 
         self._name = name
         self._eflux = eflux
@@ -24,13 +24,14 @@ class SpectrumGenerator(object):
         self._dec = dec
         self._z = z
         self._host_nh = host_nh
-        self._mw_nh = None
+        self._mw_nh = mw_nh
         self._whim_n0 = whim_n0
         self._whim_T = whim_T
 
         self._demo_plugin = demo_plugin
 
-        self._get_mw_nh()
+        # now this is done in pop synth
+#        self._get_mw_nh()
 
         self._create_plugin()
 
@@ -116,12 +117,13 @@ class SpectrumFactory(object):
                                    dec=population.dec[i],
                                    z=population.distances[i],
                                    host_nh=population.host_nh[i]/1.e22,
+                                   mw_nh=population.mw_nh[i]/1.e22,
                                    whim_n0=whim_n0,
                                    whim_T=whim_T)
 
             self._spectra.append(sg)
 
-    def write_data(self, path="data"):
+    def write_data(self, path="data", catalog_name="sim_cat.h5"):
 
         cat_entries = []
 
@@ -141,7 +143,7 @@ class SpectrumFactory(object):
 
         xrt_cat = XRTCatalog(*cat_entries)
 
-        xrt_cat.to_file("sim_cat.h5")
+        xrt_cat.to_file(catalog_name)
 
     @property
     def spectra(self) -> List:
