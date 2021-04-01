@@ -88,7 +88,7 @@ model{
   log_nH_host_sigma ~ normal(0, 1);
 
   index_mu ~ normal(-2, 1);
-  index_sigma ~ std_normal(0, 1);
+  index_sigma ~ std_normal();
 
   
 
