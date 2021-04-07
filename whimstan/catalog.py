@@ -11,8 +11,8 @@ class XRTCatalogEntry:
     name: str
     ra: float
     dec: float
-    nH_mw: float
     z: float
+    nH_mw: Optional[float] = None
     nH_host_sim: Optional[float] = None
     index_sim: Optional[float] = None
     flux_sim: Optional[float] = None
@@ -45,7 +45,10 @@ class XRTCatalog(object):
                 grp.attrs["ra"] = v.ra
                 grp.attrs["dec"] = v.dec
                 grp.attrs["z"] = v.z
-                grp.attrs["nH_mw"] = v.nH_mw
+                
+                if v.nH_mw is not None:
+                    
+                    grp.attrs["nH_mw"] = v.nH_mw
 
                 if v.nH_host_sim is not None:
 
@@ -81,8 +84,11 @@ class XRTCatalog(object):
                 flux_sim = None
                 n0_sim = None
                 temp_sim = None
-                
+                nH_mw = None
 
+                if "nH_mw" in v.attrs:
+
+                    nH_mw = v.attrs["nH_mw"]
                 
                 if "nH_host_sim" in v.attrs:
 
@@ -109,13 +115,12 @@ class XRTCatalog(object):
                     ra=v.attrs["ra"],
                     dec=v.attrs["dec"],
                     z=v.attrs["z"],
-                    nH_mw=v.attrs["nH_mw"],
+                    nH_mw=nH_mw,
                     nH_host_sim=nH_host_sim,
                     index_sim=index_sim,
                     flux_sim=flux_sim,
                     n0_sim=n0_sim,
                     temp_sim=temp_sim
-
                 )
 
                 grbs.append(tmp)
