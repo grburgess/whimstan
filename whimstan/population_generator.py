@@ -1,13 +1,13 @@
 from pathlib import Path
 from typing import Dict, List, Optional
 
+import astropy.units as u
 import numba as nb
 import numpy as np
 import popsynth
 import scipy.special as sf
 from astromodels import Powerlaw_Eflux, TbAbs
 from astropy.coordinates import SkyCoord
-import astropy.units as u
 from bb_astromodels import Integrate_Absori
 from gdpyc import GasMap
 from popsynth.utils.progress_bar import progress_bar
@@ -179,13 +179,15 @@ class ObscuredFluxSampler(popsynth.DerivedLumAuxSampler):
         # kev to erg
         kev2erg = 1.6021766339999998e-09
 
+        n_energies_for_intergration = 50
+
+        intergration_energies = np.geomspace(
+            self._a, self._b, num=n_energies_for_intergration)
+
         out = np.empty(size)
 
         # we want to have the flux measured in the XRT so
         # we need to integrate the obscured flux
-
-        # e_edges between a and b
-        e_edges = np.geomspace(self._a, self._b, 50)
         
         for i in progress_bar(range(size), desc="computing obscured fluxes"):
 
@@ -209,10 +211,12 @@ class ObscuredFluxSampler(popsynth.DerivedLumAuxSampler):
             # now compute the energy integral.
             # using the slower quad here because
             # the gas models have a shit load of lines
+
             #flux = quad(lambda x: x * spec(x), self._a, self._b)[0] * kev2erg
 
-            # quad is too slow for whim calc... so try trapz.
-            flux = np.trapz(e_edges*spec(e_edges), e_edges) * kev2erg
+            flux = np.trapz(
+                intergration_energies*spec(intergration_energies),
+                intergration_energies,) * kev2erg
             
             out[i] = flux
 
