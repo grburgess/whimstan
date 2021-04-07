@@ -6,6 +6,7 @@ _available_models = {}
 _available_models["simple_xrt"] = "simple_xrt.stan"
 _available_models["hbm_xrt"] = "host_hbm.stan"
 
+# t_fixed => T=10**7 K at the moment!
 _available_models["whim_only_t_fixed"] = "whimonly_t_fixed.stan"
 _available_models["whim_and_mw_t_fixed"] = "whim_and_mw_t_fixed.stan"
 _available_models["all_t_fixed"] = "all_t_fixed.stan"
