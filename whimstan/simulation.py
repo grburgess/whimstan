@@ -4,6 +4,7 @@ from typing import List
 
 import astropy.units as u
 import popsynth
+from popsynth.utils.progress_bar import progress_bar
 from astromodels import Model, PointSource, Powerlaw_Eflux, TbAbs
 from astropy.coordinates import SkyCoord
 from bb_astromodels import Integrate_Absori
@@ -15,7 +16,9 @@ from .catalog import XRTCatalog, XRTCatalogEntry
 
 class SpectrumGenerator(object):
 
-    def __init__(self, name, eflux, index, ra, dec, z, host_nh, mw_nh , whim_n0=None, whim_T=None, demo_plugin=None):
+    def __init__(self, name, eflux, index, ra, dec, z, host_nh,
+                 mw_nh, whim_n0=None, whim_T=None, demo_plugin=None,
+                 use_mw_gas=True, use_host_gas=True):
 
         self._name = name
         self._eflux = eflux
@@ -27,7 +30,9 @@ class SpectrumGenerator(object):
         self._mw_nh = mw_nh
         self._whim_n0 = whim_n0
         self._whim_T = whim_T
-
+        self._use_mw_gas = use_mw_gas
+        self._use_host_gas = use_host_gas
+        
         self._demo_plugin = demo_plugin
 
         # now this is done in pop synth
@@ -56,8 +61,11 @@ class SpectrumGenerator(object):
 
                                          )
 
-        spec = Powerlaw_Eflux(F=self._eflux, index=self._index, a=.4, b=15) * TbAbs(NH=self._mw_nh,
-                                                                                    redshift=0) * TbAbs(NH=self._host_nh, redshift=self._z)
+        spec = Powerlaw_Eflux(F=self._eflux, index=self._index, a=.4, b=15)
+        if self._use_mw_gas:
+            spec *= TbAbs(NH=self._mw_nh, redshift=0)
+        if self._use_host_gas:
+            spec *= TbAbs(NH=self._host_nh, redshift=self._z)
 
         if (self._whim_n0 is not None) and (self._whim_T is not None):
 
@@ -88,8 +96,8 @@ class SpectrumGenerator(object):
         return XRTCatalogEntry(self._name.replace("grb", ""),
                                self._ra,
                                self._dec,
-                               self._mw_nh,
                                self._z,
+                               self._mw_nh,
                                nH_host_sim=self._host_nh,
                                index_sim=self._index,
                                flux_sim=self._eflux,
@@ -102,24 +110,38 @@ class SpectrumGenerator(object):
 
 class SpectrumFactory(object):
 
-    def __init__(self, population: popsynth.Population, whim_n0=None, whim_T=None):
+    def __init__(self, population: popsynth.Population, whim_n0=None, whim_T=None,
+                 use_mw_gas=True, use_host_gas=True):
 
         self._spectra = []
 
-        for i in range(population.n_objects):
+        for i in progress_bar(range(population.n_objects), desc="Calculating the simulated datasets"):
 
             name = f"grb00{i}"
 
+            if use_mw_gas:
+                mw_nh = population.mw_nh[i]/1.e22
+            else:
+                mw_nh = None
+
+            if use_host_gas:
+                host_nh = population.host_nh[i]/1.e22
+            else:
+                host_nh = None
+
+        
             sg = SpectrumGenerator(name=name,
                                    eflux=population.fluxes_latent[i],
                                    index=population.spec_idx[i],
                                    ra=population.ra[i],
                                    dec=population.dec[i],
                                    z=population.distances[i],
-                                   host_nh=population.host_nh[i]/1.e22,
-                                   mw_nh=population.mw_nh[i]/1.e22,
+                                   host_nh=host_nh,
+                                   mw_nh=mw_nh,
                                    whim_n0=whim_n0,
-                                   whim_T=whim_T)
+                                   whim_T=whim_T,
+                                   use_mw_gas=use_mw_gas,
+                                   use_host_gas=use_host_gas)
 
             self._spectra.append(sg)
 
@@ -142,7 +164,7 @@ class SpectrumFactory(object):
             cat_entries.append(s.xrt_catalog_entry)
 
         xrt_cat = XRTCatalog(*cat_entries)
-
+        
         xrt_cat.to_file(catalog_name)
 
     @property
