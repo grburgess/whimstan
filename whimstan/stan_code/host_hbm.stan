@@ -43,27 +43,33 @@ transformed data{
 
 parameters{
 
-  vector<upper=0>[N_grbs] index;
+  vector[N_grbs] index_raw;
   vector[N_grbs] log_K_raw; // raw energy flux norm
 
   real log_nH_host_mu;
   real<lower=0> log_nH_host_sigma;
   vector[N_grbs] log_nH_host_raw;
+  real<lower=0> index_sigma;
+  real index_mu;
 
+
+  
   // vector<lower=0>[N_grbs] nH_mw;
 
 }
 
 
 transformed parameters{
+  vector[N_grbs] index;
   vector[N_grbs] log_K; // log eflux
   vector[N_grbs] K;
   vector[N_grbs] log_nH_host;
   vector[N_grbs] nH_host;
 
   log_nH_host = log_nH_host_mu + log_nH_host_raw * log_nH_host_sigma;
+  index = index_mu + index_raw * index_sigma;
 
-  log_K = log_K_raw -12;
+  log_K = log_K_raw -10;
   
 
   K =  pow(10, log_K);
@@ -75,13 +81,17 @@ transformed parameters{
 model{
 
 
-  index ~ normal(-2, 1);
+  index_raw ~ std_normal();
   log_K_raw ~ normal(0, 3);
   log_nH_host_raw ~ std_normal();
 
   log_nH_host_mu ~ normal(0, 1);
   log_nH_host_sigma ~ normal(0, 1);
 
+  index_mu ~ normal(-2, 1);
+  index_sigma ~ std_normal();
+
+  
 
   target += reduce_sum(partial_log_like, all_N, grainsize, N_ene, N_chan, host_precomputed_absorp, precomputed_absorp, ene_avg, ene_width, mask, n_chans_used, K, index, nH_host, nH_mw, rsp, exposure, exposure_ratio, counts, bkg );
 
