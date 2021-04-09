@@ -80,18 +80,11 @@ matrix calc_num(vector spec, real temp, real xi, int[] atomicnumber, real[,,] si
 
 
 // precalc sigma interpolation for all z we need => 0.02 z steps up to z=max(z) of all GRBs
+matrix log_absori_shells(int nz_shells, real zshell_thickness, real n0, matrix num,
+                         matrix[,] sigma_interp, int num_e_edges, int[] atomicnumber){
 
-vector integrate_absori(real z, real n0, matrix num, vector abundance, matrix[,] sigma_interp, int num_e_edges){
+       matrix[nz_shells,num_e_edges] taus=rep_matrix(0.0, nz_shells, num_e_edges);
 
-       int num_ein = num_e_edges;
-       vector[num_ein] taus=rep_vector(0.0, num_ein);
-       vector[num_ein] xsec;
-
-       //int num_atomicnumber=size(atomicnumber);
-       //int max_atomicnumber=max(atomicnumber);
-       //matrix[num_atomicnumber, max_atomicnumber] num = calc_num(spec, temp, xi, atomicnumber, sigma, ion);
-
-       int nz;
        real zsam;
        real z1;
        real zf;
@@ -102,35 +95,56 @@ vector integrate_absori(real z, real n0, matrix num, vector abundance, matrix[,]
        real c=2.99792458e5;
        real cmpermpc=3.08568e24;
 
-       // how many 0.02 z shells do we need?
-       nz=0;
-       while (nz*0.02<z){
-             nz+=1;
-       }
-
-       for (i in 1:nz){
+       for (i in 1:nz_shells){
            // "slab approximation" in this z "shell"
-           // thickness of the "shell" (only different in the last shell)
-           if (i==nz){
-              zsam = i*0.02-z;
-              }
-           else {
-              zsam = 0.02;
-           }
-           z1 = (i*0.02-0.01)+1.0;
+           z1 = ((i-0.5)*zshell_thickness)+1.0;
+           // zf from z integral (see eq. 1 in arxiv 2102.02530)
            zf = (pow(z1,2)/sqrt(omegam*pow(z1,3)+omegal));
-           zf *= zsam*c*n0*cmpermpc/h0;
 
-           for (j in 1:num_ein){
-               //print(num.*sigma_interp[i,j]);
-               //print(sum(num.*sigma_interp[i,j]));
-               xsec[j] = sum(num.*sigma_interp[i,j])*6.6e-5*1e-22;
+           // for every energy
+           for (j in 1:num_e_edges){
+             taus[i,j] = sum(num.*sigma_interp[i,j])*zf;
            }
-           // if this is the last shell we have to check
-           // "how much" of this shell we really need
-           taus += xsec*zf;
+       }
+       taus = zshell_thickness*c*n0*cmpermpc/h0*6.6e-5*1e-22*taus;
 
-           }
+       return taus;
+}
 
-       return exp(-taus);
+//if t is fixed we can use this to precalc most of it
+vector integrate_absori_precalc(matrix[] sum_sigma_interp, matrix num, int num_e_edges){
+  vector[num_e_edges] taus;
+  for (j in 1:num_e_edges){
+    taus[j] = -sum(sum_sigma_interp[j].*num);
+  }
+  return taus;
+}
+
+
+vector integrate_absori(matrix[] sum_sigma_interp, matrix num, real n0, int num_e_edges){
+  vector[num_e_edges] taus;
+  for (j in 1:num_e_edges){
+    taus[j] = -n0*sum(sum_sigma_interp[j].*num);
+  }
+  return exp(taus);
+}
+
+
+vector integrate_absori2(real z, matrix logabso_shells, real zshell_thickness,
+                         int num_e_edges, int n_spectra){
+
+  vector[num_e_edges] taus;
+  int nz;
+  real frac;
+
+  nz=0;
+  while ((nz+1)*zshell_thickness<z){
+    nz+=1;
+  }
+  frac = ((nz+1)*zshell_thickness-z)/z;
+
+  for (j in 1:num_e_edges){
+    taus[j] = -(sum(logabso_shells[:nz,j])+frac*logabso_shells[nz+1,j]);
+  }
+  return exp(taus);
 }
