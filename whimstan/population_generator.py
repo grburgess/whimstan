@@ -225,6 +225,7 @@ def create_simulation(r0: float = 5,
                       rise: float = 1.,
                       decay: float = 4.0,
                       peak: float = 1.5,
+                      z_max: float  = 10.,
                       Lmin: float = 1e46,
                       alpha: float = 1.5,
                       host_gas_mean: float = 23,
@@ -293,7 +294,7 @@ def create_simulation(r0: float = 5,
         rise=rise,
         decay=decay,
         peak=peak,
-        r_max=r_max,
+        r_max=z_max,
 
 
 
