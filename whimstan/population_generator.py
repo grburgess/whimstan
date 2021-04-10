@@ -125,7 +125,7 @@ class HostGas(popsynth.AuxiliarySampler):
 
 
 class MilkyWayGas(popsynth.AuxiliarySampler):
-    _auxiliary_parameter_name = "MilkyWayGas"
+    _auxiliary_sampler_name = "MilkyWayGas"
     def __init__(self):
         """
         The value of the milky way gas density in 1/cm2
