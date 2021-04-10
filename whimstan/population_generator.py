@@ -70,6 +70,8 @@ class Cloud(object):
 
 class SchechterSampler(popsynth.AuxiliarySampler):
 
+    _auxiliary_sampler_name = "SchechterSampler"
+
     Lmin = popsynth.auxiliary_sampler.AuxiliaryParameter(default=1, vmin=0)
     alpha = popsynth.auxiliary_sampler.AuxiliaryParameter(default=1)
 
@@ -96,7 +98,7 @@ class SchechterSampler(popsynth.AuxiliarySampler):
 
 
 class HostGas(popsynth.AuxiliarySampler):
-
+    _auxiliary_sampler_name = "HostGas"
     nh_mean = popsynth.auxiliary_sampler.AuxiliaryParameter(default=22, vmin=0)
     zratio = popsynth.auxiliary_sampler.AuxiliaryParameter(
         default=1, vmin=0, vmax=1)
@@ -149,6 +151,8 @@ class MilkyWayGas(popsynth.AuxiliarySampler):
 
 class ObscuredFluxSampler(popsynth.DerivedLumAuxSampler):
 
+    _auxiliary_sampler_name = "ObscuredFluxSampler"
+
     def __init__(self, a: float = .4, b: float = 15,
                  whim_n0: Optional[float] = None, whim_T: Optional[float] = None,
                  use_mw_gas: bool = True, use_host_gas: bool = True):
@@ -188,7 +192,7 @@ class ObscuredFluxSampler(popsynth.DerivedLumAuxSampler):
 
         # we want to have the flux measured in the XRT so
         # we need to integrate the obscured flux
-        
+
         for i in progress_bar(range(size), desc="computing obscured fluxes"):
 
             spec = Powerlaw_Eflux(F=self._secondary_samplers["plaw_flux"].true_values[i]/(4 * np.pi * (self.luminosity_distance[i]**2)),
@@ -196,9 +200,11 @@ class ObscuredFluxSampler(popsynth.DerivedLumAuxSampler):
                                   a=self._a,
                                   b=self._b)
             if self._use_mw_gas:
-                spec *= TbAbs(NH=self._secondary_samplers["mw_nh"].true_values[i]/(1.e22), redshift=0)
+                spec *= TbAbs(
+                    NH=self._secondary_samplers["mw_nh"].true_values[i]/(1.e22), redshift=0)
             if self._use_host_gas:
-                spec *= TbAbs(NH=self._secondary_samplers["host_nh"].true_values[i]/(1.e22), redshift=self._distance[i])
+                spec *= TbAbs(NH=self._secondary_samplers["host_nh"].true_values[i]/(
+                    1.e22), redshift=self._distance[i])
 
             # add on the WHIM if needed
             if (self._whim_n0 is not None) and (self._whim_T is not None):
@@ -217,7 +223,7 @@ class ObscuredFluxSampler(popsynth.DerivedLumAuxSampler):
             flux = np.trapz(
                 intergration_energies*spec(intergration_energies),
                 intergration_energies,) * kev2erg
-            
+
             out[i] = flux
 
         self._true_values = out
@@ -230,10 +236,11 @@ class ObscuredFluxSampler(popsynth.DerivedLumAuxSampler):
 
 
 def create_simulation(r0: float = 5,
-                      rise: float = 1.,
-                      decay: float = 4.0,
-                      peak: float = 1.5,
-                      z_max: float  = 10.,
+                      a: float = 0.0157
+                      rise: float = .118,
+                      decay: float = 4.2,
+                      peak: float = 3.4,
+                      z_max: float = 10.,
                       Lmin: float = 1e46,
                       alpha: float = 1.5,
                       host_gas_mean: float = 23,
@@ -306,6 +313,7 @@ def create_simulation(r0: float = 5,
 
     pop_gen: popsynth.PopulationSynth = popsynth.populations.SFRPopulation(
         r0=r0,
+        a=a,
         rise=rise,
         decay=decay,
         peak=peak,
