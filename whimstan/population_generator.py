@@ -236,7 +236,7 @@ class ObscuredFluxSampler(popsynth.DerivedLumAuxSampler):
 
 
 def create_simulation(r0: float = 5,
-                      a: float = 0.0157
+                      a: float = 0.0157,
                       rise: float = .118,
                       decay: float = 4.2,
                       peak: float = 3.4,
