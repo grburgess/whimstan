@@ -295,8 +295,8 @@ def create_simulation(r0: float = 5,
                       alpha: float = 1.5,
                       host_gas_mean: float = 23,
                       host_gas_cloud_ratio: float = 0.1,
-                      mw_nh_limit=Optional[float] = None,
-                      b_limit=Optional[float] = None,
+                      mw_nh_limit: Optional[float] = None,
+                      b_limit: Optional[float] = None,
                       use_clouds: bool = True,
                       spec_idx_mean: float = -2.,
                       spec_idx_std: float = .2,
@@ -305,8 +305,6 @@ def create_simulation(r0: float = 5,
                       whim_n0: Optional[float] = None,
                       whim_T: Optional[float] = None
                       ) -> popsynth.PopulationSynth:
-
-    r_max = 5.
 
     if use_host_gas:
         if use_clouds:
@@ -334,16 +332,13 @@ def create_simulation(r0: float = 5,
         mw_nh = MilkyWayGas()
 
         if mw_nh_limit is not None:
-        
+
             mws = MWGasSelection()
 
             mws.gas_limit = mw_nh_limit
 
             mw_nh.set_selection_probability(mws)
 
-            
-
-        
     # GRB spectrum
 
     # sample the spectral index
@@ -392,8 +387,7 @@ def create_simulation(r0: float = 5,
 
         gps = GalacticPlaceSelection()
         gps.b_limit = b_limit
-        
+
         pop_gen.add_spatial_selector(gps)
 
-    
     return pop_gen
