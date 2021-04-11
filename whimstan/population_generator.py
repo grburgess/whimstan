@@ -126,6 +126,7 @@ class HostGas(popsynth.AuxiliarySampler):
 
 class MilkyWayGas(popsynth.AuxiliarySampler):
     _auxiliary_sampler_name = "MilkyWayGas"
+
     def __init__(self):
         """
         The value of the milky way gas density in 1/cm2
@@ -147,6 +148,55 @@ class MilkyWayGas(popsynth.AuxiliarySampler):
             mw_nh[i] = GasMap.nhf(coord, nhmap='DL', radius=1*u.deg).value
 
         self._true_values = mw_nh
+
+
+class MWGasSelection(popsynth.SelectionProbabilty):
+
+    _selection_name = "MWGasSelection"
+
+    gas_limit = popsynth.SelectionParameter(
+        vmin=0)
+
+    def __init__(self, name="mw gas selector"):
+        """
+        places a limit on the amount of MW gas allowed for 
+        each object in the sample
+
+        """
+
+        super(MWGasSelection, self).__init__(name=name, use_obs_value=True)
+
+    def draw(self, size: int):
+
+        self._selection = self._observed_value < np.power(10., self.gas_limit)
+
+
+class GalacticPlaceSelection(popsynth.SpatialSelection):
+
+    _selection_name = "GalacticPlaceSelection"
+
+    b_limit = popsynth.SelectionParameter(vmin=0, vmax=90)
+
+    def __init__(self, name="mw plane selector"):
+        """
+        places a limit above the galactic plane for objects
+        """
+        super(GalacticPlaceSelection, self).__init__(name=name)
+
+    def draw(self, size: int):
+
+        b = []
+
+        for ra, dec in zip(self._spatial_distribution.ra, self._spatial_distribution.dec):
+
+            g_coor = SkyCoord(ra, dec, unit="deg",
+                              frame="icrs").transform_to("galactic")
+
+            b.append(g_coor.b.deg)
+
+        b = np.array(b)
+
+        self._selection = (b >= self.b_limit) | (b <= -self.b_limit)
 
 
 class ObscuredFluxSampler(popsynth.DerivedLumAuxSampler):
@@ -245,6 +295,8 @@ def create_simulation(r0: float = 5,
                       alpha: float = 1.5,
                       host_gas_mean: float = 23,
                       host_gas_cloud_ratio: float = 0.1,
+                      mw_nh_limit=Optional[float] = None,
+                      b_limit=Optional[float] = None,
                       use_clouds: bool = True,
                       spec_idx_mean: float = -2.,
                       spec_idx_std: float = .2,
@@ -281,6 +333,17 @@ def create_simulation(r0: float = 5,
         # there are no random variables for the milky way gas
         mw_nh = MilkyWayGas()
 
+        if mw_nh_limit is not None:
+        
+            mws = MWGasSelection()
+
+            mws.gas_limit = mw_nh_limit
+
+            mw_nh.set_selection_probability(mws)
+
+            
+
+        
     # GRB spectrum
 
     # sample the spectral index
@@ -325,4 +388,12 @@ def create_simulation(r0: float = 5,
 
     pop_gen.add_observed_quantity(ls)
 
+    if b_limit is not None:
+
+        gps = GalacticPlaceSelection()
+        gps.b_limit = b_limit
+        
+        pop_gen.add_spatial_selector(gps)
+
+    
     return pop_gen
