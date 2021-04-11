@@ -1,8 +1,10 @@
+from collections import OrderedDict
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional
 
 import h5py
+import numpy as np
 
 
 @dataclass
@@ -24,11 +26,114 @@ class XRTCatalog(object):
 
     def __init__(self, *grbs):
 
-        self._catalog: Dict[str, XRTCatalogEntry] = {}
+        self._catalog: Dict[str, XRTCatalogEntry] = OrderedDict()
 
         for grb in grbs:
 
             self._catalog[grb.name] = grb
+
+        # create a flag if this is a sim
+
+        if grb.nH_host_sim is None:
+
+            self._is_sim = False
+
+        else:
+
+            self._is_sim = True
+
+    @property
+    def if_sim(self) -> bool:
+        """
+        if this is from a simulation
+        """
+
+        return self._is_sim
+
+    @property
+    def z(self) -> np.ndarray:
+        z = []
+
+        for k, v in self._catalog.items():
+
+            z.append(v.z)
+
+        return np.array(z)
+
+    @property
+    def ra(self) -> np.ndarray:
+        ra = []
+
+        for k, v in self._catalog.items():
+
+            ra.append(v.ra)
+
+        return np.array(ra)
+
+    @property
+    def dec(self) -> np.ndarray:
+        dec = []
+
+        for k, v in self._catalog.items():
+
+            dec.append(v.dec)
+
+        return np.array(dec)
+
+    @property
+    def nH_mw(self) -> np.ndarray:
+        nH_mw = []
+
+        for k, v in self._catalog.items():
+
+            nH_mw.append(v.nH_mw)
+
+        return np.array(nH_mw)
+
+    @property
+    def nH_host_sim(self) -> np.ndarray:
+        if self._is_sim:
+            nH_host_sim = []
+
+            for k, v in self._catalog.items():
+
+                nH_host_sim.append(v.nH_host_sim)
+
+            return np.array(nH_host_sim)
+
+        else:
+
+            return None
+
+    @property
+    def index_sim(self) -> np.ndarray:
+        if self._is_sim:
+            index_sim = []
+
+            for k, v in self._catalog.items():
+
+                index_sim.append(v.index_sim)
+
+            return np.array(index_sim)
+
+        else:
+
+            return None
+
+    @property
+    def flux_sim(self) -> np.ndarray:
+        if self._is_sim:
+            flux_sim = []
+
+            for k, v in self._catalog.items():
+
+                flux_sim.append(v.flux_sim)
+
+            return np.array(flux_sim)
+
+        else:
+
+            return None
 
     @property
     def catalog(self):
@@ -45,9 +150,9 @@ class XRTCatalog(object):
                 grp.attrs["ra"] = v.ra
                 grp.attrs["dec"] = v.dec
                 grp.attrs["z"] = v.z
-                
+
                 if v.nH_mw is not None:
-                    
+
                     grp.attrs["nH_mw"] = v.nH_mw
 
                 if v.nH_host_sim is not None:
@@ -89,7 +194,7 @@ class XRTCatalog(object):
                 if "nH_mw" in v.attrs:
 
                     nH_mw = v.attrs["nH_mw"]
-                
+
                 if "nH_host_sim" in v.attrs:
 
                     nH_host_sim = v.attrs["nH_host_sim"]
