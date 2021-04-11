@@ -90,7 +90,7 @@ model{
   log_K_raw ~ normal(0, 3);
   log_nH_host_raw ~ std_normal();
 
-  log_nH_host_mu ~ normal(0, 1);
+  log_nH_host_mu_raw ~ normal(0, 1);
   log_nH_host_sigma ~ normal(0, 1);
 
   index_mu ~ normal(-2, 1);
