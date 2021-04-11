@@ -16,33 +16,33 @@ class Fit(object):
         ::
 
         """
-        self._catalog = catalog
-        self._data_path = data_path
+        self._catalog: XRTCatalog = catalog
+        self._data_path: Path = data_path
 
-        self._n_grbs = stan_fit.posterior.K.stack(
+        self._n_grbs: int = stan_fit.posterior.K.stack(
             sample=("chain", "draw")).values.shape[0]
 
-        self._flux = stan_fit.posterior.K.stack(
+        self._flux: np.ndarray = stan_fit.posterior.K.stack(
             sample=("chain", "draw")).values
-        self._index = stan_fit.posterior.index.stack(
+        self._index: np.ndarray = stan_fit.posterior.index.stack(
             sample=("chain", "draw")).values
-        self._host_nh = stan_fit.posterior.nH_host.stack(
+        self._host_nh: np.ndarray = stan_fit.posterior.nH_host.stack(
             sample=("chain", "draw")).values
 
         # whim stuff
 
         # group properties
 
-        self._log_nh_host_mu = stan_fit.posterior.log_nH_host_mu.stack(
+        self._log_nh_host_mu: np.ndarray = stan_fit.posterior.log_nH_host_mu.stack(
             sample=("chain", "draw")).values
 
-        self._log_nh_host_sigma = stan_fit.posterior.log_nH_host_sigma.stack(
+        self._log_nh_host_sigma: np.ndarray = stan_fit.posterior.log_nH_host_sigma.stack(
             sample=("chain", "draw")).values
 
-        self._index_mu = stan_fit.posterior.index_mu.stack(
+        self._index_mu: np.ndarray = stan_fit.posterior.index_mu.stack(
             sample=("chain", "draw")).values
 
-        self._index_sigma = stan_fit.posterior.index_sigma.stack(
+        self._index_sigma: np.ndarray = stan_fit.posterior.index_sigma.stack(
             sample=("chain", "draw")).values
 
         if data_path is not None:
