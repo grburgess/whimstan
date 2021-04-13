@@ -43,17 +43,28 @@ transformed data{
 
 parameters{
 
-  vector[N_grbs] index_raw;
-  vector[N_grbs] log_K_raw; // raw energy flux norm
+
+
 
   real log_nH_host_mu_raw;
   
   real<lower=0> log_nH_host_sigma;
   vector[N_grbs] log_nH_host_raw;
-  real<lower=0> index_sigma;
+ 
   real index_mu;
+  real<lower=0> index_sigma;
+
+  vector[N_grbs] index_raw;
 
 
+  real log_K_mu_raw;
+  
+
+  real<lower=0> log_K_sigma;
+
+  
+  vector[N_grbs] log_K_raw; // raw energy flux norm
+  
   
   // vector<lower=0>[N_grbs] nH_mw;
 
@@ -67,13 +78,16 @@ transformed parameters{
   vector[N_grbs] log_nH_host;
   vector[N_grbs] nH_host;
   vector[N_grbs] nH_host_norm;
+  real log_K_mu = log_K_mu_raw -10;
   real log_nH_host_mu = log_nH_host_mu_raw + 22;
-  
+
+
+  // non centered parameterizartion
   
   log_nH_host = log_nH_host_mu + log_nH_host_raw * log_nH_host_sigma;
   index = index_mu + index_raw * index_sigma;
 
-  log_K = log_K_raw -10;
+  log_K = log_K_mu + log_K_raw * log_K_sigma;
   
 
   K =  pow(10, log_K);
@@ -87,12 +101,16 @@ model{
 
 
   index_raw ~ std_normal();
-  log_K_raw ~ normal(0, 3);
+  log_K_raw ~ std_normal();
   log_nH_host_raw ~ std_normal();
 
   log_nH_host_mu_raw ~ normal(0, 1);
   log_nH_host_sigma ~ normal(0, 1);
 
+  log_K_mu_raw ~ normal(0, 1);
+  log_K_sigma ~ normal(0, 1);
+
+  
   index_mu ~ normal(-2, 1);
   index_sigma ~ std_normal();
 
