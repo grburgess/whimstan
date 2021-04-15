@@ -51,8 +51,8 @@ parameters{
   real<lower=0> log_nH_host_sigma;
   vector[N_grbs] log_nH_host_raw;
  
-  real index_mu;
-  real<lower=0> index_sigma;
+  // real index_mu;
+  // real<lower=0> index_sigma;
 
   vector[N_grbs] index_raw;
 
@@ -65,6 +65,7 @@ parameters{
   
   vector[N_grbs] log_K_raw; // raw energy flux norm
   
+  vector[N_grbs] index;
   
   // vector<lower=0>[N_grbs] nH_mw;
 
@@ -72,7 +73,7 @@ parameters{
 
 
 transformed parameters{
-  vector[N_grbs] index;
+  //vector[N_grbs] index;
   vector[N_grbs] log_K; // log eflux
   vector[N_grbs] K;
   vector[N_grbs] log_nH_host;
@@ -85,7 +86,7 @@ transformed parameters{
   // non centered parameterizartion
   
   log_nH_host = log_nH_host_mu + log_nH_host_raw * log_nH_host_sigma;
-  index = index_mu + index_raw * index_sigma;
+  //index = index_mu + index_raw * index_sigma;
 
   log_K = log_K_mu + log_K_raw * log_K_sigma;
   
@@ -100,7 +101,7 @@ transformed parameters{
 model{
 
 
-  index_raw ~ std_normal();
+  //index_raw ~ std_normal();
   log_K_raw ~ std_normal();
   log_nH_host_raw ~ std_normal();
 
@@ -109,10 +110,10 @@ model{
 
   log_K_mu_raw ~ std_normal();
   log_K_sigma ~ std_normal();
-
+  index ~ normal(-2, 0.5);
   
-  index_mu ~ normal(-2, 1);
-  index_sigma ~ std_normal();
+  //  index_mu ~ normal(-2, 1);
+  //index_sigma ~ std_normal();
 
   
 
