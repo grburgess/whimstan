@@ -51,10 +51,10 @@ parameters{
   real<lower=0> log_nH_host_sigma;
   vector[N_grbs] log_nH_host_raw;
  
-  real index_mu;
-  real<lower=0> index_sigma;
+  real log_index_mu;
+  real<lower=0> log_index_sigma;
 
-  vector[N_grbs] index_raw;
+  vector[N_grbs] log_index_raw;
 
 
   real log_K_mu_raw;
@@ -85,7 +85,7 @@ transformed parameters{
   // non centered parameterizartion
   
   log_nH_host = log_nH_host_mu + log_nH_host_raw * log_nH_host_sigma;
-  index = index_mu + index_raw * index_sigma;
+  index = -exp(log_index_mu + log_index_raw * log_index_sigma);
 
   log_K = log_K_mu + log_K_raw * log_K_sigma;
   
@@ -100,19 +100,19 @@ transformed parameters{
 model{
 
 
-  index_raw ~ std_normal();
+  log_index_raw ~ std_normal();
   log_K_raw ~ std_normal();
   log_nH_host_raw ~ std_normal();
 
-  log_nH_host_mu_raw ~ normal(0, 1);
-  log_nH_host_sigma ~ normal(0, 1);
+  log_nH_host_mu_raw ~ std_normal();
+  log_nH_host_sigma ~ std_normal();
 
-  log_K_mu_raw ~ normal(0, 1);
-  log_K_sigma ~ normal(0, 1);
+  log_K_mu_raw ~ std_normal();
+  log_K_sigma ~ std_normal();
 
   
-  index_mu ~ normal(-2, 1);
-  index_sigma ~ std_normal();
+  log_index_mu ~ normal(0, .1);
+  log_index_sigma ~ std_normal();
 
   
 
