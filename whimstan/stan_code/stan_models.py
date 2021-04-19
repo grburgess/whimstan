@@ -8,7 +8,7 @@ _available_models["simple_xrt"] = "simple_xrt.stan"
 # HBM with galaxy gas and plaw
 _available_models["hbm_xrt"] = "host_hbm.stan"
 
-# HBM with ONLY plaw
+# HBM with ONLY plaw`
 _available_models["hbm_plaw_xrt"] = "hbm_plaw_only.stan"
 
 

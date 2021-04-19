@@ -86,8 +86,6 @@ model{
 
   index_raw ~ std_normal();
   log_K_raw ~ std_normal();
-  log_nH_host_raw ~ std_normal();
-
 
   log_K_mu_raw ~ std_normal();
   log_K_sigma ~ std_normal();
