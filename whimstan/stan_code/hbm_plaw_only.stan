@@ -96,6 +96,6 @@ model{
 
 
 
-  target += reduce_sum(partial_log_like, all_N, grainsize, N_ene, N_chan, ene_avg, ene_width, mask, n_chans_used, K, index, rsp, exposure, exposure_ratio, counts, bkg );
+  target += reduce_sum(partial_log_like_plaw, all_N, grainsize, N_ene, N_chan, ene_avg, ene_width, mask, n_chans_used, K, index, rsp, exposure, exposure_ratio, counts, bkg );
 
 }
