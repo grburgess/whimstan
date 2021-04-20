@@ -52,10 +52,6 @@ parameters{
 
   vector[N_grbs] log_K_raw; // raw energy flux norm
 
-  //vector[N_grbs] index;
-
-  // vector<lower=0>[N_grbs] nH_mw;
-
 }
 
 
@@ -89,11 +85,10 @@ model{
 
   log_K_mu_raw ~ std_normal();
   log_K_sigma ~ std_normal();
-  //index ~ normal(-2, 0.5);
+
 
   index_mu ~ normal(-2, .1);
   index_sigma ~ std_normal();
-
 
 
   target += reduce_sum(partial_log_like_plaw, all_N, grainsize, N_ene, N_chan, ene_avg, ene_width, mask, n_chans_used, K, index, rsp, exposure, exposure_ratio, counts, bkg );

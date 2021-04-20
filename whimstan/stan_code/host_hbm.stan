@@ -74,12 +74,12 @@ transformed parameters{
   //  vector[N_grbs] nH_host;
   vector[N_grbs] nH_host_norm;
   real log_K_mu = log_K_mu_raw - 9;
-  real log_nH_host_mu = log_nH_host_mu_raw + 22;
+  
 
 
   // non centered parameterizartion
 
-  log_nH_host = log_nH_host_mu + log_nH_host_raw * log_nH_host_sigma;
+  log_nH_host = log_nH_host_mu_raw + log_nH_host_raw * log_nH_host_sigma;
 
   index = index_mu + index_raw * index_sigma;
 
@@ -87,7 +87,7 @@ transformed parameters{
 
   K =  pow(10,log_K);
 
-  nH_host_norm = log_nH_host  * inv(22.);
+  nH_host_norm = power(10,log_nH_host);
 
 }
 
@@ -112,5 +112,12 @@ model{
 
 
   target += reduce_sum(partial_log_like, all_N, grainsize, N_ene, N_chan, host_precomputed_absorp, precomputed_absorp, ene_avg, ene_width, mask, n_chans_used, K, index, nH_host_norm, nH_mw, rsp, exposure, exposure_ratio, counts, bkg );
+
+}
+
+generated quantities {
+
+real log_nH_host_mu = log_nH_host_mu_raw + 22;
+  
 
 }
