@@ -85,9 +85,9 @@ transformed parameters{
 
   log_K = log_K_mu + log_K_raw * log_K_sigma;
 
-  K =  pow(10,log_K);
+  K =  pow(10.,log_K);
 
-  nH_host_norm = power(10,log_nH_host);
+  nH_host_norm = pow(10.,log_nH_host);
 
 }
 
