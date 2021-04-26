@@ -21,6 +21,42 @@ class XRTCatalogEntry:
     n0_sim: Optional[float] = None
     temp_sim: Optional[float] = None
 
+    @property
+    def simulated_parameters(self) -> np.ndarray:
+        """
+
+        get a numpy array of the simulated parameters
+
+        :returns: 
+
+        """
+        tmp: List[float] = []
+
+   
+
+        if self.flux_sim is not None:
+
+            tmp.append(self.flux_sim)
+
+        if self.index_sim is not None:
+
+            tmp.append(self.index_sim)
+
+        if self.nH_host_sim is not None:
+
+            tmp.append(self.nH_host_sim)
+
+        if self.n0_sim is not None:
+
+            tmp.append(self.n0_sim)
+
+        if self.temp_sim is not None:
+
+            tmp.append(self.temp_sim)
+
+            
+        return np.array(tmp)
+
 
 class XRTCatalog(object):
 
@@ -43,7 +79,7 @@ class XRTCatalog(object):
             self._is_sim = True
 
     @property
-    def if_sim(self) -> bool:
+    def is_sim(self) -> bool:
         """
         if this is from a simulation
         """
@@ -91,7 +127,7 @@ class XRTCatalog(object):
         return np.array(nH_mw)
 
     @property
-    def nH_host_sim(self) -> np.ndarray:
+    def nH_host_sim(self) -> Optional[np.ndarray]:
         if self._is_sim:
             nH_host_sim = []
 
@@ -106,7 +142,7 @@ class XRTCatalog(object):
             return None
 
     @property
-    def index_sim(self) -> np.ndarray:
+    def index_sim(self) -> Optional[np.ndarray]:
         if self._is_sim:
             index_sim = []
 
@@ -121,7 +157,7 @@ class XRTCatalog(object):
             return None
 
     @property
-    def flux_sim(self) -> np.ndarray:
+    def flux_sim(self) -> Optional[np.ndarray]:
         if self._is_sim:
             flux_sim = []
 
@@ -130,6 +166,34 @@ class XRTCatalog(object):
                 flux_sim.append(v.flux_sim)
 
             return np.array(flux_sim)
+
+        else:
+
+            return None
+
+    @property
+    def n0_sim(self) -> Optional[float]:
+
+        if self._is_sim:
+
+            # just grab the first element as
+            # they are all the same
+
+            return list(self._catalog.values())[0].n0_sim
+
+        else:
+
+            return None
+
+    @property
+    def temp_sim(self) -> Optional[float]:
+
+        if self._is_sim:
+
+            # just grab the first element as
+            # they are all the same
+
+            return list(self._catalog.values())[0].temp_sim
 
         else:
 
