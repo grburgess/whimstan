@@ -10,7 +10,7 @@ from astromodels import Model, PointSource, Powerlaw, Powerlaw_Eflux, TbAbs
 from bb_astromodels import Integrate_Absori
 from natsort import natsorted
 
-from .catalog import XRTCatalog
+from .catalog import XRTCatalog, XRTCatalogEntry
 
 
 @dataclass
@@ -188,7 +188,7 @@ class Fit(object):
 
         """
 
-        card = self._catalog.catalog[self._grbs[id]]
+        card: XRTCatalogEntry = self._catalog.catalog[self._grbs[id]]
 
         model_all: Optional[Model] = None
 
@@ -238,6 +238,59 @@ class Fit(object):
         model_pl = Model(ps_pl)
 
         return ModelContainer(model_all, model_host, model_mw, model_pl)
+
+    def _nH_sim_difference(self, id) -> np.ndarray:
+
+        if not self._catalog.is_sim:
+
+            return
+
+        card: XRTCatalogEntry = self._catalog.catalog[self._grbs[id]]
+
+        difference = self._host_nh[id] - card.nH_host_sim
+
+        return difference
+
+    def plot_nH_z_excess(self):
+
+        mean_difference = np.empty(self._n_grbs)
+
+        for i in range(self._n_grbs):
+
+            mean_difference[i] = np.median(self._nH_sim_difference(i))
+
+        fig, ax = plt.subplots()
+
+        ax.semilogy(self._catalog.z+1, mean_difference, ".")
+
+        ax.set_ylabel("nH 10e22")
+
+        ax.set_xlabel("z+1")
+
+        return fig
+
+    def plot_nH_z(self, show_truth: bool = False):
+
+        mean_difference = np.empty(self._n_grbs)
+
+        for i in range(self._n_grbs):
+
+            mean_difference[i] = np.median(self._host_nh[i])
+
+        fig, ax = plt.subplots()
+
+        ax.semilogy(self._catalog.z+1, mean_difference, ".")
+
+        if show_truth:
+
+            ax.semilogy(self._catalog.z+1,
+                        self._catalog.nH_host_simanyhow, ".")
+
+        ax.set_ylabel("nH 10e22")
+
+        ax.set_xlabel("z+1")
+
+        return fig
 
     def plot_model_spectrum(self, id):
 
