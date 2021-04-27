@@ -4,7 +4,13 @@ import os
 _available_models = {}
 
 _available_models["simple_xrt"] = "simple_xrt.stan"
+
+# HBM with galaxy gas and plaw
 _available_models["hbm_xrt"] = "host_hbm.stan"
+
+# HBM with ONLY plaw`
+_available_models["hbm_plaw_xrt"] = "hbm_plaw_only.stan"
+
 
 # t_fixed => T=10**7 K at the moment!
 _available_models["whim_only_t_fixed"] = "whimonly_t_fixed.stan"

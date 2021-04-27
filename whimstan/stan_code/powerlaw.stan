@@ -12,23 +12,18 @@ vector powerlaw(vector ene, real K, real index) {
 vector powerlaw_flux(vector ene, real K, real index, real a, real b) {
 
 
-  real norm;
-  real intflux;
+ 
+ 
+
   real erg2keV = 6.24151e8;	
 
-  if (index != -2.0){
+  real dp2 = 2 + index;
 
-          real dp2 = 2 + index;
+  real inv_int_flux =  inv((pow(b, dp2) - pow(a, dp2))) * dp2;
 
-	  intflux =  (pow(b, dp2) - pow(a, dp2)) / dp2;}
-     else{
 
-         intflux = - log(a/b);
-       }
-
-  norm = (K / (intflux) ) * erg2keV;
        
-  return norm * pow(ene, index);
+  return  K * inv_int_flux * erg2keV * pow(ene, index);
 
 
 }

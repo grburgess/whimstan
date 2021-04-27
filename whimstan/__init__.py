@@ -6,7 +6,7 @@ from .stan_code.stan_models import get_model
 from .catalog import XRTCatalog, XRTCatalogEntry
 
 
-display(YouTubeVideo("Tb6tz6ohprw", start=17, autoplay=1))
+# display(YouTubeVideo("Tb6tz6ohprw", start=17, autoplay=1))
 
 
 __version__ = get_versions()['version']

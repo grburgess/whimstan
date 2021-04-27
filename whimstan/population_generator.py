@@ -70,6 +70,8 @@ class Cloud(object):
 
 class SchechterSampler(popsynth.AuxiliarySampler):
 
+    _auxiliary_sampler_name = "SchechterSampler"
+
     Lmin = popsynth.auxiliary_sampler.AuxiliaryParameter(default=1, vmin=0)
     alpha = popsynth.auxiliary_sampler.AuxiliaryParameter(default=1)
 
@@ -96,7 +98,7 @@ class SchechterSampler(popsynth.AuxiliarySampler):
 
 
 class HostGas(popsynth.AuxiliarySampler):
-
+    _auxiliary_sampler_name = "HostGas"
     nh_mean = popsynth.auxiliary_sampler.AuxiliaryParameter(default=22, vmin=0)
     zratio = popsynth.auxiliary_sampler.AuxiliaryParameter(
         default=1, vmin=0, vmax=1)
@@ -123,6 +125,7 @@ class HostGas(popsynth.AuxiliarySampler):
 
 
 class MilkyWayGas(popsynth.AuxiliarySampler):
+    _auxiliary_sampler_name = "MilkyWayGas"
 
     def __init__(self):
         """
@@ -147,7 +150,58 @@ class MilkyWayGas(popsynth.AuxiliarySampler):
         self._true_values = mw_nh
 
 
+class MWGasSelection(popsynth.SelectionProbabilty):
+
+    _selection_name = "MWGasSelection"
+
+    gas_limit = popsynth.SelectionParameter(
+        vmin=0)
+
+    def __init__(self, name="mw gas selector"):
+        """
+        places a limit on the amount of MW gas allowed for 
+        each object in the sample
+
+        """
+
+        super(MWGasSelection, self).__init__(name=name, use_obs_value=True)
+
+    def draw(self, size: int):
+
+        self._selection = self._observed_value < np.power(10., self.gas_limit)
+
+
+class GalacticPlaceSelection(popsynth.SpatialSelection):
+
+    _selection_name = "GalacticPlaceSelection"
+
+    b_limit = popsynth.SelectionParameter(vmin=0, vmax=90)
+
+    def __init__(self, name="mw plane selector"):
+        """
+        places a limit above the galactic plane for objects
+        """
+        super(GalacticPlaceSelection, self).__init__(name=name)
+
+    def draw(self, size: int):
+
+        b = []
+
+        for ra, dec in zip(self._spatial_distribution.ra, self._spatial_distribution.dec):
+
+            g_coor = SkyCoord(ra, dec, unit="deg",
+                              frame="icrs").transform_to("galactic")
+
+            b.append(g_coor.b.deg)
+
+        b = np.array(b)
+
+        self._selection = (b >= self.b_limit) | (b <= -self.b_limit)
+
+
 class ObscuredFluxSampler(popsynth.DerivedLumAuxSampler):
+
+    _auxiliary_sampler_name = "ObscuredFluxSampler"
 
     def __init__(self, a: float = .4, b: float = 15,
                  whim_n0: Optional[float] = None, whim_T: Optional[float] = None,
@@ -188,7 +242,7 @@ class ObscuredFluxSampler(popsynth.DerivedLumAuxSampler):
 
         # we want to have the flux measured in the XRT so
         # we need to integrate the obscured flux
-        
+
         for i in progress_bar(range(size), desc="computing obscured fluxes"):
 
             spec = Powerlaw_Eflux(F=self._secondary_samplers["plaw_flux"].true_values[i]/(4 * np.pi * (self.luminosity_distance[i]**2)),
@@ -196,9 +250,11 @@ class ObscuredFluxSampler(popsynth.DerivedLumAuxSampler):
                                   a=self._a,
                                   b=self._b)
             if self._use_mw_gas:
-                spec *= TbAbs(NH=self._secondary_samplers["mw_nh"].true_values[i]/(1.e22), redshift=0)
+                spec *= TbAbs(
+                    NH=self._secondary_samplers["mw_nh"].true_values[i]/(1.e22), redshift=0)
             if self._use_host_gas:
-                spec *= TbAbs(NH=self._secondary_samplers["host_nh"].true_values[i]/(1.e22), redshift=self._distance[i])
+                spec *= TbAbs(NH=self._secondary_samplers["host_nh"].true_values[i]/(
+                    1.e22), redshift=self._distance[i])
 
             # add on the WHIM if needed
             if (self._whim_n0 is not None) and (self._whim_T is not None):
@@ -217,7 +273,7 @@ class ObscuredFluxSampler(popsynth.DerivedLumAuxSampler):
             flux = np.trapz(
                 intergration_energies*spec(intergration_energies),
                 intergration_energies,) * kev2erg
-            
+
             out[i] = flux
 
         self._true_values = out
@@ -230,13 +286,17 @@ class ObscuredFluxSampler(popsynth.DerivedLumAuxSampler):
 
 
 def create_simulation(r0: float = 5,
-                      rise: float = 1.,
-                      decay: float = 4.0,
-                      peak: float = 1.5,
+                      a: float = 0.0157,
+                      rise: float = .118,
+                      decay: float = 4.2,
+                      peak: float = 3.4,
+                      z_max: float = 10.,
                       Lmin: float = 1e46,
                       alpha: float = 1.5,
                       host_gas_mean: float = 23,
                       host_gas_cloud_ratio: float = 0.1,
+                      mw_nh_limit: Optional[float] = None,
+                      b_limit: Optional[float] = None,
                       use_clouds: bool = True,
                       spec_idx_mean: float = -2.,
                       spec_idx_std: float = .2,
@@ -245,8 +305,6 @@ def create_simulation(r0: float = 5,
                       whim_n0: Optional[float] = None,
                       whim_T: Optional[float] = None
                       ) -> popsynth.PopulationSynth:
-
-    r_max = 5.
 
     if use_host_gas:
         if use_clouds:
@@ -272,6 +330,14 @@ def create_simulation(r0: float = 5,
     if use_mw_gas:
         # there are no random variables for the milky way gas
         mw_nh = MilkyWayGas()
+
+        if mw_nh_limit is not None:
+
+            mws = MWGasSelection()
+
+            mws.gas_limit = mw_nh_limit
+
+            mw_nh.set_selection_probability(mws)
 
     # GRB spectrum
 
@@ -305,15 +371,23 @@ def create_simulation(r0: float = 5,
 
     pop_gen: popsynth.PopulationSynth = popsynth.populations.SFRPopulation(
         r0=r0,
+        a=a,
         rise=rise,
         decay=decay,
         peak=peak,
-        r_max=r_max,
+        r_max=z_max,
 
 
 
     )
 
     pop_gen.add_observed_quantity(ls)
+
+    if b_limit is not None:
+
+        gps = GalacticPlaceSelection()
+        gps.b_limit = b_limit
+
+        pop_gen.add_spatial_selector(gps)
 
     return pop_gen

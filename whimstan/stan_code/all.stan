@@ -59,27 +59,42 @@ transformed data{
 parameters{
 
   //vector<upper=0>[N_grbs] index;
-  vector[N_grbs] index;
+
+  real log_nH_host_mu_raw;
+
+  real<lower=0> log_nH_host_sigma;
+  vector[N_grbs] log_nH_host_raw;
+
+  real index_mu;
+  real<lower=0> index_sigma;
+  vector[N_grbs] index_raw;
+
+
+  real log_K_mu_raw;
+  real<lower=0> log_K_sigma;
+
+
   vector[N_grbs] log_K_raw; // raw energy flux norm
 
-  // host gas
-  real log_nH_host_mu;
-  vector[N_grbs] log_nH_host_raw;
-  real<lower=0> log_nH_host_sigma;
-  
   // absori parameter
-  real log_n0_whim;
-  real log_t_whim;
+  real log_n0_whim_raw;
+  real log_t_whim_raw;
 }
 
 
 transformed parameters{
+  vector[N_grbs] index;
   vector[N_grbs] log_K; // log eflux
   vector[N_grbs] K;
+  vector[N_grbs] log_nH_host;
+  //  vector[N_grbs] nH_host;
+  vector[N_grbs] nH_host_norm;
+  real log_n0_whim = log_n0_whim_raw -7;
+  real log_t_whim = log_t_whim_raw + 7;
 
-  // host gas
-  vector[N_grbs] log_nH_host =  log_nH_host_mu + log_nH_host_raw * log_nH_host_sigma;
-  vector[N_grbs] nH_host = pow(10, log_nH_host);
+
+
+  real log_K_mu = log_K_mu_raw - 9;
 
   // absori
   real n0_whim = pow(10, log_n0_whim);
@@ -93,9 +108,19 @@ transformed parameters{
     num[i] = abundance[i]*num[i];
   }
 
-  log_K = log_K_raw -12;
-  
-  K =  pow(10, log_K);
+  // non centered parameterizartion
+
+  log_nH_host = log_nH_host_mu_raw + log_nH_host_raw * log_nH_host_sigma;
+
+  index = index_mu + index_raw * index_sigma;
+
+  log_K = log_K_mu + log_K_raw * log_K_sigma;
+
+  K =  pow(10.,log_K);
+
+  nH_host_norm = pow(10.,log_nH_host);
+
+
 
 }
 
@@ -103,42 +128,50 @@ transformed parameters{
 model{
 
 
-  index ~ normal(-2, 1);
-  log_K_raw ~ normal(0, 3);
-  // host gas
-  log_nH_host_raw ~ std_normal();
-  log_nH_host_mu ~ normal(0, 1);
-  log_nH_host_sigma ~ normal(0, 1);
-  //absori
-  log_n0_whim ~ normal(-7,1);
 
-  // fix temp for the moment
-  log_t_whim ~ normal(7,1);
- 
+  index_raw ~ std_normal();
+  log_K_raw ~ std_normal();
+  log_nH_host_raw ~ std_normal();
+
+  log_nH_host_mu_raw ~ std_normal();
+  log_nH_host_sigma ~ std_normal();
+
+  log_K_mu_raw ~ std_normal();
+  log_K_sigma ~ std_normal();
+
+
+  index_mu ~ normal(-2, .1);
+  index_sigma ~ std_normal();
+
+
+
+  //absori
+  log_n0_whim_raw ~ std_normal();
+
+  log_t_whim_raw ~ std_normal();
+
   target += reduce_sum(partial_log_like_all, all_N, grainsize, N_ene, N_chan, ene_avg, ene_width, mask, n_chans_used, mw_abs, K, index, n0_whim, num, sum_sigma_interp, nH_host, host_precomputed_absorp, rsp, exposure, exposure_ratio, counts, bkg);
 
 }
 
 generated quantities {
 
-	  vector[N_ene] whim_abs[N_grbs];
-	  vector[N_ene] host_abs[N_grbs];
-	  vector[N_ene] powerlaw_spectrum[N_grbs];
-	  vector[N_chan] predicted_counts[N_grbs];
-	  vector[N_ene] source_spectrum[N_grbs];
-	  vector[N_ene] integral_flux[N_grbs];
+  // vector[N_ene] whim_abs[N_grbs];
+  // vector[N_ene] host_abs[N_grbs];
+  // vector[N_ene] powerlaw_spectrum[N_grbs];
+  // vector[N_chan] predicted_counts[N_grbs];
+  // vector[N_ene] source_spectrum[N_grbs];
+  // vector[N_ene] integral_flux[N_grbs];
 
-	  for (i in 1:N_grbs){
-	      whim_abs[i] = exp(integrate_absori_precalc(sum_sigma_interp[i], num, N_ene)*n0_whim);
-	      host_abs[i] = absorption(nH_host[i], host_precomputed_absorp[i]);
-	      powerlaw_spectrum[i] = powerlaw_flux(ene_avg[i], K[i], index[i], 0.4, 15);
-	      source_spectrum[i] = powerlaw_spectrum[i] .* whim_abs[i] .* mw_abs[i] .* host_abs[i];
+  // for (i in 1:N_grbs){
+  //   whim_abs[i] = exp(integrate_absori_precalc(sum_sigma_interp[i], num, N_ene)*n0_whim);
+  //   host_abs[i] = absorption(nH_host[i], host_precomputed_absorp[i]);
+  //   powerlaw_spectrum[i] = powerlaw_flux(ene_avg[i], K[i], index[i], 0.4, 15);
+  //   source_spectrum[i] = powerlaw_spectrum[i] .* whim_abs[i] .* mw_abs[i] .* host_abs[i];
 
-	      integral_flux[i] = source_spectrum[i] .* ene_width[i];
-	      
-	      predicted_counts[i] =  (rsp[i] * integral_flux[i]) * exposure[i];
-	      }
+  //   integral_flux[i] = source_spectrum[i] .* ene_width[i];
+
+  //   predicted_counts[i] =  (rsp[i] * integral_flux[i]) * exposure[i];
+  // }
 
 }
-
-	      

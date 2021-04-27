@@ -1,14 +1,14 @@
 
 from pathlib import Path
-from typing import List
+from typing import Dict, List, Optional
 
 import astropy.units as u
 import popsynth
-from popsynth.utils.progress_bar import progress_bar
 from astromodels import Model, PointSource, Powerlaw_Eflux, TbAbs
 from astropy.coordinates import SkyCoord
 from bb_astromodels import Integrate_Absori
 from gdpyc import GasMap
+from popsynth.utils.progress_bar import progress_bar
 from threeML import OGIPLike, quiet_mode
 
 from .catalog import XRTCatalog, XRTCatalogEntry
@@ -16,24 +16,54 @@ from .catalog import XRTCatalog, XRTCatalogEntry
 
 class SpectrumGenerator(object):
 
-    def __init__(self, name, eflux, index, ra, dec, z, host_nh,
-                 mw_nh, whim_n0=None, whim_T=None, demo_plugin=None,
-                 use_mw_gas=True, use_host_gas=True):
+    def __init__(self, name: str, eflux: float, index: float, ra: float, dec: float, z: float, host_nh: float, mw_nh: float, whim_n0: Optional[float] = None, whim_T: Optional[float] = None, demo_plugin: Optional[OGIPLike] = None,
+                 use_mw_gas: bool = True, use_host_gas: bool = True):
+        """
 
-        self._name = name
-        self._eflux = eflux
-        self._index = index
-        self._ra = ra
-        self._dec = dec
-        self._z = z
-        self._host_nh = host_nh
-        self._mw_nh = mw_nh
-        self._whim_n0 = whim_n0
-        self._whim_T = whim_T
-        self._use_mw_gas = use_mw_gas
-        self._use_host_gas = use_host_gas
-        
-        self._demo_plugin = demo_plugin
+        :param name:  the name of the function
+        :type name: str
+        :param eflux: 
+        :type eflux: float
+        :param index: 
+        :type index: float
+        :param ra: 
+        :type ra: float
+        :param dec: 
+        :type dec: float
+        :param z: 
+        :type z: float
+        :param host_nh: host nH density in 1/10^22 cm2
+        :type host_nh: float
+        :param mw_nh: milkyway nH density in 1/10^22 cm2
+        :type mw_nh: float
+        :param whim_n0: 
+        :type whim_n0: Optional[float]
+        :param whim_T: 
+        :type whim_T: Optional[float]
+        :param demo_plugin: 
+        :type demo_plugin: Optional[OGIPLike]
+        :param use_mw_gas: 
+        :type use_mw_gas: bool
+        :param use_host_gas: 
+        :type use_host_gas: bool
+        :returns: 
+
+        """
+
+        self._name: str = name
+        self._eflux: float = eflux
+        self._index: float = index
+        self._ra: float = ra
+        self._dec: float = dec
+        self._z: float = z
+        self._host_nh: float = host_nh
+        self._mw_nh: float = mw_nh
+        self._whim_n0: Optional[float] = whim_n0
+        self._whim_T: Optional[float] = whim_T
+        self._use_mw_gas: bool = use_mw_gas
+        self._use_host_gas: bool = use_host_gas
+
+        self._demo_plugin: Optional[OGIPLike] = demo_plugin
 
         # now this is done in pop synth
 #        self._get_mw_nh()
@@ -129,7 +159,6 @@ class SpectrumFactory(object):
             else:
                 host_nh = None
 
-        
             sg = SpectrumGenerator(name=name,
                                    eflux=population.fluxes_latent[i],
                                    index=population.spec_idx[i],
@@ -164,7 +193,7 @@ class SpectrumFactory(object):
             cat_entries.append(s.xrt_catalog_entry)
 
         xrt_cat = XRTCatalog(*cat_entries)
-        
+
         xrt_cat.to_file(catalog_name)
 
     @property
