@@ -9,8 +9,15 @@ import scipy.stats as stats
 from astromodels import Model, PointSource, Powerlaw, Powerlaw_Eflux, TbAbs
 from bb_astromodels import Integrate_Absori
 from natsort import natsorted
+from threeML import OGIPLike
 
 from .catalog import XRTCatalog, XRTCatalogEntry
+from .spectral_plot import display_posterior_model_counts
+
+green = "#1AFEA8"
+purple = "#D656FF"
+red = "#FF284F"
+blue = "#42B8FF"
 
 
 @dataclass
@@ -37,7 +44,7 @@ class Fit(object):
 
         """
         self._catalog: XRTCatalog = catalog
-        self._data_path: Path = data_path
+        self._data_path: Optional[Path] = data_path
 
         self._n_grbs: int = stan_fit.posterior.K.stack(
             sample=("chain", "draw")).values.shape[0]
@@ -108,10 +115,23 @@ class Fit(object):
 
     @property
     def catalog(self) -> XRTCatalog:
+        """
+        The catalog of the GRBs
+
+        :returns: 
+
+        """
         self._catalog
 
     @property
     def n_grbs(self) -> int:
+        """
+        The number of GRBs in the fit
+
+        :returns: 
+
+        """
+
         return self._n_grbs
 
     @property
@@ -178,7 +198,7 @@ class Fit(object):
 
         return fig
 
-    def _get_spectrum(self, id) -> ModelContainer:
+    def _get_spectrum(self, id: int) -> ModelContainer:
         """
 
 
@@ -271,20 +291,18 @@ class Fit(object):
 
     def plot_nH_z(self, show_truth: bool = False):
 
-        mean_difference = np.empty(self._n_grbs)
-
-        for i in range(self._n_grbs):
-
-            mean_difference[i] = np.median(self._host_nh[i])
-
         fig, ax = plt.subplots()
-
-        ax.semilogy(self._catalog.z+1, mean_difference, ".")
 
         if show_truth:
 
             ax.semilogy(self._catalog.z+1,
-                        self._catalog.nH_host_simanyhow, ".")
+                        self._catalog.nH_host_sim, "o", color=green, alpha=0.7, zorder=-1000)
+
+        for i in range(self._n_grbs):
+
+            lo, hi = av.hdi(self._host_nh[i], hdi_prob=0.95)
+
+            ax.vlines(self._catalog.z[i] + 1, lo, hi, color=purple)
 
         ax.set_ylabel("nH 10e22")
 
@@ -292,7 +310,62 @@ class Fit(object):
 
         return fig
 
-    def plot_model_spectrum(self, id):
+    def plot_data_spectrum(self, id: int) -> plt.Figure:
+
+        if self._data_path is not None:
+
+            bpath = self._data_path / f"grb{self._grbs[id]}/"
+
+        else:
+
+            return
+
+        o = OGIPLike("xrt",
+                     observation=bpath / "apc.pha",
+                     background=bpath / "apc_bak.pha",
+                     response=bpath / "apc.rsp",
+                     spectrum_number=1
+
+                     )
+
+        if self._has_whim_fit:
+
+            pass
+
+        if self._has_host_fit:
+
+            samples = np.vstack(
+                (self._flux[id], self._index[id], self._host_nh[id]))
+
+        # get the model container object
+        model_container: ModelContainer = self._get_spectrum(id)
+
+        if self._has_whim_fit:
+
+            model = model_container.model_all
+
+        elif self._has_host_fit:
+
+            model = model_container.model_host
+
+        fig = display_posterior_model_counts(o, model, samples.T[::20],
+                                             shade=False,
+                                             min_rate=-99,
+                                             model_color=green,
+                                             data_color=purple,
+                                             background_color=blue,
+                                             show_background=True,
+                                             source_only=False)
+
+        ax = fig.get_axes()[0]
+
+        ax.set_yscale("linear")
+        ax.set_xscale("linear")
+        ax.set_xlim(.3)
+
+        return fig
+
+    def plot_model_spectrum(self, id: int) -> plt.Figure:
 
         # get the model container object
         model_container: ModelContainer = self._get_spectrum(id)
@@ -325,7 +398,7 @@ class Fit(object):
                 model_container.model_all.set_free_parameters(sample)
 
                 ax.loglog(ene, model_container.model_all.get_point_source_fluxes(
-                    0, ene), color="purple", lw=1, alpha=0.1)
+                    0, ene), color=purple, lw=1, alpha=0.1)
 
             if self._has_host_fit:
 
@@ -333,16 +406,16 @@ class Fit(object):
 
                 model_container.model_host.set_free_parameters(sample[:3])
 
-                ax.loglog(ene, model_container.model_mw.get_point_source_fluxes(
-                    0, ene), color="red", lw=1, alpha=0.1)
+                # ax.loglog(ene, model_container.model_mw.get_point_source_fluxes(
+                #     0, ene), color="red", lw=1, alpha=0.1)
 
                 ax.loglog(ene, model_container.model_host.get_point_source_fluxes(
-                    0, ene), color="green", lw=1, alpha=0.1)
+                    0, ene), color=green, lw=1, alpha=0.1)
 
             model_container.model_pl.set_free_parameters(sample[:2])
 
             ax.loglog(ene, model_container.model_pl.get_point_source_fluxes(
-                0, ene), color="blue", lw=1, alpha=0.1)
+                0, ene), color=blue, lw=1, alpha=0.1)
 
         if self._catalog.is_sim:
 
@@ -356,7 +429,7 @@ class Fit(object):
                     simulated_parameters)
 
                 ax.loglog(ene, model_container.model_all.get_point_source_fluxes(
-                    0, ene), color="limegreen")
+                    0, ene), color="k", lw=0.5)
 
             if model_container.model_host is not None:
 
@@ -368,16 +441,16 @@ class Fit(object):
                 model_container.model_host.set_free_parameters(
                     simulated_parameters[:3])
 
-                ax.loglog(ene, model_container.model_mw.get_point_source_fluxes(
-                    0, ene), color="white")
+                # ax.loglog(ene, model_container.model_mw.get_point_source_fluxes(
+                #     0, ene), color="white")
 
                 ax.loglog(ene, model_container.model_host.get_point_source_fluxes(
-                    0, ene), color="grey")
+                    0, ene), color="grey", lw=0.5)
 
             model_container.model_pl.set_free_parameters(
                 simulated_parameters[:2])
 
             ax.loglog(ene, model_container.model_pl.get_point_source_fluxes(
-                0, ene), color="yellow")
+                0, ene), color="k", lw=0.5)
 
         return fig
