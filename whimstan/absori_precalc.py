@@ -106,9 +106,9 @@ def interpolate_sigma(ekeV, energy_base, sigma_base):
 
 
 # Constants
-omegam=0.3
-omegal=0.7
-h0=70.
+omegam=0.307
+omegal=0.693
+h0=67.7
 c=2.99792458e5
 cmpermpc=3.08568e24
 def sum_sigma_interp_precalc(z, x, energy_base, sigma_base, zshell_thickness=0.02):
