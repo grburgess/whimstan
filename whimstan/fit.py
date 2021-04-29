@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 
 import arviz as av
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import numpy as np
 import scipy.stats as stats
 from astromodels import Model, PointSource, Powerlaw, Powerlaw_Eflux, TbAbs
@@ -63,7 +64,7 @@ class Fit(object):
             self._host_nh = stan_fit.posterior.nH_host_norm.stack(
                 sample=("chain", "draw")).values
 
-            self._log_nh_host_mu = stan_fit.posterior.log_nH_host_mu.stack(
+            self._log_nh_host_mu = stan_fit.posterior.log_nH_host_mu_raw.stack(
                 sample=("chain", "draw")).values
 
             self._log_nh_host_sigma = stan_fit.posterior.log_nH_host_sigma.stack(
@@ -76,10 +77,20 @@ class Fit(object):
             # we do not have a host gas fit
 
             pass
-
-        # whim stuff
+        print(self._has_host_fit)
         self._has_whim_fit: bool = False
+        try:
+            self._n0_whim = stan_fit.posterior.n0_whim.stack(
+                sample=("chain", "draw")).values
+            self._t_whim = stan_fit.posterior.t_whim.stack(
+                sample=("chain", "draw")).values
+            self._has_whim_fit = True
+        except:
+            
+            # we do not have a whim fit
 
+            pass
+        
         # group properties
 
         self._index_mu: np.ndarray = stan_fit.posterior.index_mu.stack(
@@ -102,7 +113,7 @@ class Fit(object):
 
         self._has_whim_sim: bool = False
         self._has_host_sim: bool = False
-
+        
         if self._catalog.is_sim:
 
             if self._catalog.n0_sim is not None:
@@ -330,9 +341,10 @@ class Fit(object):
 
         if self._has_whim_fit:
 
-            pass
+            samples = np.vstack(
+                (self._flux[id], self._index[id], self._host_nh[id], self._n0_whim, self._t_whim))
 
-        if self._has_host_fit:
+        elif self._has_host_fit:
 
             samples = np.vstack(
                 (self._flux[id], self._index[id], self._host_nh[id]))
@@ -366,7 +378,7 @@ class Fit(object):
         return fig
 
     def plot_model_spectrum(self, id: int) -> plt.Figure:
-
+        
         # get the model container object
         model_container: ModelContainer = self._get_spectrum(id)
 
@@ -382,11 +394,21 @@ class Fit(object):
 
         ene = np.geomspace(0.1, 5, 500)
 
+        custom_lines = []
+        labels = []
+        if self._has_whim_fit:
+            labels.append("Host and whim posterior")
+            custom_lines.append(Line2D([0], [0], color=purple, lw=2))
+        if self._has_host_fit:
+            labels.append("Host posterior")
+            custom_lines.append(Line2D([0], [0], color=green, lw=2))
+        
         if self._has_whim_fit:
 
-            pass
+            samples = np.vstack(
+                (self._flux[id], self._index[id], self._host_nh[id], self._n0_whim, self._t_whim))
 
-        if self._has_host_fit:
+        elif self._has_host_fit:
 
             samples = np.vstack(
                 (self._flux[id], self._index[id], self._host_nh[id]))
@@ -401,7 +423,6 @@ class Fit(object):
                     0, ene), color=purple, lw=1, alpha=0.1)
 
             if self._has_host_fit:
-
                 model_container.model_mw.set_free_parameters(sample[:2])
 
                 model_container.model_host.set_free_parameters(sample[:3])
@@ -424,7 +445,8 @@ class Fit(object):
             if model_container.model_all is not None:
 
                 # ok, we have some whim
-
+                labels.append("Total Simualted")
+                custom_lines.append(Line2D([0], [0], color="k", lw=2))
                 model_container.model_all.set_free_parameters(
                     simulated_parameters)
 
@@ -434,7 +456,10 @@ class Fit(object):
             if model_container.model_host is not None:
 
                 # ok, we have some host gas (MW as well)
-
+                labels.append("Simulation Host included")
+                custom_lines.append(Line2D([0], [0], color="grey", lw=2))
+                labels.append("Simulation MW included")
+                custom_lines.append(Line2D([0], [0], color="darkred", lw=2))
                 model_container.model_mw.set_free_parameters(
                     simulated_parameters[:2])
 
@@ -451,6 +476,9 @@ class Fit(object):
                 simulated_parameters[:2])
 
             ax.loglog(ene, model_container.model_pl.get_point_source_fluxes(
-                0, ene), color="k", lw=0.5)
-
+                0, ene), color="darkred", lw=0.5)
+        ax.legend(custom_lines, labels)
+        ax.set_xlabel("Energy [keV]")
+        ax.set_ylabel("Flux [ph cm-2 s-1 keV-1]")
         return fig
+                                
