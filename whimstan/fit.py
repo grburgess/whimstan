@@ -185,14 +185,14 @@ class Fit(object):
         if self._catalog.is_sim:
 
             ax.hist(np.log10(self._catalog.nH_host_sim) + 22, bins=10,
-                    density=True, histtype="step", lw=2)
+                    density=True, histtype="step", lw=2,color="k")
 
             # ax.plot(xgrid, stats.norm.pdf(xgrid, loc=, scale=0.5),  color="b")
 
-        for mu, sig in zip(self._index_mu, self._index_sigma):
+        for mu, sig in zip(self._log_nh_host_mu, self._log_nh_host_sigma):
 
             ax.plot(xgrid, stats.norm.pdf(
-                xgrid, loc=mu, scale=sig), alpha=0.1, color="r")
+                xgrid, loc=mu, scale=sig), alpha=0.1, color=green)
 
         ax.set_xlabel("log10(nH host)")
 
@@ -283,7 +283,7 @@ class Fit(object):
 
         ax.semilogy(self._catalog.z+1, mean_difference, ".")
 
-        ax.set_ylabel("nH 10e22")
+        ax.set_ylabel(r"nH $10^{22}$")
 
         ax.set_xlabel("z+1")
 
@@ -295,18 +295,24 @@ class Fit(object):
 
         if show_truth:
 
-            ax.semilogy(self._catalog.z+1,
-                        self._catalog.nH_host_sim, "o", color=green, alpha=0.7, zorder=-1000)
+            ax.loglog(self._catalog.z+1,
+                        1e22*self._catalog.nH_host_sim, "o", color=green, alpha=0.7, zorder=-1000)
 
         for i in range(self._n_grbs):
 
-            lo, hi = av.hdi(self._host_nh[i], hdi_prob=0.95)
+            lo, hi = av.hdi(1e22*self._host_nh[i], hdi_prob=0.95)
 
             ax.vlines(self._catalog.z[i] + 1, lo, hi, color=purple)
 
-        ax.set_ylabel("nH 10e22")
+        ax.set_ylabel(r"host nH (cm$^{-2}$)")
 
         ax.set_xlabel("z+1")
+
+        ax.set_xscale("log")
+
+        ax.set_yscale("log")
+        
+        ax.set_xlim(right=10)
 
         return fig
 
@@ -453,4 +459,8 @@ class Fit(object):
             ax.loglog(ene, model_container.model_pl.get_point_source_fluxes(
                 0, ene), color="k", lw=0.5)
 
+
+        ax.set_xlabel("Energy (keV)")
+        ax.set_ylabel("flux (phts /s /kev / cm2)")
+            
         return fig

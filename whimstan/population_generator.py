@@ -141,11 +141,11 @@ class MilkyWayGas(popsynth.AuxiliarySampler):
 
         mw_nh = np.empty(size)
 
-        for i, (ra, dec) in enumerate(zip(self._ra, self._dec)):
+        coord = SkyCoord(ra=self._ra, dec=self._dec, unit="deg", frame="icrs")
 
-            coord = SkyCoord(ra=ra, dec=dec, unit="deg", frame="icrs")
+        for i,c in enumerate(coord):
 
-            mw_nh[i] = GasMap.nhf(coord, nhmap='DL', radius=1*u.deg).value
+            mw_nh[i] = GasMap.nhf(c, nhmap='DL', radius=1*u.deg).value
 
         self._true_values = mw_nh
 
@@ -185,18 +185,11 @@ class GalacticPlaceSelection(popsynth.SpatialSelection):
 
     def draw(self, size: int):
 
-        b = []
+        g_coor = SkyCoord(self._spatial_distribution.ra, self._spatial_distribution.dec, unit="deg",
+                          frame="icrs").transform_to("galactic")
 
-        for ra, dec in zip(self._spatial_distribution.ra, self._spatial_distribution.dec):
-
-            g_coor = SkyCoord(ra, dec, unit="deg",
-                              frame="icrs").transform_to("galactic")
-
-            b.append(g_coor.b.deg)
-
-        b = np.array(b)
-
-        self._selection = (b >= self.b_limit) | (b <= -self.b_limit)
+        self._selection = (g_coor.b.deg >= self.b_limit) | (
+            g_coor.b.deg <= -self.b_limit)
 
 
 class ObscuredFluxSampler(popsynth.DerivedLumAuxSampler):
