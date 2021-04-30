@@ -34,15 +34,17 @@ def display_posterior_model_counts(plugin,
                                    shade=True,
                                    q_level=68,
                                    gradient=0.6,
+                                   axes=None,
                                    **kwargs):
 
 
     show_residuals = False
-    
-    residual_plot = ResidualPlot(show_residuals=show_residuals)
-    
 
-    axes = residual_plot.data_axis
+    if axes!=None:
+        residual_plot = ResidualPlot(show_residuals=show_residuals, model_subplot=axes)
+    else:
+        residual_plot = ResidualPlot(show_residuals=show_residuals)
+        axes = residual_plot.data_axis
 
     plugin.set_model(model)
 

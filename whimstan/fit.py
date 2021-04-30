@@ -8,6 +8,7 @@ import numpy as np
 import scipy.stats as stats
 from astromodels import Model, PointSource, Powerlaw, Powerlaw_Eflux, TbAbs
 from bb_astromodels import Integrate_Absori
+from matplotlib.lines import Line2D
 from natsort import natsorted
 from threeML import OGIPLike
 
@@ -63,7 +64,7 @@ class Fit(object):
             self._host_nh = stan_fit.posterior.nH_host_norm.stack(
                 sample=("chain", "draw")).values
 
-            self._log_nh_host_mu = stan_fit.posterior.log_nH_host_mu.stack(
+            self._log_nh_host_mu = stan_fit.posterior.log_nH_host_mu_raw.stack(
                 sample=("chain", "draw")).values
 
             self._log_nh_host_sigma = stan_fit.posterior.log_nH_host_sigma.stack(
@@ -76,9 +77,19 @@ class Fit(object):
             # we do not have a host gas fit
 
             pass
-
-        # whim stuff
+        print(self._has_host_fit)
         self._has_whim_fit: bool = False
+        try:
+            self._n0_whim = stan_fit.posterior.n0_whim.stack(
+                sample=("chain", "draw")).values
+            self._t_whim = stan_fit.posterior.t_whim.stack(
+                sample=("chain", "draw")).values
+            self._has_whim_fit = True
+        except:
+
+            # we do not have a whim fit
+
+            pass
 
         # group properties
 
@@ -185,7 +196,7 @@ class Fit(object):
         if self._catalog.is_sim:
 
             ax.hist(np.log10(self._catalog.nH_host_sim) + 22, bins=10,
-                    density=True, histtype="step", lw=2,color="k")
+                    density=True, histtype="step", lw=2, color="k")
 
             # ax.plot(xgrid, stats.norm.pdf(xgrid, loc=, scale=0.5),  color="b")
 
@@ -296,7 +307,7 @@ class Fit(object):
         if show_truth:
 
             ax.loglog(self._catalog.z+1,
-                        1e22*self._catalog.nH_host_sim, "o", color=green, alpha=0.7, zorder=-1000)
+                      1e22*self._catalog.nH_host_sim, "o", color=green, alpha=0.7, zorder=-1000)
 
         for i in range(self._n_grbs):
 
@@ -311,7 +322,7 @@ class Fit(object):
         ax.set_xscale("log")
 
         ax.set_yscale("log")
-        
+
         ax.set_xlim(right=10)
 
         return fig
@@ -336,9 +347,10 @@ class Fit(object):
 
         if self._has_whim_fit:
 
-            pass
+            samples = np.vstack(
+                (self._flux[id], self._index[id], self._host_nh[id], self._n0_whim, self._t_whim))
 
-        if self._has_host_fit:
+        elif self._has_host_fit:
 
             samples = np.vstack(
                 (self._flux[id], self._index[id], self._host_nh[id]))
@@ -388,11 +400,21 @@ class Fit(object):
 
         ene = np.geomspace(0.1, 5, 500)
 
+        custom_lines = []
+        labels = []
+        if self._has_whim_fit:
+            labels.append("Host and whim posterior")
+            custom_lines.append(Line2D([0], [0], color=purple, lw=2))
+        if self._has_host_fit:
+            labels.append("Host posterior")
+            custom_lines.append(Line2D([0], [0], color=green, lw=2))
+
         if self._has_whim_fit:
 
-            pass
+            samples = np.vstack(
+                (self._flux[id], self._index[id], self._host_nh[id], self._n0_whim, self._t_whim))
 
-        if self._has_host_fit:
+        elif self._has_host_fit:
 
             samples = np.vstack(
                 (self._flux[id], self._index[id], self._host_nh[id]))
@@ -407,7 +429,6 @@ class Fit(object):
                     0, ene), color=purple, lw=1, alpha=0.1)
 
             if self._has_host_fit:
-
                 model_container.model_mw.set_free_parameters(sample[:2])
 
                 model_container.model_host.set_free_parameters(sample[:3])
@@ -430,7 +451,8 @@ class Fit(object):
             if model_container.model_all is not None:
 
                 # ok, we have some whim
-
+                labels.append("Total Simualted")
+                custom_lines.append(Line2D([0], [0], color="k", lw=2))
                 model_container.model_all.set_free_parameters(
                     simulated_parameters)
 
@@ -440,7 +462,10 @@ class Fit(object):
             if model_container.model_host is not None:
 
                 # ok, we have some host gas (MW as well)
-
+                labels.append("Simulation Host included")
+                custom_lines.append(Line2D([0], [0], color="grey", lw=2))
+                labels.append("Simulation MW included")
+                custom_lines.append(Line2D([0], [0], color="darkred", lw=2))
                 model_container.model_mw.set_free_parameters(
                     simulated_parameters[:2])
 
@@ -457,10 +482,11 @@ class Fit(object):
                 simulated_parameters[:2])
 
             ax.loglog(ene, model_container.model_pl.get_point_source_fluxes(
-                0, ene), color="k", lw=0.5)
+                0, ene), color="darkred", lw=0.5)
+        ax.legend(custom_lines, labels)
+
+        ax.set_xlabel("energy (keV)")
+        ax.set_ylabel(r"flux phts s$^{-1}$kev$^{-1}$cm$^{-2}$)")
 
 
-        ax.set_xlabel("Energy (keV)")
-        ax.set_ylabel("flux (phts /s /kev / cm2)")
-            
         return fig
