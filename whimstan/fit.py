@@ -10,6 +10,7 @@ from astromodels import Model, PointSource, Powerlaw, Powerlaw_Eflux, TbAbs
 from bb_astromodels import Integrate_Absori
 from matplotlib.lines import Line2D
 from natsort import natsorted
+from numpy.typing import ArrayLike
 from threeML import OGIPLike
 
 from .catalog import XRTCatalog, XRTCatalogEntry
@@ -50,15 +51,15 @@ class Fit(object):
         self._n_grbs: int = stan_fit.posterior.K.stack(
             sample=("chain", "draw")).values.shape[0]
 
-        self._flux: np.ndarray = stan_fit.posterior.K.stack(
+        self._flux: ArrayLike = stan_fit.posterior.K.stack(
             sample=("chain", "draw")).values
-        self._index: np.ndarray = stan_fit.posterior.index.stack(
+        self._index: ArrayLike = stan_fit.posterior.index.stack(
             sample=("chain", "draw")).values
 
         self._has_host_fit: bool = False
-        self._host_nh: Optional[np.ndarray] = None
-        self._log_nh_host_mu: Optional[np.ndarray] = None
-        self._log_nh_host_sigma: Optional[np.ndarray] = None
+        self._host_nh: Optional[ArrayLike] = None
+        self._log_nh_host_mu: Optional[ArrayLike] = None
+        self._log_nh_host_sigma: Optional[ArrayLike] = None
 
         try:
             self._host_nh = stan_fit.posterior.nH_host_norm.stack(
@@ -93,10 +94,10 @@ class Fit(object):
 
         # group properties
 
-        self._index_mu: np.ndarray = stan_fit.posterior.index_mu.stack(
+        self._index_mu: ArrayLike = stan_fit.posterior.index_mu.stack(
             sample=("chain", "draw")).values
 
-        self._index_sigma: np.ndarray = stan_fit.posterior.index_sigma.stack(
+        self._index_sigma: ArrayLike = stan_fit.posterior.index_sigma.stack(
             sample=("chain", "draw")).values
 
         if data_path is not None:
@@ -146,19 +147,19 @@ class Fit(object):
         return self._n_grbs
 
     @property
-    def z(self) -> np.ndarray:
+    def z(self) -> ArrayLike:
         return self._catalog.z
 
     @property
-    def flux(self) -> np.ndarray:
+    def flux(self) -> ArrayLike:
         return self._flux
 
     @property
-    def index(self) -> np.ndarray:
+    def index(self) -> ArrayLike:
         return self._index
 
     @property
-    def host_nh(self) -> np.ndarray:
+    def host_nh(self) -> ArrayLike:
         """
         host nH denisity in 1/10^22 cm2
 
@@ -169,22 +170,22 @@ class Fit(object):
         return self._host_nh
 
     @property
-    def index_mu(self) -> np.ndarray:
+    def index_mu(self) -> ArrayLike:
         return self._index_mu
 
     @property
-    def index_sigma(self) -> np.ndarray:
+    def index_sigma(self) -> ArrayLike:
         return self._index_sigma
 
     @property
-    def log_nh_host_mu(self) -> np.ndarray:
+    def log_nh_host_mu(self) -> ArrayLike:
         return self._log_nh_host_mu
 
     @property
-    def log_nh_host_sigma(self) -> np.ndarray:
+    def log_nh_host_sigma(self) -> ArrayLike:
         return self._log_nh_host_sigma
 
-    def plot_nh_host_distribution(self):
+    def plot_nh_host_distribution(self) -> plt.Figure:
 
         fig, ax = plt.subplots()
 
@@ -200,7 +201,7 @@ class Fit(object):
 
             # ax.plot(xgrid, stats.norm.pdf(xgrid, loc=, scale=0.5),  color="b")
 
-        for mu, sig in zip(self._log_nh_host_mu, self._log_nh_host_sigma):
+        for mu, sig in zip(self._log_nh_host_mu + 22., self._log_nh_host_sigma):
 
             ax.plot(xgrid, stats.norm.pdf(
                 xgrid, loc=mu, scale=sig), alpha=0.1, color=green)
@@ -270,7 +271,7 @@ class Fit(object):
 
         return ModelContainer(model_all, model_host, model_mw, model_pl)
 
-    def _nH_sim_difference(self, id) -> np.ndarray:
+    def _nH_sim_difference(self, id) -> ArrayLike:
 
         if not self._catalog.is_sim:
 
@@ -282,7 +283,7 @@ class Fit(object):
 
         return difference
 
-    def plot_nH_z_excess(self):
+    def plot_nH_z_excess(self) -> None:
 
         mean_difference = np.empty(self._n_grbs)
 
@@ -300,7 +301,7 @@ class Fit(object):
 
         return fig
 
-    def plot_nH_z(self, show_truth: bool = False):
+    def plot_nH_z(self, show_truth: bool = False) -> plt.Figure:
 
         fig, ax = plt.subplots()
 
@@ -487,6 +488,5 @@ class Fit(object):
 
         ax.set_xlabel("energy (keV)")
         ax.set_ylabel(r"flux phts s$^{-1}$kev$^{-1}$cm$^{-2}$)")
-
 
         return fig
