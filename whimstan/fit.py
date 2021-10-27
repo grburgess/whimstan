@@ -31,9 +31,11 @@ class ModelContainer:
     model_pl: Optional[Model] = None
 
 
-class Fit(object):
-
-    def __init__(self, catalog: XRTCatalog, stan_fit: av.data.InferenceData, data_path: Optional[Path] = None):
+class Fit:
+    def __init__(self,
+                 catalog: XRTCatalog,
+                 stan_fit: av.data.InferenceData,
+                 data_path: Optional[Path] = None):
         """TODO describe function
 
         :param catalog:
@@ -178,7 +180,7 @@ class Fit(object):
         return self._index_sigma
 
     @property
-    def log_nh_host_mu(self) -> ArrayLike:
+    def log_nh_host_mu(self) -> np.ndarray:
         return self._log_nh_host_mu
 
     @property

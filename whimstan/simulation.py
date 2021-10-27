@@ -14,7 +14,7 @@ from threeML import OGIPLike, quiet_mode
 from .catalog import XRTCatalog, XRTCatalogEntry
 
 
-class SpectrumGenerator(object):
+class SpectrumGenerator:
 
     def __init__(self, name: str, eflux: float, index: float, ra: float, dec: float, z: float, host_nh: float, mw_nh: float, whim_n0: Optional[float] = None, whim_T: Optional[float] = None, demo_plugin: Optional[OGIPLike] = None,
                  use_mw_gas: bool = True, use_host_gas: bool = True):
@@ -138,7 +138,7 @@ class SpectrumGenerator(object):
                                )
 
 
-class SpectrumFactory(object):
+class SpectrumFactory:
 
     def __init__(self, population: popsynth.Population, whim_n0=None, whim_T=None,
                  use_mw_gas=True, use_host_gas=True):

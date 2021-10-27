@@ -58,8 +58,7 @@ class XRTCatalogEntry:
         return np.array(tmp)
 
 
-class XRTCatalog(object):
-
+class XRTCatalog:
     def __init__(self, *grbs):
 
         self._catalog: Dict[str, XRTCatalogEntry] = OrderedDict()

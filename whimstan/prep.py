@@ -84,6 +84,23 @@ def build_stan_data(*grbs: str, catalog=None, cat_path="data",
                     is_sim=False, use_absori=False, use_mw_gas=True,
                     use_host_gas=True):
 
+    """
+
+    :param catalog: 
+    :type catalog: 
+    :param cat_path: 
+    :type cat_path: 
+    :param is_sim: 
+    :type is_sim: 
+    :param use_absori: 
+    :type use_absori: 
+    :param use_mw_gas: 
+    :type use_mw_gas: 
+    :param use_host_gas: 
+    :type use_host_gas: 
+    :returns: 
+
+    """
     N_grbs = len(grbs)
     z = []
     if use_mw_gas:

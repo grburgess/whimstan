@@ -21,7 +21,7 @@ _available_models["all_t_fixed"] = "all_t_fixed.stan"
 # is free for whim
 _available_models["all"] = "all.stan"
 
-class StanModel(object):
+class StanModel:
     def __init__(self, name, stan_file):
 
         self._name = name
