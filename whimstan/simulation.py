@@ -1,4 +1,3 @@
-
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -15,38 +14,51 @@ from .catalog import XRTCatalog, XRTCatalogEntry
 
 
 class SpectrumGenerator:
-
-    def __init__(self, name: str, eflux: float, index: float, ra: float, dec: float, z: float, host_nh: float, mw_nh: float, whim_n0: Optional[float] = None, whim_T: Optional[float] = None, demo_plugin: Optional[OGIPLike] = None,
-                 use_mw_gas: bool = True, use_host_gas: bool = True):
+    def __init__(
+        self,
+        name: str,
+        eflux: float,
+        index: float,
+        ra: float,
+        dec: float,
+        z: float,
+        host_nh: float,
+        mw_nh: float,
+        whim_n0: Optional[float] = None,
+        whim_T: Optional[float] = None,
+        demo_plugin: Optional[OGIPLike] = None,
+        use_mw_gas: bool = True,
+        use_host_gas: bool = True,
+    ):
         """
 
         :param name:  the name of the function
         :type name: str
-        :param eflux: 
+        :param eflux:
         :type eflux: float
-        :param index: 
+        :param index:
         :type index: float
-        :param ra: 
+        :param ra:
         :type ra: float
-        :param dec: 
+        :param dec:
         :type dec: float
-        :param z: 
+        :param z:
         :type z: float
         :param host_nh: host nH density in 1/10^22 cm2
         :type host_nh: float
         :param mw_nh: milkyway nH density in 1/10^22 cm2
         :type mw_nh: float
-        :param whim_n0: 
+        :param whim_n0:
         :type whim_n0: Optional[float]
-        :param whim_T: 
+        :param whim_T:
         :type whim_T: Optional[float]
-        :param demo_plugin: 
+        :param demo_plugin:
         :type demo_plugin: Optional[OGIPLike]
-        :param use_mw_gas: 
+        :param use_mw_gas:
         :type use_mw_gas: bool
-        :param use_host_gas: 
+        :param use_host_gas:
         :type use_host_gas: bool
-        :returns: 
+        :returns:
 
         """
 
@@ -66,7 +78,7 @@ class SpectrumGenerator:
         self._demo_plugin: Optional[OGIPLike] = demo_plugin
 
         # now this is done in pop synth
-#        self._get_mw_nh()
+        #        self._get_mw_nh()
 
         self._create_plugin()
 
@@ -74,24 +86,25 @@ class SpectrumGenerator:
 
         coord = SkyCoord(ra=self._ra, dec=self._dec, unit="deg", frame="icrs")
 
-        self._mw_nh = GasMap.nhf(
-            coord, nhmap='DL', radius=1*u.deg).value / 1e22
+        self._mw_nh = (
+            GasMap.nhf(coord, nhmap="DL", radius=1 * u.deg).value / 1e22
+        )
 
     def _create_plugin(self):
         quiet_mode()
 
         if self._demo_plugin is None:
 
-            self._demo_plugin = OGIPLike("tmp",
-                                         observation="data/grb050401/apcsource.pi",
-                                         background="data/grb050401/apcback.pi",
-                                         response="data/grb050401/apc.rmf",
-                                         arf_file="data/grb050401/apc.arf",
-                                         verbose=False
+            self._demo_plugin = OGIPLike(
+                "tmp",
+                observation="data/grb050401/apcsource.pi",
+                background="data/grb050401/apcback.pi",
+                response="data/grb050401/apc.rmf",
+                arf_file="data/grb050401/apc.arf",
+                verbose=False,
+            )
 
-                                         )
-
-        spec = Powerlaw_Eflux(F=self._eflux, index=self._index, a=.4, b=15)
+        spec = Powerlaw_Eflux(F=self._eflux, index=self._index, a=0.4, b=15)
         if self._use_mw_gas:
             spec *= TbAbs(NH=self._mw_nh, redshift=0)
         if self._use_host_gas:
@@ -99,9 +112,9 @@ class SpectrumGenerator:
 
         if (self._whim_n0 is not None) and (self._whim_T is not None):
 
-            spec = spec * \
-                Integrate_Absori(n0=self._whim_n0,
-                                 temp=self._whim_T, redshift=self._z)
+            spec = spec * Integrate_Absori(
+                n0=self._whim_n0, temp=self._whim_T, redshift=self._z
+            )
 
         ps = PointSource("tmp", self._ra, self._dec, spectral_shape=spec)
         model = Model(ps)
@@ -123,54 +136,63 @@ class SpectrumGenerator:
     @property
     def xrt_catalog_entry(self):
 
-        return XRTCatalogEntry(self._name.replace("grb", ""),
-                               self._ra,
-                               self._dec,
-                               self._z,
-                               self._mw_nh,
-                               nH_host_sim=self._host_nh,
-                               index_sim=self._index,
-                               flux_sim=self._eflux,
-                               n0_sim=self._whim_n0,
-                               temp_sim=self._whim_T
-
-
-                               )
+        return XRTCatalogEntry(
+            self._name.replace("grb", ""),
+            self._ra,
+            self._dec,
+            self._z,
+            self._mw_nh,
+            nH_host_sim=self._host_nh,
+            index_sim=self._index,
+            flux_sim=self._eflux,
+            n0_sim=self._whim_n0,
+            temp_sim=self._whim_T,
+        )
 
 
 class SpectrumFactory:
-
-    def __init__(self, population: popsynth.Population, whim_n0=None, whim_T=None,
-                 use_mw_gas=True, use_host_gas=True):
+    def __init__(
+        self,
+        population: popsynth.Population,
+        whim_n0=None,
+        whim_T=None,
+        use_mw_gas=True,
+        use_host_gas=True,
+    ):
 
         self._spectra = []
 
-        for i in progress_bar(range(population.n_objects), desc="Calculating the simulated datasets"):
+        for i in progress_bar(
+            range(population.n_objects),
+            desc="Calculating the simulated datasets",
+        ):
 
             name = f"grb00{i}"
 
             if use_mw_gas:
-                mw_nh = population.mw_nh[i]/1.e22
+                mw_nh = population.mw_nh[i] / 1.0e22
             else:
                 mw_nh = None
 
             if use_host_gas:
-                host_nh = population.host_nh[i]/1.e22
+                host_nh = population.host_nh[i] / 1.0e22
             else:
                 host_nh = None
 
-            sg = SpectrumGenerator(name=name,
-                                   eflux=population.fluxes_latent[i],
-                                   index=population.spec_idx[i],
-                                   ra=population.ra[i],
-                                   dec=population.dec[i],
-                                   z=population.distances[i],
-                                   host_nh=host_nh,
-                                   mw_nh=mw_nh,
-                                   whim_n0=whim_n0,
-                                   whim_T=whim_T,
-                                   use_mw_gas=use_mw_gas,
-                                   use_host_gas=use_host_gas)
+            sg = SpectrumGenerator(
+                name=name,
+                eflux=population.fluxes_latent[i],
+                index=population.spec_idx[i],
+                ra=population.ra[i],
+                dec=population.dec[i],
+                z=population.distances[i],
+                host_nh=host_nh,
+                mw_nh=mw_nh,
+                whim_n0=whim_n0,
+                whim_T=whim_T,
+                use_mw_gas=use_mw_gas,
+                use_host_gas=use_host_gas,
+            )
 
             self._spectra.append(sg)
 
