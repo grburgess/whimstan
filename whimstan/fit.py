@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import arviz as av
 import matplotlib.pyplot as plt
@@ -32,10 +32,12 @@ class ModelContainer:
 
 
 class Fit:
-    def __init__(self,
-                 catalog: XRTCatalog,
-                 stan_fit: av.data.InferenceData,
-                 data_path: Optional[Path] = None):
+    def __init__(
+        self,
+        catalog: XRTCatalog,
+        stan_fit: av.data.InferenceData,
+        data_path: Optional[Path] = None,
+    ):
         """TODO describe function
 
         :param catalog:
@@ -51,12 +53,15 @@ class Fit:
         self._data_path: Optional[Path] = data_path
 
         self._n_grbs: int = stan_fit.posterior.K.stack(
-            sample=("chain", "draw")).values.shape[0]
+            sample=("chain", "draw")
+        ).values.shape[0]
 
         self._flux: ArrayLike = stan_fit.posterior.K.stack(
-            sample=("chain", "draw")).values
+            sample=("chain", "draw")
+        ).values
         self._index: ArrayLike = stan_fit.posterior.index.stack(
-            sample=("chain", "draw")).values
+            sample=("chain", "draw")
+        ).values
 
         self._has_host_fit: bool = False
         self._host_nh: Optional[ArrayLike] = None
@@ -65,13 +70,18 @@ class Fit:
 
         try:
             self._host_nh = stan_fit.posterior.nH_host_norm.stack(
-                sample=("chain", "draw")).values
+                sample=("chain", "draw")
+            ).values
 
             self._log_nh_host_mu = stan_fit.posterior.log_nH_host_mu_raw.stack(
-                sample=("chain", "draw")).values
+                sample=("chain", "draw")
+            ).values
 
-            self._log_nh_host_sigma = stan_fit.posterior.log_nH_host_sigma.stack(
-                sample=("chain", "draw")).values
+            self._log_nh_host_sigma = (
+                stan_fit.posterior.log_nH_host_sigma.stack(
+                    sample=("chain", "draw")
+                ).values
+            )
 
             self._has_host_fit = True
 
@@ -84,9 +94,11 @@ class Fit:
         self._has_whim_fit: bool = False
         try:
             self._n0_whim = stan_fit.posterior.n0_whim.stack(
-                sample=("chain", "draw")).values
+                sample=("chain", "draw")
+            ).values
             self._t_whim = stan_fit.posterior.t_whim.stack(
-                sample=("chain", "draw")).values
+                sample=("chain", "draw")
+            ).values
             self._has_whim_fit = True
         except:
 
@@ -97,15 +109,19 @@ class Fit:
         # group properties
 
         self._index_mu: ArrayLike = stan_fit.posterior.index_mu.stack(
-            sample=("chain", "draw")).values
+            sample=("chain", "draw")
+        ).values
 
         self._index_sigma: ArrayLike = stan_fit.posterior.index_sigma.stack(
-            sample=("chain", "draw")).values
+            sample=("chain", "draw")
+        ).values
 
         if data_path is not None:
 
-            self._grbs: Optional[List[str]] = [x.name.replace("grb", "")
-                                               for x in natsorted(data_path.glob("grb*"))]
+            self._grbs: Optional[List[str]] = [
+                x.name.replace("grb", "")
+                for x in natsorted(data_path.glob("grb*"))
+            ]
 
         else:
 
@@ -132,7 +148,7 @@ class Fit:
         """
         The catalog of the GRBs
 
-        :returns: 
+        :returns:
 
         """
         self._catalog
@@ -142,7 +158,7 @@ class Fit:
         """
         The number of GRBs in the fit
 
-        :returns: 
+        :returns:
 
         """
 
@@ -191,22 +207,34 @@ class Fit:
 
         fig, ax = plt.subplots()
 
-        xgrid = np.linspace(19., 25, 100)
+        xgrid = np.linspace(19.0, 25, 100)
 
         # if we have a simulation
         # then plot the data
 
         if self._catalog.is_sim:
 
-            ax.hist(np.log10(self._catalog.nH_host_sim) + 22, bins=10,
-                    density=True, histtype="step", lw=2, color="k")
+            ax.hist(
+                np.log10(self._catalog.nH_host_sim) + 22,
+                bins=10,
+                density=True,
+                histtype="step",
+                lw=2,
+                color="k",
+            )
 
             # ax.plot(xgrid, stats.norm.pdf(xgrid, loc=, scale=0.5),  color="b")
 
-        for mu, sig in zip(self._log_nh_host_mu + 22., self._log_nh_host_sigma):
+        for mu, sig in zip(
+            self._log_nh_host_mu + 22.0, self._log_nh_host_sigma
+        ):
 
-            ax.plot(xgrid, stats.norm.pdf(
-                xgrid, loc=mu, scale=sig), alpha=0.1, color=green)
+            ax.plot(
+                xgrid,
+                stats.norm.pdf(xgrid, loc=mu, scale=sig),
+                alpha=0.1,
+                color=green,
+            )
 
         ax.set_xlabel("log10(nH host)")
 
@@ -216,9 +244,9 @@ class Fit:
         """
 
 
-        :param id: 
-        :type id: 
-        :returns: 
+        :param id:
+        :type id:
+        :returns:
 
         """
 
@@ -228,8 +256,14 @@ class Fit:
 
         if self._has_whim_fit or self._has_whim_sim:
 
-            spec_all = Powerlaw_Eflux(a=.4, b=15) * TbAbs(NH=card.nH_mw) * TbAbs(
-                redshift=card.z) * Integrate_Absori(redshift=card.z, n0=card.n0_sim, temp=card.temp_sim)
+            spec_all = (
+                Powerlaw_Eflux(a=0.4, b=15)
+                * TbAbs(NH=card.nH_mw)
+                * TbAbs(redshift=card.z)
+                * Integrate_Absori(
+                    redshift=card.z, n0=card.n0_sim, temp=card.temp_sim
+                )
+            )
 
             spec_all.NH_2.fix = True
             spec_all.xi_4.fix = True
@@ -252,21 +286,24 @@ class Fit:
 
         if self._has_host_sim or self._has_host_fit:
 
-            spec_host = Powerlaw_Eflux(
-                a=.4, b=15) * TbAbs(NH=card.nH_mw) * TbAbs(redshift=card.z)
+            spec_host = (
+                Powerlaw_Eflux(a=0.4, b=15)
+                * TbAbs(NH=card.nH_mw)
+                * TbAbs(redshift=card.z)
+            )
             spec_host.NH_2.fix = True
 
             ps_host = PointSource("host", 0, 0, spectral_shape=spec_host)
 
             model_host = Model(ps_host)
 
-            spec_mw = Powerlaw_Eflux(a=.14, b=15) * TbAbs(NH=card.nH_mw)
+            spec_mw = Powerlaw_Eflux(a=0.14, b=15) * TbAbs(NH=card.nH_mw)
             spec_mw.NH_2.fix = True
 
             ps_mw = PointSource("mw", 0, 0, spectral_shape=spec_mw)
             model_mw = Model(ps_mw)
 
-        spec_pl = Powerlaw_Eflux(a=.4, b=15)
+        spec_pl = Powerlaw_Eflux(a=0.4, b=15)
 
         ps_pl = PointSource("pl", 0, 0, spectral_shape=spec_pl)
         model_pl = Model(ps_pl)
@@ -295,7 +332,7 @@ class Fit:
 
         fig, ax = plt.subplots()
 
-        ax.semilogy(self._catalog.z+1, mean_difference, ".")
+        ax.semilogy(self._catalog.z + 1, mean_difference, ".")
 
         ax.set_ylabel(r"nH $10^{22}$")
 
@@ -309,12 +346,18 @@ class Fit:
 
         if show_truth:
 
-            ax.loglog(self._catalog.z+1,
-                      1e22*self._catalog.nH_host_sim, "o", color=green, alpha=0.7, zorder=-1000)
+            ax.loglog(
+                self._catalog.z + 1,
+                1e22 * self._catalog.nH_host_sim,
+                "o",
+                color=green,
+                alpha=0.7,
+                zorder=-1000,
+            )
 
         for i in range(self._n_grbs):
 
-            lo, hi = av.hdi(1e22*self._host_nh[i], hdi_prob=0.95)
+            lo, hi = av.hdi(1e22 * self._host_nh[i], hdi_prob=0.95)
 
             ax.vlines(self._catalog.z[i] + 1, lo, hi, color=purple)
 
@@ -330,7 +373,7 @@ class Fit:
 
         return fig
 
-    def plot_data_spectrum(self, id: int) -> plt.Figure:
+    def get_plugin_and_model(self, id: int) -> Tuple[OGIPLike, Model]:
 
         if self._data_path is not None:
 
@@ -340,23 +383,13 @@ class Fit:
 
             return
 
-        o = OGIPLike("xrt",
-                     observation=bpath / "apc.pha",
-                     background=bpath / "apc_bak.pha",
-                     response=bpath / "apc.rsp",
-                     spectrum_number=1
-
-                     )
-
-        if self._has_whim_fit:
-
-            samples = np.vstack(
-                (self._flux[id], self._index[id], self._host_nh[id], self._n0_whim, self._t_whim))
-
-        elif self._has_host_fit:
-
-            samples = np.vstack(
-                (self._flux[id], self._index[id], self._host_nh[id]))
+        plugin = OGIPLike(
+            "xrt",
+            observation=bpath / "apc.pha",
+            background=bpath / "apc_bak.pha",
+            response=bpath / "apc.rsp",
+            spectrum_number=1,
+        )
 
         # get the model container object
         model_container: ModelContainer = self._get_spectrum(id)
@@ -369,20 +402,52 @@ class Fit:
 
             model = model_container.model_host
 
-        fig = display_posterior_model_counts(o, model, samples.T[::20],
-                                             shade=False,
-                                             min_rate=-99,
-                                             model_color=green,
-                                             data_color=purple,
-                                             background_color=blue,
-                                             show_background=True,
-                                             source_only=False)
+        return plugin, model
+
+    def plot_data_spectrum(self, id: int) -> plt.Figure:
+
+        o, model = self.get_plugin_and_model(id)
+
+        if o is None:
+
+            return
+
+        if self._has_whim_fit:
+
+            samples = np.vstack(
+                (
+                    self._flux[id],
+                    self._index[id],
+                    self._host_nh[id],
+                    self._n0_whim,
+                    self._t_whim,
+                )
+            )
+
+        elif self._has_host_fit:
+
+            samples = np.vstack(
+                (self._flux[id], self._index[id], self._host_nh[id])
+            )
+
+        fig = display_posterior_model_counts(
+            o,
+            model,
+            samples.T[::20],
+            shade=False,
+            min_rate=-99,
+            model_color=green,
+            data_color=purple,
+            background_color=blue,
+            show_background=True,
+            source_only=False,
+        )
 
         ax = fig.get_axes()[0]
 
         ax.set_yscale("linear")
         ax.set_xscale("linear")
-        ax.set_xlim(.3)
+        ax.set_xlim(0.3)
 
         return fig
 
@@ -415,12 +480,20 @@ class Fit:
         if self._has_whim_fit:
 
             samples = np.vstack(
-                (self._flux[id], self._index[id], self._host_nh[id], self._n0_whim, self._t_whim))
+                (
+                    self._flux[id],
+                    self._index[id],
+                    self._host_nh[id],
+                    self._n0_whim,
+                    self._t_whim,
+                )
+            )
 
         elif self._has_host_fit:
 
             samples = np.vstack(
-                (self._flux[id], self._index[id], self._host_nh[id]))
+                (self._flux[id], self._index[id], self._host_nh[id])
+            )
 
         for sample in samples.T[::10]:
 
@@ -428,8 +501,13 @@ class Fit:
 
                 model_container.model_all.set_free_parameters(sample)
 
-                ax.loglog(ene, model_container.model_all.get_point_source_fluxes(
-                    0, ene), color=purple, lw=1, alpha=0.1)
+                ax.loglog(
+                    ene,
+                    model_container.model_all.get_point_source_fluxes(0, ene),
+                    color=purple,
+                    lw=1,
+                    alpha=0.1,
+                )
 
             if self._has_host_fit:
                 model_container.model_mw.set_free_parameters(sample[:2])
@@ -439,13 +517,23 @@ class Fit:
                 # ax.loglog(ene, model_container.model_mw.get_point_source_fluxes(
                 #     0, ene), color="red", lw=1, alpha=0.1)
 
-                ax.loglog(ene, model_container.model_host.get_point_source_fluxes(
-                    0, ene), color=green, lw=1, alpha=0.1)
+                ax.loglog(
+                    ene,
+                    model_container.model_host.get_point_source_fluxes(0, ene),
+                    color=green,
+                    lw=1,
+                    alpha=0.1,
+                )
 
             model_container.model_pl.set_free_parameters(sample[:2])
 
-            ax.loglog(ene, model_container.model_pl.get_point_source_fluxes(
-                0, ene), color=blue, lw=1, alpha=0.1)
+            ax.loglog(
+                ene,
+                model_container.model_pl.get_point_source_fluxes(0, ene),
+                color=blue,
+                lw=1,
+                alpha=0.1,
+            )
 
         if self._catalog.is_sim:
 
@@ -457,10 +545,15 @@ class Fit:
                 labels.append("Total Simualted")
                 custom_lines.append(Line2D([0], [0], color="k", lw=2))
                 model_container.model_all.set_free_parameters(
-                    simulated_parameters)
+                    simulated_parameters
+                )
 
-                ax.loglog(ene, model_container.model_all.get_point_source_fluxes(
-                    0, ene), color="k", lw=0.5)
+                ax.loglog(
+                    ene,
+                    model_container.model_all.get_point_source_fluxes(0, ene),
+                    color="k",
+                    lw=0.5,
+                )
 
             if model_container.model_host is not None:
 
@@ -470,22 +563,33 @@ class Fit:
                 labels.append("Simulation MW included")
                 custom_lines.append(Line2D([0], [0], color="darkred", lw=2))
                 model_container.model_mw.set_free_parameters(
-                    simulated_parameters[:2])
+                    simulated_parameters[:2]
+                )
 
                 model_container.model_host.set_free_parameters(
-                    simulated_parameters[:3])
+                    simulated_parameters[:3]
+                )
 
                 # ax.loglog(ene, model_container.model_mw.get_point_source_fluxes(
                 #     0, ene), color="white")
 
-                ax.loglog(ene, model_container.model_host.get_point_source_fluxes(
-                    0, ene), color="grey", lw=0.5)
+                ax.loglog(
+                    ene,
+                    model_container.model_host.get_point_source_fluxes(0, ene),
+                    color="grey",
+                    lw=0.5,
+                )
 
             model_container.model_pl.set_free_parameters(
-                simulated_parameters[:2])
+                simulated_parameters[:2]
+            )
 
-            ax.loglog(ene, model_container.model_pl.get_point_source_fluxes(
-                0, ene), color="darkred", lw=0.5)
+            ax.loglog(
+                ene,
+                model_container.model_pl.get_point_source_fluxes(0, ene),
+                color="darkred",
+                lw=0.5,
+            )
         ax.legend(custom_lines, labels)
 
         ax.set_xlabel("energy (keV)")

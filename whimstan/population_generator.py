@@ -13,100 +13,7 @@ from gdpyc import GasMap
 from popsynth.utils.progress_bar import progress_bar
 from scipy.integrate import quad
 
-
-class Cloud:
-    def __init__(self, R: float = 1, zr_ratio: float = 1.0):
-        """
-        Creates an ellipsoidal cloud from which a
-        GRB's emission would have to propagate
-
-        :param R:
-        :type R:
-        :param zr_ratio:
-        :type zr_ratio:
-        :returns:
-
-        """
-        self._R = R
-        self._R2 = R * R
-        self._zr_ratio = zr_ratio
-        self._Z = self._R * self._zr_ratio
-        self._Z2 = self._Z * self._Z
-        self._size_vec = np.array([self._R, self._R, self._Z])
-        self._size_vec2 = self._size_vec ** 2
-
-    def sample(self) -> float:
-        """
-        generate a random point inside the cloud
-        and return its path length to the observer
-
-        :returns:
-
-        """
-        p = self.generate_point_inside()
-
-        u = self.get_unit_vector()
-
-        pl = self.compute_path_length(p, u)
-
-        return pl
-
-    def generate_point_inside(self) -> np.ndarray:
-        """
-        generate a random point inside the cloud
-        via rejection sampling
-
-        :returns:
-
-        """
-        flag = True
-        while flag:
-            p = np.array(
-                [
-                    np.random.uniform(-self._R, self._R),
-                    np.random.uniform(-self._R, self._R),
-                    np.random.uniform(-self._Z, self._Z),
-                ]
-            )
-
-            test_val = (p ** 2).dot(1.0 / self._size_vec2)
-
-            if test_val <= 1:
-
-                flag = False
-
-        return p
-
-    def get_unit_vector(self) -> np.ndarray:
-        """
-        generate a random unit vector
-
-        :returns:
-
-        """
-        v = np.random.normal(size=3)
-        u = v / np.linalg.norm(v)
-
-        return u
-
-    def compute_path_length(self, p, u) -> float:
-        """
-        compute the path length between two vectors
-
-        :param p:
-        :type p:
-        :param u:
-        :type u:
-        :returns:
-
-        """
-        b = 2 * (p * u).dot(1.0 / self._size_vec2)
-        a = (u ** 2).dot(1.0 / self._size_vec2)
-        c = (p ** 2).dot(1.0 / self._size_vec2)
-
-        l = (-b + np.sqrt(b * b - 4 * a * (c - 1))) / (2 * a)
-
-        return l
+from .cloud import Cloud
 
 
 class SchechterSampler(ps.AuxiliarySampler):
@@ -161,6 +68,51 @@ class HostGas(ps.AuxiliarySampler):
         path_length = np.array([cloud.sample() for i in range(size)])
 
         self._true_values = np.power(10.0, self.nh_mean) * path_length
+
+
+class HostGasVari(ps.AuxiliarySampler):
+    _auxiliary_sampler_name = "HostGasVari"
+
+    def __init__(self):
+        """
+        The value of the host gas density in 1/cm2
+        """
+
+        # pass up to the super class
+
+        super(HostGasVari, self).__init__("host_nh", observed=False)
+
+    def true_sampler(self, size):
+
+        zr_ratios = self.secondary_samplers["zr_ratio"]
+        nh_local = self.secondary_samplers["nh_local"]
+
+        # create a cloud with this simulation
+        clouds = [Cloud(zr_ratio=zr) for zr in zr_ratios.true_values]
+
+        # sample the latent values for this property
+
+        path_length = np.array([cloud.sample() for cloud in clouds])
+
+        self._true_values = np.power(10.0, nh_local.true_values) * path_length
+
+
+class ZRSampler(ps.AuxiliarySampler):
+    _auxiliary_sampler_name = "ZRSampler"
+    zmin = ps.AuxiliaryParameter(vmin=-99, vmax=0)
+
+    def __init__(self):
+        """
+        Log uniform sampler for the Z/R ratio
+        """
+
+        # pass up to the super class
+
+        super(ZRSampler, self).__init__("zr_ratio", observed=False)
+
+    def true_sampler(self, size):
+
+        self._true_values = 10.0 ** np.random.uniform(self.zmin, 0, size=size)
 
 
 class MilkyWayGas(ps.AuxiliarySampler):
@@ -354,10 +306,12 @@ def create_simulation(
     Lmin: float = 1e46,
     alpha: float = 1.5,
     host_gas_mean: float = 23,
+    host_gas_sigma: float = 0.5,
     host_gas_cloud_ratio: float = 0.1,
     mw_nh_limit: Optional[float] = None,
     b_limit: Optional[float] = None,
     use_clouds: bool = True,
+    vari_clouds: bool = True,
     spec_idx_mean: float = -2.0,
     spec_idx_std: float = 0.2,
     use_mw_gas: bool = True,
@@ -373,9 +327,28 @@ def create_simulation(
             # created by embedding GRBs in
             # clouds
 
-            host_nh = HostGas()
-            host_nh.nh_mean = host_gas_mean
-            host_nh.zratio = host_gas_cloud_ratio
+            if vari_clouds:
+
+                host_nh = HostGasVari()
+
+                zr_sampler = ZRSampler()
+
+                zr_sampler.zmin = np.log10(host_gas_cloud_ratio)
+
+                nh_local = ps.TruncatedNormalAuxSampler(name="nh_local")
+                nh_local.mu = host_gas_mean
+                nh_local.sigma = host_gas_sigma
+                nh_local.lower = 20
+                nh_local.upper = 26
+
+                host_nh.set_secondary_sampler(nh_local)
+                host_nh.set_secondary_sampler(zr_sampler)
+
+            else:
+
+                host_nh = HostGas()
+                host_nh.nh_mean = host_gas_mean
+                host_nh.zratio = host_gas_cloud_ratio
 
         else:
 
