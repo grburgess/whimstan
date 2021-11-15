@@ -1,12 +1,16 @@
 import cmdstanpy
 import pkg_resources
 import os
+
 _available_models = {}
 
 _available_models["simple_xrt"] = "simple_xrt.stan"
 
 # HBM with galaxy gas and plaw
 _available_models["hbm_xrt"] = "host_hbm.stan"
+
+_available_models["hbm_xrt_skew"] = "host_hbm_skew.stan"
+
 
 # HBM with ONLY plaw`
 _available_models["hbm_plaw_xrt"] = "hbm_plaw_only.stan"
@@ -20,6 +24,7 @@ _available_models["all_t_fixed"] = "all_t_fixed.stan"
 # This is the model with mw, host and whim component and the n0 and the temp
 # is free for whim
 _available_models["all"] = "all.stan"
+
 
 class StanModel:
     def __init__(self, name, stan_file):
@@ -43,7 +48,9 @@ class StanModel:
         cpp_options = dict(STAN_THREADS=True)
 
         self._model = cmdstanpy.CmdStanModel(
-            stan_file=self._stan_file, model_name=self._name, cpp_options=cpp_options
+            stan_file=self._stan_file,
+            model_name=self._name,
+            cpp_options=cpp_options,
         )
 
     @property
