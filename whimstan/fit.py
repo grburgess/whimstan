@@ -68,6 +68,18 @@ class Fit:
         self._log_nh_host_mu: Optional[ArrayLike] = None
         self._log_nh_host_sigma: Optional[ArrayLike] = None
 
+        self._nh_host_alpha = None
+
+        try:
+
+            self._nh_host_alpha = stan_fit.posterior.host_alpha.stack(
+                sample=("chain", "draw")
+            ).values
+
+        except:
+
+            pass
+
         try:
             self._host_nh = stan_fit.posterior.nH_host_norm.stack(
                 sample=("chain", "draw")
@@ -225,16 +237,33 @@ class Fit:
 
             # ax.plot(xgrid, stats.norm.pdf(xgrid, loc=, scale=0.5),  color="b")
 
-        for mu, sig in zip(
-            self._log_nh_host_mu + 22.0, self._log_nh_host_sigma
-        ):
+        if self._nh_host_alpha is None:
 
-            ax.plot(
-                xgrid,
-                stats.norm.pdf(xgrid, loc=mu, scale=sig),
-                alpha=0.1,
-                color=green,
-            )
+            for mu, sig in zip(
+                self._log_nh_host_mu + 22.0, self._log_nh_host_sigma
+            ):
+
+                ax.plot(
+                    xgrid,
+                    stats.norm.pdf(xgrid, loc=mu, scale=sig),
+                    alpha=0.1,
+                    color=green,
+                )
+
+        else:
+
+            for mu, sig, alpha in zip(
+                self._log_nh_host_mu + 22.0,
+                self._log_nh_host_sigma,
+                self._nh_host_alpha,
+            ):
+
+                ax.plot(
+                    xgrid,
+                    stats.skewnorm.pdf(xgrid, a=alpha, loc=mu, scale=sig),
+                    alpha=0.1,
+                    color=green,
+                )
 
         ax.set_xlabel("log10(nH host)")
 
