@@ -357,7 +357,7 @@ class ObscuredFluxSampler(ps.DerivedLumAuxSampler):
 
         if self._plugin_for_counts is None:
 
-            self._true_values = out
+            self._true_values = fluxes
 
         else:
 
