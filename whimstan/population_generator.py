@@ -6,12 +6,13 @@ import numba as nb
 import numpy as np
 import popsynth as ps
 import scipy.special as sf
-from astromodels import Powerlaw_Eflux, TbAbs
+from astromodels import Model, PointSource, Powerlaw_Eflux, TbAbs
 from astropy.coordinates import SkyCoord
 from bb_astromodels import Integrate_Absori
 from gdpyc import GasMap
 from popsynth.utils.progress_bar import progress_bar
 from scipy.integrate import quad
+from threeML.plugins.OGIPLike import OGIPLike
 
 from .cloud import Cloud
 
@@ -46,6 +47,7 @@ class SchechterSampler(ps.AuxiliarySampler):
 
 class HostGas(ps.AuxiliarySampler):
     _auxiliary_sampler_name = "HostGas"
+
     nh_mean = ps.auxiliary_sampler.AuxiliaryParameter(default=22, vmin=0)
     zratio = ps.auxiliary_sampler.AuxiliaryParameter(default=1, vmin=0, vmax=1)
 
@@ -162,6 +164,24 @@ class MWGasSelection(ps.SelectionProbability):
         self._selection = self._observed_value < np.power(10.0, self.gas_limit)
 
 
+class CountsSelector(ps.SelectionProbability):
+
+    _selection_name = "CountsSelector"
+
+    counts_limit = ps.SelectionParameter(vmin=0)
+
+    def __init__(self, name="counts selector"):
+        """
+        places a min limit on the number of counts
+        """
+
+        super(CountsSelector, self).__init__(name=name, use_obs_value=True)
+
+    def draw(self, size: int):
+
+        self._selection = self._observed_value > self.counts_limit
+
+
 class GalacticPlaceSelection(ps.SpatialSelection):
 
     _selection_name = "GalacticPlaceSelection"
@@ -188,6 +208,22 @@ class GalacticPlaceSelection(ps.SpatialSelection):
         )
 
 
+class ExposureSampler(ps.AuxiliarySampler):
+
+    _auxiliary_sampler_name = "ExposureSampler"
+
+    def __init__(self, low, high):
+
+        self._low = low
+        self._high = high
+
+        super().__init__(name="exposure", observed=False)
+
+    def true_sampler(self, size):
+
+        self._true_values = np.random.uniform(self._low, self._high, size)
+
+
 class ObscuredFluxSampler(ps.DerivedLumAuxSampler):
 
     _auxiliary_sampler_name = "ObscuredFluxSampler"
@@ -200,6 +236,7 @@ class ObscuredFluxSampler(ps.DerivedLumAuxSampler):
         whim_T: Optional[float] = None,
         use_mw_gas: bool = True,
         use_host_gas: bool = True,
+        plugin_for_counts: Optional[OGIPLike] = None,
     ):
         """
         computes the obscured flux from the GRB by integrating the spectra
@@ -220,6 +257,8 @@ class ObscuredFluxSampler(ps.DerivedLumAuxSampler):
         self._use_mw_gas = use_mw_gas
         self._use_host_gas = use_host_gas
 
+        self._plugin_for_counts: Optional[OGIPLike] = plugin_for_counts
+
         super(ObscuredFluxSampler, self).__init__(
             "obscured_flux", uses_distance=True
         )
@@ -235,7 +274,8 @@ class ObscuredFluxSampler(ps.DerivedLumAuxSampler):
             self._a, self._b, num=n_energies_for_intergration
         )
 
-        out = np.empty(size)
+        fluxes = np.empty(size)
+        counts = np.empty(size)
 
         # we want to have the flux measured in the XRT so
         # we need to integrate the obscured flux
@@ -256,12 +296,16 @@ class ObscuredFluxSampler(ps.DerivedLumAuxSampler):
                     redshift=0,
                 )
             if self._use_host_gas:
-                spec *= TbAbs(
-                    NH=self._secondary_samplers["host_nh"].true_values[i]
-                    / (1.0e22),
-                    redshift=self._distance[i],
+
+                tmp = TbAbs(redshift=self._distance[i])
+
+                tmp.NH.bounds = (None, None)
+
+                tmp.NH = self._secondary_samplers["host_nh"].true_values[i] / (
+                    1.0e22
                 )
 
+                spec *= tmp
             # add on the WHIM if needed
             if (self._whim_n0 is not None) and (self._whim_T is not None):
 
@@ -277,6 +321,30 @@ class ObscuredFluxSampler(ps.DerivedLumAuxSampler):
 
             # flux = quad(lambda x: x * spec(x), self._a, self._b)[0] * kev2erg
 
+            if self._plugin_for_counts is not None:
+
+                # self._plugin_for_counts._background_spectrum._exposure = new_exposure
+                # self._plugin_for_counts._background_spectrum._exposure = new_exposure
+
+                ps = PointSource("tmp", 0, 0, spectral_shape=spec)
+
+                model = Model(ps)
+
+                self._plugin_for_counts.set_model(model)
+
+                self._plugin_for_counts.set_active_measurements("0.3-10")
+
+                count_spectrum = (
+                    self._plugin_for_counts._evaluate_model()
+                    * self._secondary_samplers["exposure"].true_values[i]
+                )
+
+                total_counts = (
+                    count_spectrum[self._plugin_for_counts.mask]
+                ).sum()
+
+                counts[i] = total_counts
+
             flux = (
                 np.trapz(
                     intergration_energies * spec(intergration_energies),
@@ -285,15 +353,23 @@ class ObscuredFluxSampler(ps.DerivedLumAuxSampler):
                 * kev2erg
             )
 
-            out[i] = flux
+            fluxes[i] = flux
 
-        self._true_values = out
+        if self._plugin_for_counts is None:
+
+            self._true_values = out
+
+        else:
+
+            self._true_values = counts
+
+        self._fluxes = fluxes
 
     def compute_luminosity(self):
 
         # have to compute back to a luminosity
 
-        return (4.0 * np.pi * self.luminosity_distance ** 2) * self._true_values
+        return (4.0 * np.pi * self.luminosity_distance ** 2) * self._fluxes
 
 
 def create_simulation(
@@ -318,6 +394,10 @@ def create_simulation(
     use_host_gas: bool = True,
     whim_n0: Optional[float] = None,
     whim_T: Optional[float] = None,
+    demo_plugin: Optional[OGIPLike] = None,
+    counts_limit: Optional[float] = None,
+    exposure_high: Optional[float] = None,
+    exposure_low: Optional[float] = None,
 ) -> ps.PopulationSynth:
 
     if use_host_gas:
@@ -392,11 +472,14 @@ def create_simulation(
     # that would lead to the flux actually observed
     # by the XRT
 
+    # if we include a plugin here, then the selection is on the counts
+
     ls = ObscuredFluxSampler(
         whim_n0=whim_n0,
         whim_T=whim_T,
         use_mw_gas=use_mw_gas,
         use_host_gas=use_host_gas,
+        plugin_for_counts=demo_plugin,
     )
 
     ls.set_secondary_sampler(spec_idx)
@@ -405,6 +488,18 @@ def create_simulation(
         ls.set_secondary_sampler(host_nh)
     if use_mw_gas:
         ls.set_secondary_sampler(mw_nh)
+
+    if demo_plugin is not None:
+
+        exposure = ExposureSampler(low=exposure_low, high=exposure_high)
+
+        ls.set_secondary_sampler(exposure)
+
+        count_selector = CountsSelector()
+
+        count_selector.counts_limit = counts_limit
+
+        ls.set_selection_probability(count_selector)
 
     pop_gen: ps.PopulationSynth = ps.populations.SFRPopulation(
         r0=r0,

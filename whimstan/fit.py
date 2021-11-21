@@ -6,7 +6,7 @@ import arviz as av
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as stats
-from astromodels import Model, PointSource, Powerlaw, Powerlaw_Eflux, TbAbs
+from astromodels import Model, PointSource, Powerlaw_Eflux, TbAbs
 from bb_astromodels import Integrate_Absori
 from matplotlib.lines import Line2D
 from natsort import natsorted
@@ -16,10 +16,22 @@ from threeML import OGIPLike
 from .catalog import XRTCatalog, XRTCatalogEntry
 from .spectral_plot import display_posterior_model_counts
 
-green = "#1AFEA8"
-purple = "#D656FF"
-red = "#FF284F"
-blue = "#42B8FF"
+# green = "#1AFEA8"
+# purple = "#D656FF"
+# red = "#FF284F"
+# blue = "#42B8FF"
+
+# red = "#FE5F55"
+# black = "#5D576B"
+# blue = "#0AD3FF"
+# green = "#A1E5AB"
+# yellow = "#FFE66D"
+
+black = "#3B5360"
+purple = "#776D8A"
+red = "#8B5E83"
+peach = "#D6B0B1"
+green = "#BEE5D3"
 
 
 @dataclass
@@ -102,7 +114,7 @@ class Fit:
             # we do not have a host gas fit
 
             pass
-        print(self._has_host_fit)
+
         self._has_whim_fit: bool = False
         try:
             self._n0_whim = stan_fit.posterior.n0_whim.stack(
@@ -232,7 +244,7 @@ class Fit:
                 density=True,
                 histtype="step",
                 lw=2,
-                color="k",
+                color=black,
             )
 
             # ax.plot(xgrid, stats.norm.pdf(xgrid, loc=, scale=0.5),  color="b")
@@ -306,6 +318,10 @@ class Fit:
 
             #     spec_all.temp_4.fix = True
 
+            for k, v in spec_all.parameters.items():
+
+                v.bounds = (None, None)
+
             ps_all = PointSource("all", 0, 0, spectral_shape=spec_all)
 
             model_all = Model(ps_all)
@@ -322,6 +338,10 @@ class Fit:
             )
             spec_host.NH_2.fix = True
 
+            for k, v in spec_host.parameters.items():
+
+                v.bounds = (None, None)
+
             ps_host = PointSource("host", 0, 0, spectral_shape=spec_host)
 
             model_host = Model(ps_host)
@@ -329,10 +349,18 @@ class Fit:
             spec_mw = Powerlaw_Eflux(a=0.14, b=15) * TbAbs(NH=card.nH_mw)
             spec_mw.NH_2.fix = True
 
+            for k, v in spec_mw.parameters.items():
+
+                v.bounds = (None, None)
+
             ps_mw = PointSource("mw", 0, 0, spectral_shape=spec_mw)
             model_mw = Model(ps_mw)
 
         spec_pl = Powerlaw_Eflux(a=0.4, b=15)
+
+        for k, v in spec_pl.parameters.items():
+
+            v.bounds = (None, None)
 
         ps_pl = PointSource("pl", 0, 0, spectral_shape=spec_pl)
         model_pl = Model(ps_pl)
@@ -380,7 +408,7 @@ class Fit:
                 1e22 * self._catalog.nH_host_sim,
                 "o",
                 color=green,
-                alpha=0.7,
+                alpha=1.0,
                 zorder=-1000,
             )
 
@@ -388,7 +416,9 @@ class Fit:
 
             lo, hi = av.hdi(1e22 * self._host_nh[i], hdi_prob=0.95)
 
-            ax.vlines(self._catalog.z[i] + 1, lo, hi, color=purple)
+            ax.vlines(
+                self._catalog.z[i] + 1, lo, hi, color=purple, linewidth=0.7
+            )
 
         ax.set_ylabel(r"host nH (cm$^{-2}$)")
 
@@ -433,7 +463,14 @@ class Fit:
 
         return plugin, model
 
-    def plot_data_spectrum(self, id: int) -> plt.Figure:
+    def plot_data_spectrum(
+        self,
+        id: int,
+        min_rate: float = -99,
+        model_color=green,
+        data_color=purple,
+        thin=2,
+    ) -> plt.Figure:
 
         o, model = self.get_plugin_and_model(id)
 
@@ -462,13 +499,13 @@ class Fit:
         fig = display_posterior_model_counts(
             o,
             model,
-            samples.T[::20],
+            samples.T[::thin],
             shade=False,
-            min_rate=-99,
-            model_color=green,
-            data_color=purple,
-            background_color=blue,
-            show_background=True,
+            min_rate=min_rate,
+            model_color=model_color,
+            data_color=data_color,
+            # background_color=blue,
+            show_background=False,
             source_only=False,
         )
 
@@ -480,7 +517,7 @@ class Fit:
 
         return fig
 
-    def plot_model_spectrum(self, id: int) -> plt.Figure:
+    def plot_model_spectrum(self, id: int, thin=2) -> plt.Figure:
 
         # get the model container object
         model_container: ModelContainer = self._get_spectrum(id)
@@ -524,7 +561,7 @@ class Fit:
                 (self._flux[id], self._index[id], self._host_nh[id])
             )
 
-        for sample in samples.T[::10]:
+        for sample in samples.T[::thin]:
 
             if self._has_whim_fit:
 
@@ -559,7 +596,7 @@ class Fit:
             ax.loglog(
                 ene,
                 model_container.model_pl.get_point_source_fluxes(0, ene),
-                color=blue,
+                color=peach,
                 lw=1,
                 alpha=0.1,
             )
@@ -572,7 +609,7 @@ class Fit:
 
                 # ok, we have some whim
                 labels.append("Total Simualted")
-                custom_lines.append(Line2D([0], [0], color="k", lw=2))
+                custom_lines.append(Line2D([0], [0], color=black, lw=2))
                 model_container.model_all.set_free_parameters(
                     simulated_parameters
                 )
@@ -580,7 +617,7 @@ class Fit:
                 ax.loglog(
                     ene,
                     model_container.model_all.get_point_source_fluxes(0, ene),
-                    color="k",
+                    color=black,
                     lw=0.5,
                 )
 
@@ -589,8 +626,8 @@ class Fit:
                 # ok, we have some host gas (MW as well)
                 labels.append("Simulation Host included")
                 custom_lines.append(Line2D([0], [0], color="grey", lw=2))
-                labels.append("Simulation MW included")
-                custom_lines.append(Line2D([0], [0], color="darkred", lw=2))
+                # labels.append("Simulation MW included")
+                # custom_lines.append(Line2D([0], [0], color=red, lw=2))
                 model_container.model_mw.set_free_parameters(
                     simulated_parameters[:2]
                 )
@@ -616,7 +653,7 @@ class Fit:
             ax.loglog(
                 ene,
                 model_container.model_pl.get_point_source_fluxes(0, ene),
-                color="darkred",
+                color=red,
                 lw=0.5,
             )
         ax.legend(custom_lines, labels)

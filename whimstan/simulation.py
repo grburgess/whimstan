@@ -29,6 +29,7 @@ class SpectrumGenerator:
         demo_plugin: Optional[OGIPLike] = None,
         use_mw_gas: bool = True,
         use_host_gas: bool = True,
+        exposure: Optional[float] = None,
     ):
         """
 
@@ -77,6 +78,8 @@ class SpectrumGenerator:
 
         self._demo_plugin: Optional[OGIPLike] = demo_plugin
 
+        self._exposure = exposure
+
         # now this is done in pop synth
         #        self._get_mw_nh()
 
@@ -103,6 +106,13 @@ class SpectrumGenerator:
                 arf_file="data/grb050401/apc.arf",
                 verbose=False,
             )
+
+        if self._exposure is not None:
+
+            self._demo_plugin._background_spectrum._exposure = self._exposure
+            self._demo_plugin._observed_spectrum._exposure = self._exposure
+
+            self._demo_plugin._precalculations()
 
         spec = Powerlaw_Eflux(F=self._eflux, index=self._index, a=0.4, b=15)
         if self._use_mw_gas:
@@ -179,6 +189,14 @@ class SpectrumFactory:
             else:
                 host_nh = None
 
+            try:
+
+                exposure = population.exposure[i]
+
+            except:
+
+                exposure = None
+
             sg = SpectrumGenerator(
                 name=name,
                 eflux=population.fluxes_latent[i],
@@ -192,6 +210,7 @@ class SpectrumFactory:
                 whim_T=whim_T,
                 use_mw_gas=use_mw_gas,
                 use_host_gas=use_host_gas,
+                exposure=exposure,
             )
 
             self._spectra.append(sg)
