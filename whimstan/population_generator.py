@@ -182,11 +182,12 @@ class CountsSelector(ps.SelectionProbability):
         self._selection = self._observed_value > self.counts_limit
 
 
-class GalacticPlaceSelection(ps.SpatialSelection):
+class GalacticPlaceDistanceSelection(ps.SpatialSelection):
 
     _selection_name = "GalacticPlaceSelection"
 
     b_limit = ps.SelectionParameter(vmin=0, vmax=90)
+    z_min = ps.SelectionParameter(vmin=0)
 
     def __init__(self, name="mw plane selector"):
         """
@@ -203,9 +204,13 @@ class GalacticPlaceSelection(ps.SpatialSelection):
             frame="icrs",
         ).transform_to("galactic")
 
-        self._selection = (g_coor.b.deg >= self.b_limit) | (
+        selection = (g_coor.b.deg >= self.b_limit) | (
             g_coor.b.deg <= -self.b_limit
         )
+
+        selection2 = self._spatial_distribution.distances > self.z_min
+
+        self._selection = selection & selection2
 
 
 class ExposureSampler(ps.AuxiliarySampler):
@@ -398,6 +403,7 @@ def create_simulation(
     counts_limit: Optional[float] = None,
     exposure_high: Optional[float] = None,
     exposure_low: Optional[float] = None,
+    z_min: float = 0,
 ) -> ps.PopulationSynth:
 
     if use_host_gas:
@@ -516,6 +522,7 @@ def create_simulation(
 
         gps = GalacticPlaceSelection()
         gps.b_limit = b_limit
+        gps.z_min = z_min
 
         pop_gen.add_spatial_selector(gps)
 

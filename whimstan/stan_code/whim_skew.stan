@@ -59,9 +59,9 @@ transformed data{
 parameters{
 
   //vector<upper=0>[N_grbs] index;
-
   real log_nH_host_mu_raw;
-
+  real<upper=0> host_alpha; // skew normal paramter
+  
   real<lower=0> log_nH_host_sigma;
   vector[N_grbs] log_nH_host_raw;
 
@@ -89,10 +89,9 @@ transformed parameters{
   vector[N_grbs] log_nH_host;
   //  vector[N_grbs] nH_host;
   vector[N_grbs] nH_host_norm;
+
   real log_n0_whim = log_n0_whim_raw -7;
   real log_t_whim = log_t_whim_raw + 7;
-
-
 
   real log_K_mu = log_K_mu_raw - 9;
 
@@ -128,12 +127,13 @@ transformed parameters{
 model{
 
 
+  host_alpha ~ normal(-2,1);
 
   index_raw ~ std_normal();
   log_K_raw ~ std_normal();
   log_nH_host_raw ~ std_normal();
 
-  log_nH_host_mu_raw ~ std_normal();
+  log_nH_host_mu_raw ~ skew_normal(0,1, host_alpha);
   log_nH_host_sigma ~ std_normal();
 
   log_K_mu_raw ~ std_normal();
@@ -144,8 +144,8 @@ model{
   index_sigma ~ std_normal();
 
 
-
   //absori
+
   log_n0_whim_raw ~ std_normal();
 
   log_t_whim_raw ~ std_normal();

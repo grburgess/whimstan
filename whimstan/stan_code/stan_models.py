@@ -24,6 +24,7 @@ _available_models["all_t_fixed"] = "all_t_fixed.stan"
 # This is the model with mw, host and whim component and the n0 and the temp
 # is free for whim
 _available_models["all"] = "all.stan"
+_available_models["whim_skew"] = "whim_skew.stan"
 
 
 class StanModel:
