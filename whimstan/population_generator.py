@@ -184,7 +184,7 @@ class CountsSelector(ps.SelectionProbability):
 
 class GalacticPlaceDistanceSelection(ps.SpatialSelection):
 
-    _selection_name = "GalacticPlaceSelection"
+    _selection_name = "GalacticPlaceDistanceSelection"
 
     b_limit = ps.SelectionParameter(vmin=0, vmax=90)
     z_min = ps.SelectionParameter(vmin=0)
@@ -193,7 +193,7 @@ class GalacticPlaceDistanceSelection(ps.SpatialSelection):
         """
         places a limit above the galactic plane for objects
         """
-        super(GalacticPlaceSelection, self).__init__(name=name)
+        super().__init__(name=name)
 
     def draw(self, size: int):
 
