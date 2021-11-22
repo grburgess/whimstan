@@ -520,7 +520,7 @@ def create_simulation(
 
     if b_limit is not None:
 
-        gps = GalacticPlaceSelection()
+        gps = GalacticPlaceDistanceSelection()
         gps.b_limit = b_limit
         gps.z_min = z_min
 
