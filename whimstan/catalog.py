@@ -27,12 +27,10 @@ class XRTCatalogEntry:
 
         get a numpy array of the simulated parameters
 
-        :returns: 
+        :returns:
 
         """
         tmp: List[float] = []
-
-   
 
         if self.flux_sim is not None:
 
@@ -54,7 +52,6 @@ class XRTCatalogEntry:
 
             tmp.append(self.temp_sim)
 
-            
         return np.array(tmp)
 
 
@@ -76,6 +73,21 @@ class XRTCatalog:
         else:
 
             self._is_sim = True
+
+    def get_sub_selection(self, selection: np.ndarray) -> "XRTCatalog":
+        """
+        pass in a selection boolean array and this builds a sub catalog
+        """
+
+        out: List[XRTCatalogEntry] = []
+
+        for (k, v), flag in zip(self._catalog.items(), selection):
+
+            if flag:
+
+                out.append(v)
+
+        return XRTCatalog(*out)
 
     @property
     def is_sim(self) -> bool:
@@ -288,7 +300,7 @@ class XRTCatalog:
                     index_sim=index_sim,
                     flux_sim=flux_sim,
                     n0_sim=n0_sim,
-                    temp_sim=temp_sim
+                    temp_sim=temp_sim,
                 )
 
                 grbs.append(tmp)
