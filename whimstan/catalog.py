@@ -90,6 +90,11 @@ class XRTCatalog:
         return XRTCatalog(*out)
 
     @property
+    def grbs(self) -> List[str]:
+
+        return list(self._catalog.keys())
+
+    @property
     def is_sim(self) -> bool:
         """
         if this is from a simulation

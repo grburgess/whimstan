@@ -9,7 +9,14 @@ from astromodels.utils.data_files import _get_data_file_path
 from threeML import OGIPLike, silence_warnings, update_logging_level
 from tqdm.auto import tqdm
 
-from whimstan.absori_precalc import get_abundance, load_absori_base, get_spec, sum_sigma_interp_precalc
+from .catalog import XRTCatalog
+
+from whimstan.absori_precalc import (
+    get_abundance,
+    load_absori_base,
+    get_spec,
+    sum_sigma_interp_precalc,
+)
 
 
 silence_warnings()
@@ -24,7 +31,7 @@ def build_tbabs_arg(ene):
     xsect_ene = dxs["ENERGY"]
     xsect_val = dxs["SIGMA"]
 
-    return np.interp(ene, xsect_ene,  xsect_val)
+    return np.interp(ene, xsect_ene, xsect_val)
 
 
 @dataclass
@@ -61,44 +68,49 @@ def extract_xrt_data(plugin):
     ene_lo = plugin.response.monte_carlo_energies[:-1]
     ene_hi = plugin.response.monte_carlo_energies[1:]
 
-    ene_avg = (ene_hi + ene_lo) / 2.
+    ene_avg = (ene_hi + ene_lo) / 2.0
     ene_width = ene_hi - ene_lo
 
-    return XRTObs(n_ene=n_ene,
-                  n_chan=n_chan,
-                  ene_avg=ene_avg,
-                  ene_width=ene_width,
-                  obs_count=[int(x) for x in plugin.observed_counts],
-                  bkg_count=[int(x) for x in plugin.background_counts],
-                  rsp=rsp,
-                  scale_factor=float(scale_factor),
-                  mask=[int(x) for x in mask],
-                  n_chans_used=int(n_chans_used),
-                  exposure=float(plugin.exposure)
+    return XRTObs(
+        n_ene=n_ene,
+        n_chan=n_chan,
+        ene_avg=ene_avg,
+        ene_width=ene_width,
+        obs_count=[int(x) for x in plugin.observed_counts],
+        bkg_count=[int(x) for x in plugin.background_counts],
+        rsp=rsp,
+        scale_factor=float(scale_factor),
+        mask=[int(x) for x in mask],
+        n_chans_used=int(n_chans_used),
+        exposure=float(plugin.exposure),
+    )
 
 
-                  )
-
-
-def build_stan_data(*grbs: str, catalog=None, cat_path="data",
-                    is_sim=False, use_absori=False, use_mw_gas=True,
-                    use_host_gas=True):
+def build_stan_data(
+    *grbs: str,
+    catalog: Optional[XRTCatalog] = None,
+    cat_path="data",
+    is_sim=False,
+    use_absori=False,
+    use_mw_gas=True,
+    use_host_gas=True,
+):
 
     """
 
-    :param catalog: 
-    :type catalog: 
-    :param cat_path: 
-    :type cat_path: 
-    :param is_sim: 
-    :type is_sim: 
-    :param use_absori: 
-    :type use_absori: 
-    :param use_mw_gas: 
-    :type use_mw_gas: 
-    :param use_host_gas: 
-    :type use_host_gas: 
-    :returns: 
+    :param catalog:
+    :type catalog:
+    :param cat_path:
+    :type cat_path:
+    :param is_sim:
+    :type is_sim:
+    :param use_absori:
+    :type use_absori:
+    :param use_mw_gas:
+    :type use_mw_gas:
+    :param use_host_gas:
+    :type use_host_gas:
+    :returns:
 
     """
     N_grbs = len(grbs)
@@ -121,6 +133,8 @@ def build_stan_data(*grbs: str, catalog=None, cat_path="data",
     ene_width = []
     exposure = []
 
+    grbs = catalog.grbs
+
     for grb in tqdm(grbs, colour="#3DFF6C", desc="building GRBs"):
 
         z.append(catalog.catalog[grb].z)
@@ -139,12 +153,13 @@ def build_stan_data(*grbs: str, catalog=None, cat_path="data",
 
                 try:
 
-                    o = OGIPLike("xrt",
-                                 observation=bpath / f"{opt}.pi",
-                                 background=bpath / f"{opt}back.pi",
-                                 response=bpath / f"{opt}.rmf",
-                                 arf_file=bpath / f"{opt}.arf"
-                                 )
+                    o = OGIPLike(
+                        "xrt",
+                        observation=bpath / f"{opt}.pi",
+                        background=bpath / f"{opt}back.pi",
+                        response=bpath / f"{opt}.rmf",
+                        arf_file=bpath / f"{opt}.arf",
+                    )
                     print(f"GRB {grb} using {opt}")
 
                     break
@@ -159,12 +174,13 @@ def build_stan_data(*grbs: str, catalog=None, cat_path="data",
         else:
             opt = "apc"
 
-            o = OGIPLike("xrt",
-                         observation=bpath / f"{opt}.pha",
-                         background=bpath / f"{opt}_bak.pha",
-                         response=bpath / f"{opt}.rsp",
-                         spectrum_number=1
-                         )
+            o = OGIPLike(
+                "xrt",
+                observation=bpath / f"{opt}.pha",
+                background=bpath / f"{opt}_bak.pha",
+                response=bpath / f"{opt}.rsp",
+                spectrum_number=1,
+            )
 
         x = extract_xrt_data(o)
 
@@ -193,8 +209,8 @@ def build_stan_data(*grbs: str, catalog=None, cat_path="data",
             pcaz.append(pz.tolist())
 
         # absori stuff
-                                  
-    # absori stuff 
+
+    # absori stuff
     if use_absori:
 
         ion, sigma, atomicnumber, absori_base_energy = load_absori_base()
@@ -205,39 +221,38 @@ def build_stan_data(*grbs: str, catalog=None, cat_path="data",
         spec = get_spec()
 
         for i, zval in enumerate(z):
-            sum_sigma_interp[i] = sum_sigma_interp_precalc(zval, np.array(ene_avg[i]),
-                                                           absori_base_energy,
-                                                           sigma.T, 0.02)
+            sum_sigma_interp[i] = sum_sigma_interp_precalc(
+                zval, np.array(ene_avg[i]), absori_base_energy, sigma.T, 0.02
+            )
 
         absori_dict = dict(
-            #absori
+            # absori
             spec=spec,
             ion=ion,
             sigma=sigma,
             atomicnumber=atomicnumber,
             sum_sigma_interp=sum_sigma_interp,
             abundance=abundance,
-            xi=1,# fixed at the moment
+            xi=1,  # fixed at the moment
         )
 
     res = dict(
-            N_grbs=N_grbs,
-            N_chan=N_chan[0],
-            N_ene=N_ene[0],
-            rsp=rsp,
-            exposure_ratio=exposure_ratio,
-            ene_avg=ene_avg,
-            ene_width=ene_width,
-            counts=counts,
-            bkg=bkg,
-            mask=mask,
-            n_chans_used=n_chans_used,
-            z=z,
-            precomputed_absorp=pca,
-            host_precomputed_absorp=pcaz,
-
-            exposure=exposure,
-        )
+        N_grbs=N_grbs,
+        N_chan=N_chan[0],
+        N_ene=N_ene[0],
+        rsp=rsp,
+        exposure_ratio=exposure_ratio,
+        ene_avg=ene_avg,
+        ene_width=ene_width,
+        counts=counts,
+        bkg=bkg,
+        mask=mask,
+        n_chans_used=n_chans_used,
+        z=z,
+        precomputed_absorp=pca,
+        host_precomputed_absorp=pcaz,
+        exposure=exposure,
+    )
 
     if use_mw_gas:
         res["nH_mw"] = nH_mw
@@ -245,8 +260,8 @@ def build_stan_data(*grbs: str, catalog=None, cat_path="data",
 
     if use_host_gas:
         res["host_precomputed_absorp"] = pcaz
-        
+
     if use_absori:
         res.update(absori_dict)
-            
+
     return res
