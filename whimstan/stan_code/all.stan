@@ -78,7 +78,7 @@ parameters{
 
   // absori parameter
   real log_n0_whim_raw;
-  real log_t_whim_raw;
+  //  real log_t_whim_raw;
   real<upper=8> log_t_whim;
 }
 

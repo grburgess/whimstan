@@ -16,22 +16,12 @@ from threeML import OGIPLike
 from .catalog import XRTCatalog, XRTCatalogEntry
 from .spectral_plot import display_posterior_model_counts
 
-# green = "#1AFEA8"
-# purple = "#D656FF"
-# red = "#FF284F"
-# blue = "#42B8FF"
-
-# red = "#FE5F55"
-# black = "#5D576B"
-# blue = "#0AD3FF"
-# green = "#A1E5AB"
-# yellow = "#FFE66D"
-
-black = "#3B5360"
-purple = "#776D8A"
-red = "#8B5E83"
-peach = "#D6B0B1"
-green = "#BEE5D3"
+green = "#00D584"
+purple = "#985CFC"
+yellow = "#EDE966"
+grey = "#385656"
+lightgrey = "#839393"
+black = "#1F2222"
 
 
 @dataclass
@@ -244,7 +234,7 @@ class Fit:
                 density=True,
                 histtype="step",
                 lw=2,
-                color=black,
+                color=grey,
             )
 
             # ax.plot(xgrid, stats.norm.pdf(xgrid, loc=, scale=0.5),  color="b")
@@ -596,7 +586,7 @@ class Fit:
             ax.loglog(
                 ene,
                 model_container.model_pl.get_point_source_fluxes(0, ene),
-                color=peach,
+                color=yellow,
                 lw=1,
                 alpha=0.1,
             )
@@ -617,7 +607,7 @@ class Fit:
                 ax.loglog(
                     ene,
                     model_container.model_all.get_point_source_fluxes(0, ene),
-                    color=black,
+                    color=lightgrey,
                     lw=0.5,
                 )
 
@@ -625,7 +615,7 @@ class Fit:
 
                 # ok, we have some host gas (MW as well)
                 labels.append("Simulation Host included")
-                custom_lines.append(Line2D([0], [0], color="grey", lw=2))
+                custom_lines.append(Line2D([0], [0], color=grey, lw=2))
                 # labels.append("Simulation MW included")
                 # custom_lines.append(Line2D([0], [0], color=red, lw=2))
                 model_container.model_mw.set_free_parameters(
@@ -642,7 +632,7 @@ class Fit:
                 ax.loglog(
                     ene,
                     model_container.model_host.get_point_source_fluxes(0, ene),
-                    color="grey",
+                    color=grey,
                     lw=0.5,
                 )
 
@@ -653,7 +643,7 @@ class Fit:
             ax.loglog(
                 ene,
                 model_container.model_pl.get_point_source_fluxes(0, ene),
-                color=red,
+                color=black,
                 lw=0.5,
             )
         ax.legend(custom_lines, labels)
