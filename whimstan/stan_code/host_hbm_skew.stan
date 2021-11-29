@@ -106,7 +106,7 @@ model{
 
   log_nH_host_raw ~ normal(0,1);
 
-  target += normal_lcdf(alpha * log_nH_host_raw | 0, 1);
+  target += normal_lcdf(host_alpha * log_nH_host_raw | 0, 1);
   
   log_nH_host_mu_raw ~ std_normal();
   log_nH_host_sigma ~ std_normal();
