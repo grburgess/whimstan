@@ -222,92 +222,128 @@ class XRTCatalog:
 
     def to_file(self, file_name):
 
-        with h5py.File(file_name, "w") as f:
+        if isinstance(file_name, str):
 
-            for k, v in self._catalog.items():
+            is_file = True
 
-                grp = f.create_group(k)
-                grp.attrs["ra"] = v.ra
-                grp.attrs["dec"] = v.dec
-                grp.attrs["z"] = v.z
+            f = h5py.File(file_name, "w")
 
-                if v.nH_mw is not None:
+        elif isinstance(file_name, h5py.Group):
 
-                    grp.attrs["nH_mw"] = v.nH_mw
+            f = file_name
 
-                if v.nH_host_sim is not None:
+            is_file = False
 
-                    grp.attrs["nH_host_sim"] = v.nH_host_sim
+        else:
 
-                if v.index_sim is not None:
+            raise RuntimeError()
 
-                    grp.attrs["index_sim"] = v.index_sim
+        for k, v in self._catalog.items():
 
-                if v.flux_sim is not None:
+            grp = f.create_group(k)
+            grp.attrs["ra"] = v.ra
+            grp.attrs["dec"] = v.dec
+            grp.attrs["z"] = v.z
 
-                    grp.attrs["flux_sim"] = v.flux_sim
+            if v.nH_mw is not None:
 
-                if v.n0_sim is not None:
+                grp.attrs["nH_mw"] = v.nH_mw
 
-                    grp.attrs["n0_sim"] = v.n0_sim
+            if v.nH_host_sim is not None:
 
-                if v.temp_sim is not None:
+                grp.attrs["nH_host_sim"] = v.nH_host_sim
 
-                    grp.attrs["temp_sim"] = v.temp_sim
+            if v.index_sim is not None:
+
+                grp.attrs["index_sim"] = v.index_sim
+
+            if v.flux_sim is not None:
+
+                grp.attrs["flux_sim"] = v.flux_sim
+
+            if v.n0_sim is not None:
+
+                grp.attrs["n0_sim"] = v.n0_sim
+
+            if v.temp_sim is not None:
+
+                grp.attrs["temp_sim"] = v.temp_sim
+
+        if is_file:
+
+            f.close()
 
     @classmethod
     def from_file(cls, file_name):
 
-        with h5py.File(file_name, "r") as f:
+        if isinstance(file_name, str):
 
-            grbs = []
+            is_file = True
 
-            for k, v in f.items():
+            f = h5py.File(file_name, "r")
 
-                nH_host_sim = None
-                index_sim = None
-                flux_sim = None
-                n0_sim = None
-                temp_sim = None
-                nH_mw = None
+        elif isinstance(file_name, h5py.Group):
 
-                if "nH_mw" in v.attrs:
+            f = file_name
 
-                    nH_mw = v.attrs["nH_mw"]
+            is_file = False
 
-                if "nH_host_sim" in v.attrs:
+        else:
 
-                    nH_host_sim = v.attrs["nH_host_sim"]
+            raise RuntimeError()
 
-                if "index_sim" in v.attrs:
+        grbs = []
 
-                    index_sim = v.attrs["index_sim"]
+        for k, v in f.items():
 
-                if "flux_sim" in v.attrs:
+            nH_host_sim = None
+            index_sim = None
+            flux_sim = None
+            n0_sim = None
+            temp_sim = None
+            nH_mw = None
 
-                    flux_sim = v.attrs["flux_sim"]
+            if "nH_mw" in v.attrs:
 
-                if "n0_sim" in v.attrs:
+                nH_mw = v.attrs["nH_mw"]
 
-                    n0_sim = v.attrs["n0_sim"]
+            if "nH_host_sim" in v.attrs:
 
-                if "temp_sim" in v.attrs:
+                nH_host_sim = v.attrs["nH_host_sim"]
 
-                    temp_sim = v.attrs["temp_sim"]
+            if "index_sim" in v.attrs:
 
-                tmp = XRTCatalogEntry(
-                    name=k,
-                    ra=v.attrs["ra"],
-                    dec=v.attrs["dec"],
-                    z=v.attrs["z"],
-                    nH_mw=nH_mw,
-                    nH_host_sim=nH_host_sim,
-                    index_sim=index_sim,
-                    flux_sim=flux_sim,
-                    n0_sim=n0_sim,
-                    temp_sim=temp_sim,
-                )
+                index_sim = v.attrs["index_sim"]
 
-                grbs.append(tmp)
+            if "flux_sim" in v.attrs:
+
+                flux_sim = v.attrs["flux_sim"]
+
+            if "n0_sim" in v.attrs:
+
+                n0_sim = v.attrs["n0_sim"]
+
+            if "temp_sim" in v.attrs:
+
+                temp_sim = v.attrs["temp_sim"]
+
+            tmp = XRTCatalogEntry(
+                name=k,
+                ra=v.attrs["ra"],
+                dec=v.attrs["dec"],
+                z=v.attrs["z"],
+                nH_mw=nH_mw,
+                nH_host_sim=nH_host_sim,
+                index_sim=index_sim,
+                flux_sim=flux_sim,
+                n0_sim=n0_sim,
+                temp_sim=temp_sim,
+            )
+
+            grbs.append(tmp)
+
+        if is_file:
+
+            f.close()
 
         return cls(*grbs)
