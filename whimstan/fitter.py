@@ -1,0 +1,3 @@
+class Fitter:
+
+    pass
