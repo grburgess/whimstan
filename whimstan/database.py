@@ -198,9 +198,7 @@ class Database:
 
         self._catalog.to_file(cat_grp)
 
-
-        for grb is self.catalog.grbs:
-
+        for grb in self.catalog.grbs:
 
             grb_grp = f.create_group(grb)
 
@@ -209,7 +207,6 @@ class Database:
         if is_file:
 
             f.close()
-
 
     @classmethod
     def from_fits_files(
