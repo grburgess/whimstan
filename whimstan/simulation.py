@@ -261,7 +261,7 @@ class SpectrumFactory:
         db = Database.from_fits_files(
             file_name=database_name,
             catalog=xrt_cat,
-            path=root,
+            cat_path=root,
             is_sim=True,
             clean=True,
         )
