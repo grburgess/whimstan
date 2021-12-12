@@ -11,6 +11,7 @@ from popsynth.utils.progress_bar import progress_bar
 from threeML import OGIPLike, quiet_mode
 
 from .catalog import XRTCatalog, XRTCatalogEntry
+from .database import Database
 
 
 class SpectrumGenerator:
@@ -236,6 +237,34 @@ class SpectrumFactory:
         xrt_cat = XRTCatalog(*cat_entries)
 
         xrt_cat.to_file(catalog_name)
+
+    def create_database(self, database_name: str = "database.h5") -> None:
+
+        cat_entries = []
+
+        root = Path("_tmp")
+
+        root.mkdir(parents=True, exist_ok=True)
+
+        for s in self._spectra:
+
+            p = root / s.name
+            p.mkdir(parents=True, exist_ok=True)
+
+            pi: OGIPLike = s.simulated_data
+            pi.write_pha(p / "apc", force_rsp_write=True)
+
+            cat_entries.append(s.xrt_catalog_entry)
+
+        xrt_cat = XRTCatalog(*cat_entries)
+
+        db = Database.from_fits_files(
+            file_name=database_name,
+            catalog=xrt_cat,
+            path=root,
+            is_sim=True,
+            clean=True,
+        )
 
     @property
     def spectra(self) -> List:
