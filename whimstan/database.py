@@ -320,10 +320,12 @@ class Database:
         :returns:
 
         """
-        N_grbs = len(grbs)
+
         z = []
+
         if use_mw_gas:
             nH_mw = []
+
         exposure_ratio = []
         counts = []
         bkg = []
@@ -341,6 +343,8 @@ class Database:
         exposure = []
 
         grbs = self._catalog.grbs
+
+        N_grbs = len(grbs)
 
         for grb in tqdm(grbs, colour="#3DFF6C", desc="building GRBs"):
 
