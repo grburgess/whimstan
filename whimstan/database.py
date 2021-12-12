@@ -218,7 +218,7 @@ class Database:
         catalog: XRTCatalog,
         cat_path="data",
         is_sim=True,
-        clean: bool = True,
+        clean: bool = False,
     ):
 
         grbs = catalog.grbs
@@ -283,6 +283,11 @@ class Database:
                 grb_grp = f.create_group(grb)
 
                 plugin_to_hdf_group(plugin, grb_grp)
+
+                if clean and is_sim:
+                    observation.unlink()
+                    background.unlink()
+                    response.unlink()
 
             # Now save the catalog
 
