@@ -224,7 +224,7 @@ class Fit:
 
     @classmethod
     def from_live_fit(
-        cls, stan_data: av.InferenceData, database: Database, model_name
+        cls, stan_fit: av.InferenceData, database: Database, model_name
     ):
         """
         Create a fit object from a recent stan fit in
