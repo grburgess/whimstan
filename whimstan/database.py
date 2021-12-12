@@ -286,6 +286,8 @@ class Database:
                     background.unlink()
                     response.unlink()
 
+                    bpath.rmdir()
+
             # Now save the catalog
 
             cat_grp = f.create_group("catalog")
