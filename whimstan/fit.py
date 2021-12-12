@@ -290,6 +290,8 @@ class Fit:
             pass
 
         has_whim_fit: bool = False
+        n0_whim = None
+        t_whim = None
 
         try:
             n0_whim = stan_fit.posterior.n0_whim.stack(
