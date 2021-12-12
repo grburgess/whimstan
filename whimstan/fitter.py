@@ -49,7 +49,7 @@ def make_fit(
 
     if save_stan_fit:
 
-        av_fit.to_dataframe(f"stan_fit_{file_name}")
+        av_fit.to_netcdf(f"stan_fit_{file_name}")
 
     fit = Fit.from_live_fit(av_fit, database=database, model_name=model_name)
 
