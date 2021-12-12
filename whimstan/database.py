@@ -9,6 +9,7 @@ import numpy as np
 import h5py
 
 from tqdm.auto import tqdm
+import astropy.io.fits as fits
 
 from threeML.plugins.DispersionSpectrumLike import DispersionSpectrumLike
 from threeML.plugins.OGIPLike import OGIPLike
