@@ -264,9 +264,11 @@ class Fit:
                 sample=("chain", "draw")
             ).values
 
+            has_skew_fit = True
+
         except:
 
-            pass
+            has_skew_fit = False
 
         try:
             host_nh = stan_fit.posterior.nH_host_norm.stack(
@@ -337,6 +339,7 @@ class Fit:
             flux=flux,
             index=index,
             has_host_fit=has_host_fit,
+            has_skew_fit=has_skew_fit,
             host_nh=host_nh,
             log_nh_host_mu=log_nh_host_mu,
             log_nh_host_sigma=log_nh_host_sigma,
