@@ -36,7 +36,7 @@ def make_fit(
 
     stan_fit = model.model.sample(
         data=data,
-        n_chains=n_chains,
+        chains=n_chains,
         parallel_chains=n_chains,
         threads_per_chain=n_threads,
         show_progress=True,
