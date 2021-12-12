@@ -246,6 +246,10 @@ class SpectrumFactory:
 
         root.mkdir(parents=True, exist_ok=True)
 
+        for f in root.glob("*apc*"):
+
+            f.unlink()
+
         for s in self._spectra:
 
             p = root / s.name
