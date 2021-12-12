@@ -1,7 +1,13 @@
 from IPython.display import YouTubeVideo, display
 
 from ._version import get_versions
-from .prep import build_stan_data, build_tbabs_arg
+#from .prep import build_stan_data, build_tbabs_arg
+
+from ,fitter import make_fit
+from .fit import Fit
+
+from .database import Database
+
 from .stan_code.stan_models import get_model
 from .catalog import XRTCatalog, XRTCatalogEntry
 
