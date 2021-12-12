@@ -246,7 +246,7 @@ class SpectrumFactory:
 
         root.mkdir(parents=True, exist_ok=True)
 
-        for f in root.glob("*apc*"):
+        for f in root.glob("grb*/*apc*"):
 
             f.unlink()
 
