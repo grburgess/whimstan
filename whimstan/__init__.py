@@ -9,7 +9,7 @@ from .fitter import make_fit
 from .fit import Fit
 
 from .database import Database, XRTCatalog, XRTCatalogEntry
-from .simulations import create_population. SpectrumFactory
+from .simulations import create_population, SpectrumFactory
 
 
 from .stan_code.stan_models import get_model
