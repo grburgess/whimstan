@@ -377,7 +377,7 @@ class ObscuredFluxSampler(ps.DerivedLumAuxSampler):
         return (4.0 * np.pi * self.luminosity_distance ** 2) * self._fluxes
 
 
-def create_simulation(
+def create_population(
     r0: float = 5,
     a: float = 0.0157,
     rise: float = 0.118,
