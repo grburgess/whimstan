@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Optional, Tuple
 
 import h5py
 
@@ -15,9 +14,8 @@ from natsort import natsorted
 from numpy.typing import ArrayLike
 from threeML import OGIPLike
 
-from .catalog import XRTCatalog, XRTCatalogEntry
+from .database import XRTCatalog, XRTCatalogEntry, Database
 from .spectral_plot import display_posterior_model_counts
-from .database import Database
 
 
 green = "#00D584"
