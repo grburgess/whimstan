@@ -364,7 +364,7 @@ class Fit:
 
             database: Database = Database.read(f["database"])
 
-            posterior = PosteriorContainer = PosteriorContainer.from_hdf_group(
+            posterior: PosteriorContainer = PosteriorContainer.from_hdf_group(
                 f["posterior"]
             )
 
