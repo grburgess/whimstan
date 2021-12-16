@@ -13,8 +13,6 @@ def test_whim_simulation(whim_population):
 
 
 
-
-
 def test_no_whim_simulation(no_whim_population):
 
     factory = SpectrumFactory(no_whim_population)

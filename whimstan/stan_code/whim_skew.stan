@@ -133,7 +133,13 @@ model{
   log_K_raw ~ std_normal();
   log_nH_host_raw ~ std_normal();
 
-  log_nH_host_mu_raw ~ skew_normal(0,1, host_alpha);
+  //log_nH_host_mu_raw ~ skew_normal(0,1, host_alpha);
+
+  log_nH_host_raw ~ normal(0,1);
+
+  target += normal_lcdf(host_alpha * log_nH_host_raw | 0, 1);
+
+
   log_nH_host_sigma ~ std_normal();
 
   log_K_mu_raw ~ std_normal();
