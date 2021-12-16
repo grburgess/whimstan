@@ -1,16 +1,11 @@
-import popsynth
-import numba as nb
 import numpy as np
-from gdpyc import GasMap, DustMap
+
 from pathlib import Path
 
 
-from whimstan.population_generator import create_simulation
+from whimstan import create_population
 
 from whimstan.utils.package_data import get_path_of_data_file
-
-
-from whimstan import Database, XRTCatalog
 
 
 from threeML import OGIPLike
@@ -28,31 +23,22 @@ warnings.filterwarnings("ignore")
 @pytest.fixture(scope="session")
 def demo_plugin():
 
-
-
     demo_plugin = OGIPLike(
         "tmp",
         observation=get_path_of_data_file("apcsource.pi"),
         background=get_path_of_data_file("apcback.pi"),
-    response=get_path_of_data_file("apc.rmf"),
-    arf_file=get_path_of_data_file("apc.arf"),
-    verbose=False,
+        response=get_path_of_data_file("apc.rmf"),
+        arf_file=get_path_of_data_file("apc.arf"),
+        verbose=False,
     )
 
-
     yield demo_plugin
-
 
 
 @pytest.fixture(scope="session")
 def no_whim_population(demo_plugin):
 
-
-
-
-
-
-    pop_gen = create_simulation(
+    pop_gen = create_population(
         r0=2.5,
         z_max=10,
         Lmin=1e48,
@@ -74,7 +60,6 @@ def no_whim_population(demo_plugin):
 
     # flux_selector.boundary = 1e-11
 
-
     # pop_gen.set_flux_selection(flux_selector)
 
     pop = pop_gen.draw_survey()
@@ -87,12 +72,7 @@ def no_whim_population(demo_plugin):
 @pytest.fixture(scope="session")
 def whim_population(demo_plugin):
 
-
-
-
-
-
-    pop_gen = create_simulation(
+    pop_gen = create_population(
         r0=2.5,
         z_max=10,
         Lmin=1e48,
@@ -116,7 +96,6 @@ def whim_population(demo_plugin):
 
     # flux_selector.boundary = 1e-11
 
-
     # pop_gen.set_flux_selection(flux_selector)
 
     pop = pop_gen.draw_survey()
@@ -124,4 +103,3 @@ def whim_population(demo_plugin):
     pop = pop.to_sub_population()
 
     yield pop
-

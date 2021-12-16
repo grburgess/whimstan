@@ -11,9 +11,7 @@ from popsynth.utils.progress_bar import progress_bar
 from threeML import quiet_mode
 from threeML.plugins.OGIPLike import OGIPLike
 
-
-from .catalog import XRTCatalog, XRTCatalogEntry
-from .database import Database
+from ..database import Database, XRTCatalog, XRTCatalogEntry
 
 
 class SpectrumGenerator:

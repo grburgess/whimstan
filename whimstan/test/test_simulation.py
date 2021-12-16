@@ -1,4 +1,6 @@
-from whimstan.simulation import SpectrumFactory
+from pathlib import Path
+
+from whimstan import SpectrumFactory
 
 
 def test_whim_simulation(whim_population):
@@ -7,6 +9,10 @@ def test_whim_simulation(whim_population):
 
     factory.create_database("whim_db.h5")
 
+    Path("whim_db.h5").unlink()
+
+
+
 
 
 def test_no_whim_simulation(population):
@@ -14,3 +20,5 @@ def test_no_whim_simulation(population):
     factory = SpectrumFactory(population)
 
     factory.create_database("no_whim_db.h5")
+
+    Path("no_whim_db.h5").unlink()
