@@ -1,7 +1,7 @@
 import numpy as np
 from astropy.io import fits
 from scipy.interpolate import interp1d
-from .utils import get_path_of_data_file
+from . import get_path_of_data_file
 
 
 absori_elements = ["H", "He", "C", "N", "O", "Ne", "Mg", "Si", "S", "Fe"]
