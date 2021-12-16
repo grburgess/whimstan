@@ -12,7 +12,7 @@ from threeML import quiet_mode
 from threeML.plugins.OGIPLike import OGIPLike
 
 from ..database import Database, XRTCatalog, XRTCatalogEntry
-
+from ..utils.package_data import get_path_of_data_file
 
 class SpectrumGenerator:
     def __init__(
@@ -101,10 +101,10 @@ class SpectrumGenerator:
 
             self._demo_plugin = OGIPLike(
                 "tmp",
-                observation="data/grb050401/apcsource.pi",
-                background="data/grb050401/apcback.pi",
-                response="data/grb050401/apc.rmf",
-                arf_file="data/grb050401/apc.arf",
+                observation=get_path_of_data_file("apc.pi"),
+                background=get_path_of_data_file("apcback.pi"),
+                response=get_path_of_data_file("apc.rmf"),
+                arf_file=get_path_of_data_file("apc.arf"),
                 verbose=False,
             )
 

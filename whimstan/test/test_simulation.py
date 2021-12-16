@@ -15,9 +15,9 @@ def test_whim_simulation(whim_population):
 
 
 
-def test_no_whim_simulation(population):
+def test_no_whim_simulation(no_whim_population):
 
-    factory = SpectrumFactory(population)
+    factory = SpectrumFactory(no_whim_population)
 
     factory.create_database("no_whim_db.h5")
 

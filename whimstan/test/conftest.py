@@ -25,7 +25,7 @@ def demo_plugin():
 
     demo_plugin = OGIPLike(
         "tmp",
-        observation=get_path_of_data_file("apcsource.pi"),
+        observation=get_path_of_data_file("apc.pi"),
         background=get_path_of_data_file("apcback.pi"),
         response=get_path_of_data_file("apc.rmf"),
         arf_file=get_path_of_data_file("apc.arf"),
