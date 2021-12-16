@@ -78,7 +78,7 @@ parameters{
 
   // absori parameter
   real log_n0_whim_raw;
-  real log_t_whim_raw;
+  real<upper=8> log_t_whim;
 }
 
 
@@ -91,7 +91,7 @@ transformed parameters{
   vector[N_grbs] nH_host_norm;
 
   real log_n0_whim = log_n0_whim_raw -7;
-  real log_t_whim = log_t_whim_raw + 7;
+
 
   real log_K_mu = log_K_mu_raw - 9;
 
@@ -154,7 +154,7 @@ model{
 
   log_n0_whim_raw ~ std_normal();
 
-  log_t_whim_raw ~ std_normal();
+  log_t_whim ~ normal(6, 1);
 
   target += reduce_sum(partial_log_like_all, all_N, grainsize, N_ene, N_chan, ene_avg, ene_width, mask, n_chans_used, mw_abs, K, index, n0_whim, num, sum_sigma_interp, nH_host_norm, host_precomputed_absorp, rsp, exposure, exposure_ratio, counts, bkg);
 
