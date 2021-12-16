@@ -374,7 +374,7 @@ class Fit:
             database=database, posterior=posterior, model_name=model_name
         )
 
-    def to_file(self, file_name: str) -> None:
+    def write(self, file_name: str) -> None:
 
         with h5py.File(file_name, "w") as f:
 

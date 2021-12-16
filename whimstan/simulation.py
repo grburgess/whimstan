@@ -236,7 +236,7 @@ class SpectrumFactory:
 
         xrt_cat = XRTCatalog(*cat_entries)
 
-        xrt_cat.to_file(catalog_name)
+        xrt_cat.write(catalog_name)
 
     def create_database(self, database_name: str = "database.h5") -> None:
 

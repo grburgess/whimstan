@@ -220,7 +220,7 @@ class XRTCatalog:
 
         return self._catalog
 
-    def to_file(self, file_name):
+    def write(self, file_name):
 
         if isinstance(file_name, str):
 

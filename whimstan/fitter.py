@@ -53,4 +53,4 @@ def make_fit(
 
     fit = Fit.from_live_fit(av_fit, database=database, model_name=model_name)
 
-    fit.to_file(file_name=file_name)
+    fit.write(file_name=file_name)

@@ -197,7 +197,7 @@ class Database:
 
         cat_grp = f.create_group("catalog")
 
-        self._catalog.to_file(cat_grp)
+        self._catalog.write(cat_grp)
 
         for grb in self.catalog.grbs:
 
@@ -293,7 +293,7 @@ class Database:
 
             cat_grp = f.create_group("catalog")
 
-            catalog.to_file(cat_grp)
+            catalog.write(cat_grp)
 
         return cls.read(file_name=file_name)
 
