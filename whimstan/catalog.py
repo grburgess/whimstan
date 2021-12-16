@@ -222,6 +222,14 @@ class XRTCatalog:
 
     def write(self, file_name):
 
+        """
+        write the catalog to a file or hdf group
+
+        :param file_name:
+        :type file_name:
+        :returns:
+
+        """
         if isinstance(file_name, str):
 
             is_file = True

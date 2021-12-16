@@ -8,7 +8,9 @@ from astropy.coordinates import SkyCoord
 from bb_astromodels import Integrate_Absori
 from gdpyc import GasMap
 from popsynth.utils.progress_bar import progress_bar
-from threeML import OGIPLike, quiet_mode
+from threeML import quiet_mode
+from threeML.plugins.OGIPLike import OGIPLike
+
 
 from .catalog import XRTCatalog, XRTCatalogEntry
 from .database import Database
