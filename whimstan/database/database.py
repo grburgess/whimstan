@@ -17,16 +17,15 @@ from threeML import silence_warnings, update_logging_level
 from astromodels.utils.data_files import _get_data_file_path
 
 
-from .coverters import plugin_to_hdf_group, build_spectrum_like_from_hdf
+from ..utils.format_conversions import plugin_to_hdf_group, build_spectrum_like_from_hdf
 from .catalog import XRTCatalog
 
-from .absori_precalc import (
+from ..utils.absori_precalc import (
     get_abundance,
     load_absori_base,
     get_spec,
     sum_sigma_interp_precalc,
 )
-from whimstan import catalog
 
 
 silence_warnings()
