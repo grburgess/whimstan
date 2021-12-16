@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+import h5py
+
 import arviz as av
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,6 +17,8 @@ from threeML import OGIPLike
 
 from .catalog import XRTCatalog, XRTCatalogEntry
 from .spectral_plot import display_posterior_model_counts
+from .database import Database
+
 
 green = "#00D584"
 purple = "#985CFC"
@@ -33,12 +37,118 @@ class ModelContainer:
     model_pl: Optional[Model] = None
 
 
+@dataclass
+class PosteriorContainer:
+    flux: np.ndarray
+    index: np.ndarray
+    has_host_fit: bool
+    host_nh: Optional[np.ndarray]
+    log_nh_host_mu: Optional[ArrayLike]
+    log_nh_host_sigma: Optional[ArrayLike]
+    nh_host_alpha: Optional[ArrayLike]
+    has_whim_fit: bool
+    has_skew_fit: bool
+    n0_whim: Optional[np.ndarray]
+    t_whim: Optional[np.ndarray]
+    index_mu: Optional[np.ndarray]
+    index_sigma: Optional[np.ndarray]
+    has_whim_sim: bool
+    has_host_sim: bool
+
+    def to_hdf_group(self, hdf_grp: h5py.Group) -> None:
+
+        hdf_grp.attrs["has_host_fit"] = self.has_host_fit
+        hdf_grp.attrs["has_whim_fit"] = self.has_whim_fit
+        hdf_grp.attrs["has_host_sim"] = self.has_host_sim
+        hdf_grp.attrs["has_whim_sim"] = self.has_whim_sim
+        hdf_grp.attrs["has_skew_fit"] = self.has_skew_fit
+
+        hdf_grp.create_dataset("flux", data=self.flux, compression="gzip")
+        hdf_grp.create_dataset("index", data=self.index, compression="gzip")
+
+        if self.has_host_fit:
+
+            hdf_grp.create_dataset(
+                "log_host_mu", data=self.log_nh_host_mu, compression="gzip"
+            )
+            hdf_grp.create_dataset(
+                "log_host_sigma",
+                data=self.log_nh_host_sigma,
+                compression="gzip",
+            )
+
+            hdf_grp.create_dataset(
+                "host_nh",
+                data=self.host_nh,
+                compression="gzip",
+            )
+
+        if self.has_skew_fit:
+
+            hdf_grp.create_dataset(
+                "nh_host_alpha", data=self.nh_host_alpha, compression="gzip"
+            )
+
+        if self.has_whim_fit:
+
+            hdf_grp.create_dataset(
+                "n0_whim", data=self.n0_whim, compression="gzip"
+            )
+            hdf_grp.create_dataset(
+                "t_whim", data=self.t_whim, compression="gzip"
+            )
+
+        hdf_grp.create_dataset(
+            "index_mu", data=self.index_mu, compression="gzip"
+        )
+        hdf_grp.create_dataset(
+            "index_sigma", data=self.index_sigma, compression="gzip"
+        )
+
+    @classmethod
+    def from_hdf_group(cls, hdf_grp: h5py.Group):
+
+        n0_whim = None
+        t_whim = None
+        log_nh_host_mu = None
+        log_nh_host_sigma = None
+        host_nh = None
+        nh_host_alpha = None
+
+        if hdf_grp.attrs["has_host_fit"]:
+            host_nh = hdf_grp["host_nh"][()]
+            log_nh_host_mu = hdf_grp["log_nh_host_mu"][()]
+            log_nh_host_sigma = hdf_grp["log_nh_host_sigma"][()]
+
+        if hdf_grp.attrs["has_skew_fit"]:
+            nh_host_alpha = hdf_grp["nh_host_alpha"][()]
+
+        if hdf_grp.attrs["has_whim_fit"]:
+            n0_whim = hdf_grp["n0_whim"][()]
+            t_whim = hdf_grp["t_whim"][()]
+
+        return cls(
+            flux=hdf_grp["flux"][()],
+            index=hdf_grp["index"][()],
+            index_mu=hdf_grp["index_mu"][()],
+            index_sigma=hdf_grp["index_sigma"][()],
+            has_host_fit=hdf_grp.attrs["has_host_fit"],
+            has_whim_fit=hdf_grp.attrs["has_whim_fit"],
+            has_skew_fit=hdf_grp.attrs["has_skew_fit"],
+            has_host_sim=hdf_grp.attrs["has_host_sim"],
+            has_whim_sim=hdf_grp.attrs["has_whim_sim"],
+            host_nh=host_nh,
+            log_nh_host_mu=log_nh_host_mu,
+            log_nh_host_sigma=log_nh_host_sigma,
+            n0_whim=n0_whim,
+            t_whim=t_whim,
+            nh_host_alpha=nh_host_alpha,
+        )
+
+
 class Fit:
     def __init__(
-        self,
-        catalog: XRTCatalog,
-        stan_fit: av.data.InferenceData,
-        data_path: Optional[Path] = None,
+        self, database: Database, posterior: PosteriorContainer, model_name: str
     ):
         """TODO describe function
 
@@ -51,95 +161,50 @@ class Fit:
         :returns:
 
         """
-        self._catalog: XRTCatalog = catalog
-        self._data_path: Optional[Path] = data_path
 
-        self._n_grbs: int = stan_fit.posterior.K.stack(
-            sample=("chain", "draw")
-        ).values.shape[0]
+        self._model_name: str = model_name
 
-        self._flux: ArrayLike = stan_fit.posterior.K.stack(
-            sample=("chain", "draw")
-        ).values
-        self._index: ArrayLike = stan_fit.posterior.index.stack(
-            sample=("chain", "draw")
-        ).values
+        self._catalog: XRTCatalog = database.catalog
+        self._posterior: PosteriorContainer = posterior
+        self._database: Database = database
 
-        self._has_host_fit: bool = False
-        self._host_nh: Optional[ArrayLike] = None
-        self._log_nh_host_mu: Optional[ArrayLike] = None
-        self._log_nh_host_sigma: Optional[ArrayLike] = None
+        self._flux: ArrayLike = self._posterior.flux
+        self._index: ArrayLike = self._posterior.index
 
-        self._nh_host_alpha = None
+        self._has_host_fit: bool = self._posterior.has_host_fit
+        self._host_nh: Optional[ArrayLike] = self._posterior.host_nh
+        self._log_nh_host_mu: Optional[
+            ArrayLike
+        ] = self._posterior.log_nh_host_mu
+        self._log_nh_host_sigma: Optional[
+            ArrayLike
+        ] = self._posterior.log_nh_host_sigma
 
-        try:
+        self._nh_host_alpha = self._posterior.nh_host_alpha = None
 
-            self._nh_host_alpha = stan_fit.posterior.host_alpha.stack(
-                sample=("chain", "draw")
-            ).values
+        self._host_nh = self._posterior.host_nh
 
-        except:
+        self._log_nh_host_mu = self._posterior.log_nh_host_mu
+        self._log_nh_host_sigma = self._posterior.log_nh_host_sigma
 
-            pass
+        self._has_host_fit = self._posterior.has_host_fit
 
-        try:
-            self._host_nh = stan_fit.posterior.nH_host_norm.stack(
-                sample=("chain", "draw")
-            ).values
+        self._has_whim_fit: bool = self._posterior.has_whim_fit
 
-            self._log_nh_host_mu = stan_fit.posterior.log_nH_host_mu_raw.stack(
-                sample=("chain", "draw")
-            ).values
-
-            self._log_nh_host_sigma = (
-                stan_fit.posterior.log_nH_host_sigma.stack(
-                    sample=("chain", "draw")
-                ).values
-            )
-
-            self._has_host_fit = True
-
-        except:
-
-            # we do not have a host gas fit
-
-            pass
-
-        self._has_whim_fit: bool = False
-        try:
-            self._n0_whim = stan_fit.posterior.n0_whim.stack(
-                sample=("chain", "draw")
-            ).values
-            self._t_whim = stan_fit.posterior.t_whim.stack(
-                sample=("chain", "draw")
-            ).values
-            self._has_whim_fit = True
-        except:
-
-            # we do not have a whim fit
-
-            pass
+        self._n0_whim = self._posterior.n0_whim
+        self._t_whim = self._posterior.t_whim
 
         # group properties
 
-        self._index_mu: ArrayLike = stan_fit.posterior.index_mu.stack(
-            sample=("chain", "draw")
-        ).values
+        self._index_mu: np.ndarray = self._posterior.index_mu
 
-        self._index_sigma: ArrayLike = stan_fit.posterior.index_sigma.stack(
-            sample=("chain", "draw")
-        ).values
+        self._index_sigma: ArrayLike = self._posterior.index_sigma
 
-        if data_path is not None:
+        self._grbs = self._catalog.grbs
 
-            self._grbs: Optional[List[str]] = [
-                x.name.replace("grb", "")
-                for x in natsorted(data_path.glob("grb*"))
-            ]
+        self._n_grbs = len(self._grbs)
 
-        else:
-
-            self._grbs = None
+        self._is_sim = self._catalog.is_sim
 
         # if it is a sim, lets go ahead
         # and see what's in there
@@ -156,6 +221,172 @@ class Fit:
             if self._catalog.nH_host_sim is not None:
 
                 self._has_host_sim = True
+
+    @classmethod
+    def from_live_fit(
+        cls, stan_fit: av.InferenceData, database: Database, model_name
+    ):
+        """
+        Create a fit object from a recent stan fit in
+        memory
+
+        :param cls:
+        :type cls:
+        :param inference_data:
+        :type inference_data: av.InferenceData
+        :param database:
+        :type database: Database
+        :returns:
+
+        """
+
+        n_grbs: int = stan_fit.posterior.K.stack(
+            sample=("chain", "draw")
+        ).values.shape[0]
+
+        flux: ArrayLike = stan_fit.posterior.K.stack(
+            sample=("chain", "draw")
+        ).values
+        index: ArrayLike = stan_fit.posterior.index.stack(
+            sample=("chain", "draw")
+        ).values
+
+        has_host_fit: bool = False
+        host_nh: Optional[ArrayLike] = None
+        log_nh_host_mu: Optional[ArrayLike] = None
+        log_nh_host_sigma: Optional[ArrayLike] = None
+
+        nh_host_alpha = None
+
+        try:
+
+            nh_host_alpha = stan_fit.posterior.host_alpha.stack(
+                sample=("chain", "draw")
+            ).values
+
+            has_skew_fit = True
+
+        except:
+
+            has_skew_fit = False
+
+        try:
+            host_nh = stan_fit.posterior.nH_host_norm.stack(
+                sample=("chain", "draw")
+            ).values
+
+            log_nh_host_mu = stan_fit.posterior.log_nH_host_mu_raw.stack(
+                sample=("chain", "draw")
+            ).values
+
+            log_nh_host_sigma = stan_fit.posterior.log_nH_host_sigma.stack(
+                sample=("chain", "draw")
+            ).values
+
+            has_host_fit = True
+
+        except:
+
+            # we do not have a host gas fit
+
+            pass
+
+        has_whim_fit: bool = False
+        n0_whim = None
+        t_whim = None
+
+        try:
+            n0_whim = stan_fit.posterior.n0_whim.stack(
+                sample=("chain", "draw")
+            ).values
+            t_whim = stan_fit.posterior.t_whim.stack(
+                sample=("chain", "draw")
+            ).values
+            has_whim_fit = True
+        except:
+
+            # we do not have a whim fit
+
+            pass
+
+        # group properties
+
+        index_mu: ArrayLike = stan_fit.posterior.index_mu.stack(
+            sample=("chain", "draw")
+        ).values
+
+        index_sigma: ArrayLike = stan_fit.posterior.index_sigma.stack(
+            sample=("chain", "draw")
+        ).values
+
+        # if it is a sim, lets go ahead
+        # and see what's in there
+
+        has_whim_sim: bool = False
+        has_host_sim: bool = False
+
+        if database.catalog.is_sim:
+
+            if database.catalog.n0_sim is not None:
+
+                has_whim_sim = True
+
+            if database.catalog.nH_host_sim is not None:
+
+                has_host_sim = True
+
+        posterior: PosteriorContainer = PosteriorContainer(
+            flux=flux,
+            index=index,
+            has_host_fit=has_host_fit,
+            has_skew_fit=has_skew_fit,
+            host_nh=host_nh,
+            log_nh_host_mu=log_nh_host_mu,
+            log_nh_host_sigma=log_nh_host_sigma,
+            nh_host_alpha=nh_host_alpha,
+            has_whim_fit=has_whim_fit,
+            n0_whim=n0_whim,
+            t_whim=t_whim,
+            index_mu=index_mu,
+            index_sigma=index_sigma,
+            has_whim_sim=has_whim_sim,
+            has_host_sim=has_host_sim,
+        )
+
+        return cls(
+            database=database, posterior=posterior, model_name=model_name
+        )
+
+    @classmethod
+    def from_file(cls, file_name: str):
+
+        with h5py.File(file_name, "r") as f:
+
+            database: Database = Database.read(f["database"])
+
+            posterior = PosteriorContainer = PosteriorContainer.from_hdf_group(
+                f["posterior"]
+            )
+
+            model_name = f.attrs["model_name"]
+
+        return cls(
+            database=database, posterior=posterior, model_name=model_name
+        )
+
+    def write(self, file_name: str) -> None:
+
+        with h5py.File(file_name, "w") as f:
+
+            f.attrs["model_name"] = self._model_name
+
+            db_grp = f.create_group("database")
+
+            self._database.write(db_grp)
+
+            fit_grp = f.create_group("posterior")
+
+            self._posterior.to_hdf_group(fit_grp)
 
     @property
     def catalog(self) -> XRTCatalog:

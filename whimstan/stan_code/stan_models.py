@@ -55,10 +55,10 @@ class StanModel:
         )
 
     @property
-    def model(self):
+    def model(self) -> cmdstanpy.CmdStanModel:
         return self._model
 
-    def clean_model(self):
+    def clean_model(self) -> None:
         """
         Clean the model bin file
         to allow for compiling
@@ -73,7 +73,7 @@ class StanModel:
             os.remove(self._model.exe_file)
 
 
-def get_model(model_name):
+def get_model(model_name) -> StanModel:
     """
     Retrieve the stan model
 

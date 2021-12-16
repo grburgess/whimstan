@@ -88,7 +88,7 @@ def extract_xrt_data(plugin):
 
 def build_stan_data(
     *grbs: str,
-    catalog: Optional[XRTCatalog] = None,
+    catalog: XRTCatalog,
     cat_path="data",
     is_sim=False,
     use_absori=False,
