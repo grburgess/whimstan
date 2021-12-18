@@ -178,7 +178,7 @@ class Fit:
             ArrayLike
         ] = self._posterior.log_nh_host_sigma
 
-        self._nh_host_alpha = self._posterior.nh_host_alpha = None
+        self._nh_host_alpha = self._posterior.nh_host_alpha
 
         self._host_nh = self._posterior.host_nh
 
