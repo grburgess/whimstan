@@ -7,12 +7,14 @@ import arviz as av
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as stats
-from astromodels import Model, PointSource, Powerlaw_Eflux, TbAbs
-from bb_astromodels import Integrate_Absori
+
+
 from matplotlib.lines import Line2D
-from natsort import natsorted
 from numpy.typing import ArrayLike
-from threeML import OGIPLike
+
+from bb_astromodels import Integrate_Absori
+from threeML.plugins.OGIPLike import OGIPLike
+from astromodels import Model, PointSource, Powerlaw_Eflux, TbAbs
 
 from .database import XRTCatalog, XRTCatalogEntry, Database
 from .spectral_plot import display_posterior_model_counts
@@ -55,6 +57,14 @@ class PosteriorContainer:
 
     def to_hdf_group(self, hdf_grp: h5py.Group) -> None:
 
+        """
+        write the information to an HDF group
+
+        :param hdf_grp:
+        :type hdf_grp: h5py.Group
+        :returns:
+
+        """
         hdf_grp.attrs["has_host_fit"] = self.has_host_fit
         hdf_grp.attrs["has_whim_fit"] = self.has_whim_fit
         hdf_grp.attrs["has_host_sim"] = self.has_host_sim
@@ -115,8 +125,8 @@ class PosteriorContainer:
 
         if hdf_grp.attrs["has_host_fit"]:
             host_nh = hdf_grp["host_nh"][()]
-            log_nh_host_mu = hdf_grp["log_nh_host_mu"][()]
-            log_nh_host_sigma = hdf_grp["log_nh_host_sigma"][()]
+            log_nh_host_mu = hdf_grp["log_host_mu"][()]
+            log_nh_host_sigma = hdf_grp["log_host_sigma"][()]
 
         if hdf_grp.attrs["has_skew_fit"]:
             nh_host_alpha = hdf_grp["nh_host_alpha"][()]
@@ -148,19 +158,23 @@ class Fit:
     def __init__(
         self, database: Database, posterior: PosteriorContainer, model_name: str
     ):
-        """TODO describe function
 
-        :param catalog:
-        :type catalog: XRTCatalog
-        :param stan_fit:
-        :type stan_fit: av.data.InferenceData
-        :param data_path:
-        :type data_path: Optional[Path]
+        """
+        Holds and displays the fit to the data as well as holds the data
+
+        :param database:
+        :type database: Database
+        :param posterior:
+        :type posterior: PosteriorContainer
+        :param model_name:
+        :type model_name: str
         :returns:
 
         """
-
         self._model_name: str = model_name
+
+
+        # this simply attaches every thing to the class
 
         self._catalog: XRTCatalog = database.catalog
         self._posterior: PosteriorContainer = posterior
@@ -209,6 +223,8 @@ class Fit:
 
         self._has_whim_sim: bool = False
         self._has_host_sim: bool = False
+
+        # some special properties for the simulation
 
         if self._catalog.is_sim:
 
@@ -358,6 +374,16 @@ class Fit:
     @classmethod
     def from_file(cls, file_name: str):
 
+        """
+        read the fit and database from a previous save
+
+        :param cls:
+        :type cls:
+        :param file_name:
+        :type file_name: str
+        :returns:
+
+        """
         with h5py.File(file_name, "r") as f:
 
             database: Database = Database.read(f["database"])
@@ -394,7 +420,7 @@ class Fit:
         :returns:
 
         """
-        self._catalog
+        return self._catalog
 
     @property
     def n_grbs(self) -> int:
@@ -429,6 +455,19 @@ class Fit:
         """
 
         return self._host_nh
+
+    @property
+    def host_alpha(self) -> Optional[np.ndarray]:
+
+        return self._nh_host_alpha
+
+    @property
+    def n0_whim(self) -> ArrayLike:
+        return self._n0_whim
+
+    @property
+    def t_whim(self) -> ArrayLike:
+        return self._t_whim
 
     @property
     def index_mu(self) -> ArrayLike:
@@ -516,14 +555,24 @@ class Fit:
 
         if self._has_whim_fit or self._has_whim_sim:
 
+            # if there is no simulation,
+            # then we will setup with dummy parameters
+            n0 = 1e-7
+            temp = 1e6
+
+            if self._has_whim_sim:
+
+                n0 = card.n0_sim
+                temp = card.temp_sim
+
             spec_all = (
                 Powerlaw_Eflux(a=0.4, b=15)
                 * TbAbs(NH=card.nH_mw)
                 * TbAbs(redshift=card.z)
-                * Integrate_Absori(
-                    redshift=card.z, n0=card.n0_sim, temp=card.temp_sim
-                )
+                * Integrate_Absori(redshift=card.z, n0=n0, temp=temp)
             )
+
+            # fix the things we do not vary
 
             spec_all.NH_2.fix = True
             spec_all.xi_4.fix = True
@@ -531,11 +580,7 @@ class Fit:
             spec_all.abundance_4.fix = True
             spec_all.fe_abundance_4.fix = True
 
-            # if not self._has_whim_fit:
-
-            #     spec_all.n0_4.fix = True
-
-            #     spec_all.temp_4.fix = True
+            # kill all the bounds
 
             for k, v in spec_all.parameters.items():
 
@@ -653,21 +698,23 @@ class Fit:
 
     def get_plugin_and_model(self, id: int) -> Tuple[OGIPLike, Model]:
 
-        if self._data_path is not None:
+        plugin: OGIPLike = self._database.plugins[self._grbs[id]]
 
-            bpath = self._data_path / f"grb{self._grbs[id]}/"
+        # if self._data_path is not None:
 
-        else:
+        #     bpath = self._data_path / f"grb{self._grbs[id]}/"
 
-            return
+        # else:
 
-        plugin = OGIPLike(
-            "xrt",
-            observation=bpath / "apc.pha",
-            background=bpath / "apc_bak.pha",
-            response=bpath / "apc.rsp",
-            spectrum_number=1,
-        )
+        #     return
+
+        # plugin = OGIPLike(
+        #     "xrt",
+        #     observation=bpath / "apc.pha",
+        #     background=bpath / "apc_bak.pha",
+        #     response=bpath / "apc.rsp",
+        #     spectrum_number=1,
+        # )
 
         # get the model container object
         model_container: ModelContainer = self._get_spectrum(id)
@@ -736,8 +783,27 @@ class Fit:
 
         return fig
 
-    def plot_model_spectrum(self, id: int, thin=2) -> plt.Figure:
+    def plot_model_spectrum(
+        self,
+        id: int,
+        thin: int = 2,
+        show_sim: bool = True,
+        show_legend: bool = True,
+    ) -> plt.Figure:
 
+        """
+        plot the spectrum of the corresponding GRB in photo
+        space
+
+        :param id:
+        :type id: int
+        :param thin:
+        :type thin:
+        :param show_sim:
+        :param show_legend:
+        :returns:
+
+        """
         # get the model container object
         model_container: ModelContainer = self._get_spectrum(id)
 
@@ -780,6 +846,8 @@ class Fit:
                 (self._flux[id], self._index[id], self._host_nh[id])
             )
 
+        # scroll through the samples
+
         for sample in samples.T[::thin]:
 
             if self._has_whim_fit:
@@ -799,9 +867,6 @@ class Fit:
 
                 model_container.model_host.set_free_parameters(sample[:3])
 
-                # ax.loglog(ene, model_container.model_mw.get_point_source_fluxes(
-                #     0, ene), color="red", lw=1, alpha=0.1)
-
                 ax.loglog(
                     ene,
                     model_container.model_host.get_point_source_fluxes(0, ene),
@@ -820,11 +885,11 @@ class Fit:
                 alpha=0.1,
             )
 
-        if self._catalog.is_sim:
+        if self._catalog.is_sim and show_sim:
 
             simulated_parameters = card.simulated_parameters
 
-            if model_container.model_all is not None:
+            if (model_container.model_all is not None) and self._has_whim_sim:
 
                 # ok, we have some whim
                 labels.append("Total Simualted")
@@ -875,7 +940,10 @@ class Fit:
                 color=black,
                 lw=0.5,
             )
-        ax.legend(custom_lines, labels)
+
+        if show_legend:
+
+            ax.legend(custom_lines, labels)
 
         ax.set_xlabel("energy (keV)")
         ax.set_ylabel(r"flux phts s$^{-1}$kev$^{-1}$cm$^{-2}$)")

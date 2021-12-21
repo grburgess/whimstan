@@ -32,6 +32,7 @@ transformed data{
   int grainsize = 1;
 
 
+
   // precalculation of energy bounds
 
   for (n in 1:N_grbs) {
@@ -117,7 +118,6 @@ model{
 
   index_mu ~ normal(-2, .1);
   index_sigma ~ std_normal();
-
 
 
   target += reduce_sum(partial_log_like, all_N, grainsize, N_ene, N_chan, host_precomputed_absorp, precomputed_absorp, ene_avg, ene_width, mask, n_chans_used, K, index, nH_host_norm, nH_mw, rsp, exposure, exposure_ratio, counts, bkg );

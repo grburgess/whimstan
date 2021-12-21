@@ -152,9 +152,9 @@ model{
 
   //absori
 
-  log_n0_whim_raw ~ std_normal();
+  log_n0_whim_raw ~ normal(0, 2);
 
-  log_t_whim ~ normal(6, 1);
+  log_t_whim ~ normal(6, 2);
 
   target += reduce_sum(partial_log_like_all, all_N, grainsize, N_ene, N_chan, ene_avg, ene_width, mask, n_chans_used, mw_abs, K, index, n0_whim, num, sum_sigma_interp, nH_host_norm, host_precomputed_absorp, rsp, exposure, exposure_ratio, counts, bkg);
 
