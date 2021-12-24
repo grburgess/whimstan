@@ -17,8 +17,11 @@ from threeML import silence_warnings, update_logging_level
 from astromodels.utils.data_files import _get_data_file_path
 
 
-from ..utils.format_conversions import plugin_to_hdf_group, build_spectrum_like_from_hdf
-from .catalog import XRTCatalog
+from ..utils.format_conversions import (
+    plugin_to_hdf_group,
+    build_spectrum_like_from_hdf,
+)
+from .catalog import XRTCatalog, XRTObs
 
 from ..utils.absori_precalc import (
     get_abundance,
@@ -41,58 +44,6 @@ def build_tbabs_arg(ene):
     xsect_val = dxs["SIGMA"]
 
     return np.interp(ene, xsect_ene, xsect_val)
-
-
-@dataclass
-class XRTObs:
-
-    n_ene: int
-    n_chan: int
-    ene_avg: np.array
-    ene_width: np.array
-    obs_count: List[int]
-    bkg_count: List[int]
-    mask: np.array
-    n_chans_used: int
-    scale_factor: float
-    rsp: np.array
-    exposure: float
-
-
-def extract_xrt_data(plugin):
-
-    plugin.set_active_measurements("0.3-10.")
-
-    n_chans_used = sum(plugin.mask)
-
-    mask = np.zeros(len(plugin.mask))
-
-    mask[:n_chans_used] = np.where(plugin.mask)[0] + 1  # plus one for Stan
-
-    n_ene = len(plugin.response.monte_carlo_energies) - 1
-    n_chan = len(plugin.response.ebounds) - 1
-    rsp = plugin.response.matrix
-    scale_factor = plugin.scale_factor
-
-    ene_lo = plugin.response.monte_carlo_energies[:-1]
-    ene_hi = plugin.response.monte_carlo_energies[1:]
-
-    ene_avg = (ene_hi + ene_lo) / 2.0
-    ene_width = ene_hi - ene_lo
-
-    return XRTObs(
-        n_ene=n_ene,
-        n_chan=n_chan,
-        ene_avg=ene_avg,
-        ene_width=ene_width,
-        obs_count=[int(x) for x in plugin.observed_counts],
-        bkg_count=[int(x) for x in plugin.background_counts],
-        rsp=rsp,
-        scale_factor=float(scale_factor),
-        mask=[int(x) for x in mask],
-        n_chans_used=int(n_chans_used),
-        exposure=float(plugin.exposure),
-    )
 
 
 class Database:
@@ -222,7 +173,7 @@ class Database:
 
         with h5py.File(file_name, "w") as f:
 
-            for grb in tqdm(grbs, colour="#3DFF6C", desc="Reading GRBs"):
+            for grb in tqdm(grbs, colour="#33F0B4", desc="Reading GRBs"):
 
                 cat_path = Path(cat_path)
                 bpath = cat_path / f"grb{grb}"
@@ -236,12 +187,10 @@ class Database:
 
                         try:
 
-                            observation = (bpath / f"{opt}.pi",)
-                            background = (bpath / f"{opt}back.pi",)
-                            response = (bpath / f"{opt}.rmf",)
-                            arf_file = (bpath / f"{opt}.arf",)
-
-                            print(f"GRB {grb} using {opt}")
+                            observation = bpath / f"{opt}.pi"
+                            background = bpath / f"{opt}back.pi"
+                            response = bpath / f"{opt}.rmf"
+                            arf_file = bpath / f"{opt}.arf"
 
                             break
 
@@ -355,7 +304,7 @@ class Database:
             # extract data from the plugin associated with
             # this GRB plugin
 
-            x = extract_xrt_data(self._plugins[grb])
+            x: XRTObs = XRTObs.extract_xrt_data(self._plugins[grb])
 
             N_ene.append(int(x.n_ene))
             N_chan.append(int(x.n_chan))

@@ -13,16 +13,19 @@ from threeML.utils.OGIP.response import InstrumentResponse
 def plugin_to_hdf_group(plugin: DispersionSpectrumLike, hdf_group: h5py.Group):
     """ """
 
-    hdf_group.attrs["exposure"] = plugin.exposure
-    hdf_group.attrs["bak_scale"] = plugin.background_scale_factor
+    with plugin._without_mask_nor_rebinner():
 
-    hdf_group.create_dataset(
-        "counts", data=plugin.observed_counts, compression="gzip"
-    )
+        hdf_group.attrs["exposure"] = plugin.exposure
+        hdf_group.attrs["bak_scale"] = plugin.background_scale_factor
+        hdf_group.attrs["obs_scale"] = plugin.observed_spectrum.scale_factor
 
-    hdf_group.create_dataset(
-        "bkg_counts", data=plugin.background_counts, compression="gzip"
-    )
+        hdf_group.create_dataset(
+            "counts", data=plugin.observed_counts, compression="gzip"
+        )
+
+        hdf_group.create_dataset(
+            "bkg_counts", data=plugin.background_counts, compression="gzip"
+        )
 
     rsp_grp = hdf_group.create_group("response")
 
@@ -63,7 +66,7 @@ def binned_dispersion_spectrum_from_hdf(
         counts=hdf["counts"][()],
         exposure=hdf.attrs["exposure"],
         response=response,
-        scale_factor=1,
+        scale_factor=hdf.attrs["obs_scale"],
         is_poisson=True,
         quality=None,
         mission="Swift",

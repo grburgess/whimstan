@@ -3,8 +3,64 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from threeML.plugins.DispersionSpectrumLike import DispersionSpectrumLike
+
+
 import h5py
 import numpy as np
+
+
+@dataclass
+class XRTObs:
+
+    n_ene: int
+    n_chan: int
+    ene_avg: np.array
+    ene_width: np.array
+    obs_count: List[int]
+    bkg_count: List[int]
+    mask: np.array
+    n_chans_used: int
+    scale_factor: float
+    rsp: np.array
+    exposure: float
+
+    @classmethod
+    def extract_xrt_data(cls, plugin: DispersionSpectrumLike):
+
+        plugin.set_active_measurements("0.3-10.")
+
+        n_chans_used = sum(plugin.mask)
+
+        mask = np.zeros(len(plugin.mask))
+
+        mask[:n_chans_used] = np.where(plugin.mask)[0] + 1  # plus one for Stan
+
+        n_ene = len(plugin.response.monte_carlo_energies) - 1
+        n_chan = len(plugin.response.ebounds) - 1
+        rsp = plugin.response.matrix
+        scale_factor = plugin.scale_factor
+
+        ene_lo = plugin.response.monte_carlo_energies[:-1]
+        ene_hi = plugin.response.monte_carlo_energies[1:]
+
+        ene_avg = (ene_hi + ene_lo) / 2.0
+        ene_width = ene_hi - ene_lo
+
+        return cls(
+            n_ene=n_ene,
+            n_chan=n_chan,
+            ene_avg=ene_avg,
+            ene_width=ene_width,
+            obs_count=[int(x) for x in plugin.observed_counts],
+            bkg_count=[int(x) for x in plugin.background_counts],
+            rsp=rsp,
+            scale_factor=float(scale_factor),
+            mask=[int(x) for x in mask],
+            n_chans_used=int(n_chans_used),
+            exposure=float(plugin.exposure),
+        )
+
 
 
 @dataclass
