@@ -29,11 +29,6 @@ data{
 
 transformed data{
   array[N_grbs] int all_N;
-  array[N_grbs] vector[N_chan] log_fact_obs;
-  array[N_grbs] vector[N_chan] log_fact_bkg;
-  array[N_grbs] vector[N_chan] o_plus_b;
-  array[N_grbs] vector[N_chan] alpha_bkg_factor;
-
 
 
   int grainsize = 1;
@@ -53,29 +48,6 @@ transformed data{
 
   }
 
-  // now do some static calculations for CSTAT
-
-
-  for (n in 1:N_grbs) {
-
-    for (m in 1:N_chan) {
-
-      log_fact_obs[n,m] = logfactorial(counts[n,m]);
-
-
-      if (bkg[n,m] >0) {
-
-	log_fact_bkg[n,m] = logfactorial(bkg[n,m]);
-
-      }
-
-    }
-
-    o_plus_b[n] = counts[n] + bkg[n];
-
-  }
-
-  alpha_bkg_factor[n] = 4 * (exposure_ratio[n] + square(exposure_ratio[n])) * background_counts[n];
 
 
 }
