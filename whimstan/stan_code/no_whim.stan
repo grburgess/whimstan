@@ -89,7 +89,6 @@ parameters{
 
   real log_nH_host_mu_raw;
   real<upper=0> host_alpha; // skew normal paramter
-
   real<lower=0> log_nH_host_sigma;
   vector[N_grbs] log_nH_host_raw;
 
