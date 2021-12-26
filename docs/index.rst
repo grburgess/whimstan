@@ -1,4 +1,4 @@
-Welcome to xrt_spec_dl's documentation!
+Welcome to whimstan's documentation!
 ======================================
 
 .. toctree::
