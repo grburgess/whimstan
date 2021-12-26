@@ -406,6 +406,64 @@ def create_population(
     z_min: float = 0,
 ) -> ps.PopulationSynth:
 
+    """
+    create a population syn
+
+    :param r0:
+    :type r0: float
+    :param a:
+    :type a: float
+    :param rise:
+    :type rise: float
+    :param decay:
+    :type decay: float
+    :param peak:
+    :type peak: float
+    :param z_max:
+    :type z_max: float
+    :param Lmin:
+    :type Lmin: float
+    :param alpha:
+    :type alpha: float
+    :param host_gas_mean:
+    :type host_gas_mean: float
+    :param host_gas_sigma:
+    :type host_gas_sigma: float
+    :param host_gas_cloud_ratio:
+    :type host_gas_cloud_ratio: float
+    :param mw_nh_limit:
+    :type mw_nh_limit: Optional[float]
+    :param b_limit:
+    :type b_limit: Optional[float]
+    :param use_clouds:
+    :type use_clouds: bool
+    :param vari_clouds:
+    :type vari_clouds: bool
+    :param spec_idx_mean:
+    :type spec_idx_mean: float
+    :param spec_idx_std:
+    :type spec_idx_std: float
+    :param use_mw_gas:
+    :type use_mw_gas: bool
+    :param use_host_gas:
+    :type use_host_gas: bool
+    :param whim_n0:
+    :type whim_n0: Optional[float]
+    :param whim_T:
+    :type whim_T: Optional[float]
+    :param demo_plugin:
+    :type demo_plugin: Optional[OGIPLike]
+    :param counts_limit:
+    :type counts_limit: Optional[float]
+    :param exposure_high:
+    :type exposure_high: Optional[float]
+    :param exposure_low:
+    :type exposure_low: Optional[float]
+    :param z_min:
+    :type z_min: float
+    :returns:
+
+    """
     if use_host_gas:
         if use_clouds:
 

@@ -5,6 +5,6 @@ Welcome to whimstan's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   notebooks/docs.ipynb
+   notebooks/simulations.ipynb
    api/API.rst
 	     

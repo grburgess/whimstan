@@ -37,17 +37,17 @@ real pll_no_whim(int [] n_slice,
     int n = n_slice[i];
 
 
-    vector[N_ene] source_spectrum = powerlaw_flux(ene_avg[n], K[n], index[n], 0.4, 15) .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n];
+    // vector[N_ene] source_spectrum = powerlaw_flux(ene_avg[n], K[n], index[n], 0.4, 15) .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n];
 
 
-    vector[N_ene] integral_flux = source_spectrum .* ene_width[n];
+    // vector[N_ene] integral_flux = (powerlaw_flux(ene_avg[n], K[n], index[n], 0.4, 15) .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n]) .* ene_width[n];
 
-    vector[N_chan] predicted_counts =  (rsp[n] * integral_flux)  * exposure[n];
+    // vector[N_chan] predicted_counts =  (rsp[n] * ((powerlaw_flux(ene_avg[n], K[n], index[n], 0.4, 15) .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n]) .* ene_width[n])  * exposure[n];
 
-    
+
     loglike[i] = cstat_optimized(counts[n,mask[n,:n_chans_used[n]]],
 				   bkg[n,mask[n,:n_chans_used[n]]],
-				   predicted_counts[mask[n,:n_chans_used[n]]],
+				 ((rsp[n] * ((powerlaw_flux(ene_avg[n], K[n], index[n], 0.4, 15) .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n]) .* ene_width[n])  * exposure[n])[mask[n,:n_chans_used[n]]],
 				   exposure_ratio[n],
 				   o_plus_b[n,mask[n,:n_chans_used[n]]],
 				   alpha_bkg_factor[n,mask[n,:n_chans_used[n]]],
