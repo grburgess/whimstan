@@ -92,7 +92,7 @@ real pll_whim(int [] n_slice,
     // fill the log likelihood array
 
 
-    loglike[i] =   cstat_optimized(counts[n,mask[n_slice[i],:n_chans_used[n_slice[i]]]],
+    loglike[i] =   cstat_optimized(counts[n_slice[i],mask[n_slice[i],:n_chans_used[n_slice[i]]]],
                                    bkg[n_slice[i],mask[n_slice[i],:n_chans_used[n_slice[i]]]],
                                    (rsp[n_slice[i]] * ((powerlaw_flux(ene_avg[n_slice[i]], K[n_slice[i]], index[n_slice[i]], 0.4, 15) .* exp(integrate_absori_precalc(sum_sigma_interp[n_slice[i]], num, N_ene)*n0) .* mw_abs[n_slice[i]] .* absorption(nH_host[n_slice[i]], host_precomputed_absorp[n_slice[i]])) .* ene_width[n_slice[i]])  * exposure[n_slice[i]])[mask[n_slice[i],:n_chans_used[n_slice[i]]]],
                                    exposure_ratio[n_slice[i]],
