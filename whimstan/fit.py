@@ -12,11 +12,11 @@ import scipy.stats as stats
 from matplotlib.lines import Line2D
 from numpy.typing import ArrayLike
 
-from bb_astromodels import Integrate_Absori
-from threeML.plugins.OGIPLike import OGIPLike
-from astromodels import Model, PointSource, Powerlaw_Eflux, TbAbs
 
-from .database import XRTCatalog, XRTCatalogEntry, Database
+from threeML.plugins.OGIPLike import OGIPLike
+from astromodels import Model
+
+from .database import XRTCatalog, XRTCatalogEntry, Database, ModelContainer
 from .spectral_plot import display_posterior_model_counts
 
 
@@ -26,15 +26,6 @@ yellow = "#EDE966"
 grey = "#385656"
 lightgrey = "#839393"
 black = "#1F2222"
-
-
-@dataclass
-class ModelContainer:
-
-    model_all: Optional[Model] = None
-    model_host: Optional[Model] = None
-    model_mw: Optional[Model] = None
-    model_pl: Optional[Model] = None
 
 
 @dataclass
@@ -172,7 +163,6 @@ class Fit:
 
         """
         self._model_name: str = model_name
-
 
         # this simply attaches every thing to the class
 
@@ -549,87 +539,24 @@ class Fit:
 
         """
 
-        card: XRTCatalogEntry = self._catalog.catalog[self._grbs[id]]
-
-        model_all: Optional[Model] = None
+        with_whim: bool = False
+        with_host: bool = False
 
         if self._has_whim_fit or self._has_whim_sim:
 
-            # if there is no simulation,
-            # then we will setup with dummy parameters
-            n0 = 1e-7
-            temp = 1e6
-
-            if self._has_whim_sim:
-
-                n0 = card.n0_sim
-                temp = card.temp_sim
-
-            spec_all = (
-                Powerlaw_Eflux(a=0.4, b=15)
-                * TbAbs(NH=card.nH_mw)
-                * TbAbs(redshift=card.z)
-                * Integrate_Absori(redshift=card.z, n0=n0, temp=temp)
-            )
-
-            # fix the things we do not vary
-
-            spec_all.NH_2.fix = True
-            spec_all.xi_4.fix = True
-            spec_all.gamma_4.fix = True
-            spec_all.abundance_4.fix = True
-            spec_all.fe_abundance_4.fix = True
-
-            # kill all the bounds
-
-            for k, v in spec_all.parameters.items():
-
-                v.bounds = (None, None)
-
-            ps_all = PointSource("all", 0, 0, spectral_shape=spec_all)
-
-            model_all = Model(ps_all)
-
-        model_host: Optional[Model] = None
-        model_mw: Optional[Model] = None
+            with_whim = True
 
         if self._has_host_sim or self._has_host_fit:
 
-            spec_host = (
-                Powerlaw_Eflux(a=0.4, b=15)
-                * TbAbs(NH=card.nH_mw)
-                * TbAbs(redshift=card.z)
-            )
-            spec_host.NH_2.fix = True
+            with_host = True
 
-            for k, v in spec_host.parameters.items():
+        # now get the sepctrum from the catalog
 
-                v.bounds = (None, None)
+        grb: str = self._catalog.grbs[id]
 
-            ps_host = PointSource("host", 0, 0, spectral_shape=spec_host)
-
-            model_host = Model(ps_host)
-
-            spec_mw = Powerlaw_Eflux(a=0.14, b=15) * TbAbs(NH=card.nH_mw)
-            spec_mw.NH_2.fix = True
-
-            for k, v in spec_mw.parameters.items():
-
-                v.bounds = (None, None)
-
-            ps_mw = PointSource("mw", 0, 0, spectral_shape=spec_mw)
-            model_mw = Model(ps_mw)
-
-        spec_pl = Powerlaw_Eflux(a=0.4, b=15)
-
-        for k, v in spec_pl.parameters.items():
-
-            v.bounds = (None, None)
-
-        ps_pl = PointSource("pl", 0, 0, spectral_shape=spec_pl)
-        model_pl = Model(ps_pl)
-
-        return ModelContainer(model_all, model_host, model_mw, model_pl)
+        return self._catalog.catalog[grb].get_spectrum(
+            with_host=with_host, with_whim=with_whim
+        )
 
     def _nH_sim_difference(self, id) -> ArrayLike:
 

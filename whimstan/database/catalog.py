@@ -4,10 +4,20 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from threeML.plugins.DispersionSpectrumLike import DispersionSpectrumLike
-
+from astromodels import Model, PointSource, Powerlaw_Eflux, TbAbs
+from bb_astromodels import Integrate_Absori
 
 import h5py
 import numpy as np
+
+
+@dataclass
+class ModelContainer:
+
+    model_all: Optional[Model] = None
+    model_host: Optional[Model] = None
+    model_mw: Optional[Model] = None
+    model_pl: Optional[Model] = None
 
 
 @dataclass
@@ -62,7 +72,6 @@ class XRTObs:
         )
 
 
-
 @dataclass
 class XRTCatalogEntry:
 
@@ -109,6 +118,98 @@ class XRTCatalogEntry:
             tmp.append(self.temp_sim)
 
         return np.array(tmp)
+
+    def get_spectrum(
+        self, with_whim: bool = True, with_host: bool = True
+    ) -> ModelContainer:
+        """
+
+
+        :param id:
+        :type id:
+        :returns:
+
+        """
+
+        model_all: Optional[Model] = None
+
+        if with_whim:
+
+            # if there is no simulation,
+            # then we will setup with dummy parameters
+            n0 = 1e-7
+            temp = 1e6
+
+            if self.temp_sim is not None:
+
+                n0 = self.n0_sim
+                temp = self.temp_sim
+
+            spec_all = (
+                Powerlaw_Eflux(a=0.4, b=15)
+                * TbAbs(NH=self.nH_mw)
+                * TbAbs(redshift=self.z)
+                * Integrate_Absori(redshift=self.z, n0=n0, temp=temp)
+            )
+
+            # fix the things we do not vary
+
+            spec_all.NH_2.fix = True
+            spec_all.xi_4.fix = True
+            spec_all.gamma_4.fix = True
+            spec_all.abundance_4.fix = True
+            spec_all.fe_abundance_4.fix = True
+
+            # kill all the bounds
+
+            for k, v in spec_all.parameters.items():
+
+                v.bounds = (None, None)
+
+            ps_all = PointSource("all", 0, 0, spectral_shape=spec_all)
+
+            model_all = Model(ps_all)
+
+        model_host: Optional[Model] = None
+        model_mw: Optional[Model] = None
+
+        if with_host:
+
+            spec_host = (
+                Powerlaw_Eflux(a=0.4, b=15)
+                * TbAbs(NH=self.nH_mw)
+                * TbAbs(redshift=self.z)
+            )
+            spec_host.NH_2.fix = True
+
+            for k, v in spec_host.parameters.items():
+
+                v.bounds = (None, None)
+
+            ps_host = PointSource("host", 0, 0, spectral_shape=spec_host)
+
+            model_host = Model(ps_host)
+
+            spec_mw = Powerlaw_Eflux(a=0.14, b=15) * TbAbs(NH=self.nH_mw)
+            spec_mw.NH_2.fix = True
+
+            for k, v in spec_mw.parameters.items():
+
+                v.bounds = (None, None)
+
+            ps_mw = PointSource("mw", 0, 0, spectral_shape=spec_mw)
+            model_mw = Model(ps_mw)
+
+        spec_pl = Powerlaw_Eflux(a=0.4, b=15)
+
+        for k, v in spec_pl.parameters.items():
+
+            v.bounds = (None, None)
+
+        ps_pl = PointSource("pl", 0, 0, spectral_shape=spec_pl)
+        model_pl = Model(ps_pl)
+
+        return ModelContainer(model_all, model_host, model_mw, model_pl)
 
 
 class XRTCatalog:

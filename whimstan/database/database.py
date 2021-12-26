@@ -13,8 +13,10 @@ import astropy.io.fits as fits
 
 from threeML.plugins.DispersionSpectrumLike import DispersionSpectrumLike
 from threeML.plugins.OGIPLike import OGIPLike
+from threeML import BayesianAnalysis, DataList
 from threeML import silence_warnings, update_logging_level
 from astromodels.utils.data_files import _get_data_file_path
+from astromodels import Uniform_prior, Log_uniform_prior
 
 
 from ..utils.format_conversions import (
@@ -393,3 +395,57 @@ class Database:
             res.update(absori_dict)
 
         return res
+
+    def build_3ml_analysis(
+        self, id: int, with_whim: bool = False
+    ) -> BayesianAnalysis:
+
+        grb: str = self._catalog.grbs[id]
+
+        plugin: DispersionSpectrumLike = self._plugins[grb]
+
+        plugin.set_active_measurements("0.3-10.")
+
+        model_container = self._catalog.catalog[grb].get_spectrum(
+            with_host=True, with_whim=with_whim
+        )
+
+        if with_whim:
+
+            model = model_container.model_all
+            model_name = "all"
+
+            model.point_sources[
+                model_name
+            ].spectrum.main.composite.n0_4.prior = Log_uniform_prior(
+                lower_bound=1e-9, upper_bound=1e-4
+            )
+
+            model.point_sources[
+                model_name
+            ].spectrum.main.composite.temp_4.prior = Log_uniform_prior(
+                lower_bound=1e4, upper_bound=1e7
+            )
+
+        else:
+
+            model = model_container.model_host
+            model_name = "host"
+
+        model.point_sources[
+            model_name
+        ].spectrum.main.composite.F_1.prior = Log_uniform_prior(
+            lower_bound=1e-20, upper_bound=1e-2
+        )
+        model.point_sources[
+            model_name
+        ].spectrum.main.composite.index_1.prior = Uniform_prior(
+            lower_bound=-3, upper_bound=-1
+        )
+        model.point_sources[
+            model_name
+        ].spectrum.main.composite.NH_3.prior = Log_uniform_prior(
+            lower_bound=1.0e19 / 1.0e22, upper_bound=1.0e26 / 1.0e22
+        )
+
+        return BayesianAnalysis(model, DataList(plugin))
