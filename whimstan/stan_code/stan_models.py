@@ -27,6 +27,11 @@ _available_models["all"] = "all.stan"
 _available_models["whim_skew"] = "whim_skew.stan"
 
 
+_available_models["whim"] = "whim.stan"
+_available_models["no_whim"] = "no_whim.stan"
+
+
+
 class StanModel:
     def __init__(self, name, stan_file):
 

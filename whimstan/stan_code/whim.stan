@@ -3,7 +3,7 @@ functions {
 #include tbabs.stan
 #include powerlaw.stan
 #include cstat.stan
-#include partial_log_like.stan
+#include partial_log_like_optimized.stan
 }
 
 data{
@@ -11,37 +11,44 @@ data{
   int N_grbs;
   int N_ene;
   int N_chan;
-  matrix[N_chan, N_ene] rsp[N_grbs];
+  array [N_grbs] matrix[N_chan, N_ene] rsp;
   vector[N_grbs] z; //redshift
   vector[N_grbs] nH_mw;
-  vector[N_ene] precomputed_absorp[N_grbs];
-  vector[N_ene] host_precomputed_absorp[N_grbs];
+  array[N_grbs] vector[N_ene] precomputed_absorp;
+  array[N_grbs] vector[N_ene] host_precomputed_absorp;
   vector[N_grbs] exposure_ratio;
-  vector[N_ene] ene_avg[N_grbs];
-  vector[N_ene] ene_width[N_grbs];
-  int n_chans_used[N_grbs];
-  vector[N_chan] counts[N_grbs];
-  vector[N_chan] bkg[N_grbs];
-  int mask[N_grbs,N_chan];
+  array[N_grbs] vector[N_ene] ene_avg;
+  array[N_grbs] vector[N_ene] ene_width;
+  array[N_grbs] int n_chans_used;
+  array[N_grbs] vector[N_chan] counts;
+  array[N_grbs] vector[N_chan] bkg;
+  array[N_grbs,N_chan] int mask;
   vector[N_grbs] exposure;
 
   // absori input
   real xi;
-  int atomicnumber[10];
-  real ion[10,26,10];
-  real sigma[10,26,721];
-  vector[721] spec;
-  vector[10] abundance;
-  matrix[10,26] sum_sigma_interp[N_grbs, N_ene];
+  array[10] int atomicnumber;
+  array[10,26,10] real ion;
+  array[10,26,721] real sigma;
+  array[721] vector spec;
+  array[10] vector abundance;
+  array[N_grbs, N_ene] matrix[10,26] sum_sigma_interp;
 }
 
 
 transformed data{
   int all_N[N_grbs];
+
+  array[N_grbs] vector[N_chan] log_fact_obs;
+  array[N_grbs] vector[N_chan] log_fact_bkg;
+  array[N_grbs] vector[N_chan] o_plus_b;
+  array[N_grbs] vector[N_chan] alpha_bkg_factor;
+
+
   int grainsize = 1;
 
   //mw abs is fixed
-  vector[N_ene] mw_abs[N_grbs];
+  array[N_grbs] vector[N_ene] mw_abs;
 
   for (n in 1:N_grbs){
     mw_abs[n] = absorption(nH_mw[n], precomputed_absorp[n]);
@@ -54,6 +61,36 @@ transformed data{
     all_N[n] = n;
 
   }
+
+    // now do some static calculations for CSTAT
+
+
+  for (n in 1:N_grbs) {
+
+    for (m in 1:N_chan) {
+
+      log_fact_obs[n,m] = logfactorial(counts[n,m]);
+
+
+      if (bkg[n,m] >0) {
+
+	log_fact_bkg[n,m] = logfactorial(bkg[n,m]);
+
+      }
+
+    }
+
+    o_plus_b[n] = counts[n] + bkg[n];
+
+    alpha_bkg_factor[n] = 4 * (exposure_ratio[n] + square(exposure_ratio[n])) * bkg[n];
+
+
+  }
+
+
+
+
+
 }
 
 parameters{
@@ -61,7 +98,7 @@ parameters{
   //vector<upper=0>[N_grbs] index;
   real log_nH_host_mu_raw;
   real<upper=0> host_alpha; // skew normal paramter
-  
+
   real<lower=0> log_nH_host_sigma;
   vector[N_grbs] log_nH_host_raw;
 
@@ -156,7 +193,7 @@ model{
 
   log_t_whim ~ normal(6, 2);
 
-  target += reduce_sum(partial_log_like_all,
+  target += reduce_sum(pll_whim,
 		       all_N,
 		       grainsize,
 		       N_ene,
@@ -177,10 +214,16 @@ model{
 		       exposure,
 		       exposure_ratio,
 		       counts,
-		       bkg);
+		       bkg,
+		       log_fact_obs,
+		       log_fact_bkg,
+		       o_plus_b,
+		       alpha_bkg_factor);
 
 }
 
 generated quantities {
+
+  real log_nH_host_mu = log_nH_host_mu_raw + 22;
 
 }
