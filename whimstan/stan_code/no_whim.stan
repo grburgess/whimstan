@@ -41,7 +41,7 @@ transformed data{
   int grainsize = 1;
 
 
-    //mw abs is fixed
+  //mw abs is fixed
   array[N_grbs] vector[N_ene] mw_abs;
 
   for (n in 1:N_grbs){
@@ -67,7 +67,7 @@ transformed data{
 
       if (bkg[n,m] >0) {
 
-	log_fact_bkg[n,m] = logfactorial(bkg[n,m]);
+        log_fact_bkg[n,m] = logfactorial(bkg[n,m]);
 
       }
 
@@ -164,34 +164,34 @@ model{
 
 
   target += reduce_sum(pll_no_whim,
-		       all_N,
-		       grainsize,
-		       N_ene, N_chan,
-		       host_precomputed_absorp,
-		       precomputed_absorp,
-		       ene_avg,
-		       ene_width,
-		       mask,
-		       n_chans_used,
-		       K,
-		       index,
-		       nH_host_norm,
-		       mw_abs,
-		       rsp,
-		       exposure,
-		       exposure_ratio,
-		       counts,
-		       bkg,
-		       log_fact_obs,
-		       log_fact_bkg,
-		       o_plus_b,
-		       alpha_bkg_factor );
+                       all_N,
+                       grainsize,
+                       N_ene, N_chan,
+                       host_precomputed_absorp,
+                       precomputed_absorp,
+                       ene_avg,
+                       ene_width,
+                       mask,
+                       n_chans_used,
+                       K,
+                       index,
+                       nH_host_norm,
+                       mw_abs,
+                       rsp,
+                       exposure,
+                       exposure_ratio,
+                       counts,
+                       bkg,
+                       log_fact_obs,
+                       log_fact_bkg,
+                       o_plus_b,
+                       alpha_bkg_factor );
 
 }
 
 generated quantities {
 
-real log_nH_host_mu = log_nH_host_mu_raw + 22;
+  real log_nH_host_mu = log_nH_host_mu_raw + 22;
 
 
 }
