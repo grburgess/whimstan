@@ -18,7 +18,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip wheel
           pip3 install black
-          pip3 install --upgrade numpy<=1.20.3 numba ipython jupyter cython astropy
+          pip3 install numpy<=1.20.3 numba ipython jupyter cython astropy
 
           pip3 install jupytext jupyterthemes
 
