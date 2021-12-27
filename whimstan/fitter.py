@@ -20,6 +20,7 @@ def make_fit(
     use_mw_gas: bool = True,
     use_host_gas: bool = True,
     save_stan_fit: bool = True,
+    clean_model: bool = False
 ):
 
     if n_threads is None:
@@ -28,7 +29,13 @@ def make_fit(
 
     model: StanModel = get_model(model_name)
 
+    if clean_model:
+
+        model.clean_model()
+
+
     model.build_model()
+
 
     data = database.build_stan_data(
         use_absori=use_absori, use_mw_gas=use_mw_gas, use_host_gas=use_host_gas
