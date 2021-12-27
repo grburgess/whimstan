@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python-version: [3.8, 3.9]
+        python-version: [3.9]
 
     steps:
     - uses: actions/checkout@v2
@@ -24,11 +24,31 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        pip install --upgrade flake8 numpy ipython scipy h5py matplotlib  betagen coverage pytest pytest-cov cython codecov
 
-        pip install astropy
-        pip install astromodels
-        pip install threeml
+        if [ "$RUNNER_OS" == "macOS" ]; then
+
+        brew install c-blosc
+        brew install hdf5
+
+        fi
+
+        pip3 install flake8 numba numpy==1.20.3 ipython scipy h5py matplotlib coverage pytest pytest-cov cython codecov
+        pip3 install tempita
+        pip3 install astropy
+
+
+        git clone https://github.com/threeML/astromodels.git
+        cd astromodels
+        git checkout dev
+        python setup.py install
+        cd ..
+
+
+        git clone https://github.com/threeML/threeML.git
+        cd threeML
+        git checkout feature-riemann-integral
+        python setup.py install
+        cd ..
 
 
         python setup.py install
@@ -41,8 +61,6 @@ jobs:
     - name: Test with pytest
       run: |
         python -m pytest -vv --cov=whimstan/ --cov-report=xml
-      env:
-        NUMBA_DISABLE_JIT: 1
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:

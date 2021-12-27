@@ -16,21 +16,34 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip wheel
-          pip install black
-          pip install --upgrade numpy ipython jupyter cython astropy astromodels
-          pip install jupytext jupyterthemes
-          pip3 install astromodels
-          pip3 install threeml
+          python3 -m pip install --upgrade pip wheel
+          pip3 install black tempita
+          pip3 install numpy numba ipython jupyter cython astropy pandas tables
 
-          python setup.py develop
+          pip3 install jupytext jupyterthemes
+
+          git clone https://github.com/threeML/astromodels.git
+          cd astromodels
+          git checkout dev
+          python3 setup.py install
+          cd ..
+
+
+          git clone https://github.com/threeML/threeML.git
+          cd threeML
+          git checkout feature-riemann-integral
+          python3 setup.py install
+          cd ..
+
+
+          python3 setup.py develop
 
 
       - name: Execute the notebooks
-        shell: bash -l {0}
         run: |
 
-          jupytext --to ipynb --pipe black --execute docs/md/*.md
+          jupytext --to ipynb --pipe black --execute docs/md/simulations.md
+          jupytext --to ipynb --pipe black --execute docs/md/working_with_data.md
           mv docs/md/*.ipynb docs/notebooks
 
       - uses: actions/upload-artifact@v2
@@ -56,10 +69,27 @@ jobs:
       - name: Build the API doc
         run: |
 
-          pip3 install cython
-          pip3 install numpy scipy numba astropy
-          pip3 install astromodels
-          pip3 install threeml
+          brew install c-blosc
+          brew install hdf5
+
+          pip3 install  pip wheel -U
+          pip3 install cython tempita numpy scipy numba astropy pandas -U
+
+
+          git clone https://github.com/threeML/astromodels.git
+          cd astromodels
+          git checkout dev
+          python setup.py install
+          cd ..
+
+
+          git clone https://github.com/threeML/threeML.git
+          cd threeML
+          git checkout feature-riemann-integral
+          python setup.py install
+          cd ..
+
+
           python setup.py develop
 
 
@@ -101,9 +131,26 @@ jobs:
       - name: Install package
         run: |
 
-          pip3 install numpy scipy numba astropy
-          pip3 install astromodels
-          pip3 install threeml
+          brew install c-blosc
+          brew install hdf5
+
+
+          pip3 install tempita
+          pip3 install numpy==1.20.3 scipy numba astropy pandas tables
+
+          git clone https://github.com/threeML/astromodels.git
+          cd astromodels
+          git checkout dev
+          python setup.py install
+          cd ..
+
+
+          git clone https://github.com/threeML/threeML.git
+          cd threeML
+          git checkout feature-riemann-integral
+          python setup.py install
+          cd ..
+
           brew install sphinx-doc pandoc
 
           pip3 install wheel

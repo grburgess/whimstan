@@ -1,6 +1,9 @@
 from pathlib import Path
 from typing import Dict, List, Optional
 
+
+from joblib import Parallel, delayed
+
 import astropy.units as u
 import popsynth
 from astromodels import Model, PointSource, Powerlaw_Eflux, TbAbs
@@ -13,6 +16,7 @@ from threeML.plugins.OGIPLike import OGIPLike
 
 from ..database import Database, XRTCatalog, XRTCatalogEntry
 from ..utils.package_data import get_path_of_data_file
+
 
 class SpectrumGenerator:
     def __init__(
@@ -108,6 +112,8 @@ class SpectrumGenerator:
                 verbose=False,
             )
 
+        self._demo_plugin.model_integrate_method = "riemann"
+
         if self._exposure is not None:
 
             self._demo_plugin._background_spectrum._exposure = self._exposure
@@ -167,17 +173,14 @@ class SpectrumFactory:
         population: popsynth.Population,
         whim_n0=None,
         whim_T=None,
-        use_mw_gas=True,
-        use_host_gas=True,
+        use_mw_gas: bool = True,
+        use_host_gas: bool = True,
+        n_jobs: int = 8,
     ):
 
-        self._spectra = []
+        #        self._spectra = []
 
-        for i in progress_bar(
-            range(population.n_objects),
-            desc="Calculating the simulated datasets",
-        ):
-
+        def _gen_one_spectrum(i):
             name = f"grb00{i}"
 
             if use_mw_gas:
@@ -214,7 +217,58 @@ class SpectrumFactory:
                 exposure=exposure,
             )
 
-            self._spectra.append(sg)
+            return sg
+
+        self._spectra = Parallel(n_jobs=n_jobs)(
+            delayed(_gen_one_spectrum)(i)
+            for i in progress_bar(
+                range(population.n_objects),
+                desc="Calculating the simulated datasets",
+            )
+        )
+
+        # for i in progress_bar(
+        #     range(population.n_objects),
+        #     desc="Calculating the simulated datasets",
+        # ):
+
+        #     name = f"grb00{i}"
+
+        #     if use_mw_gas:
+        #         mw_nh = population.mw_nh[i] / 1.0e22
+        #     else:
+        #         mw_nh = None
+
+        #     if use_host_gas:
+        #         host_nh = population.host_nh[i] / 1.0e22
+        #     else:
+        #         host_nh = None
+
+        #     try:
+
+        #         exposure = population.exposure[i]
+
+        #     except:
+
+        #         exposure = None
+
+        #     sg = SpectrumGenerator(
+        #         name=name,
+        #         eflux=population.fluxes_latent[i],
+        #         index=population.spec_idx[i],
+        #         ra=population.ra[i],
+        #         dec=population.dec[i],
+        #         z=population.distances[i],
+        #         host_nh=host_nh,
+        #         mw_nh=mw_nh,
+        #         whim_n0=whim_n0,
+        #         whim_T=whim_T,
+        #         use_mw_gas=use_mw_gas,
+        #         use_host_gas=use_host_gas,
+        #         exposure=exposure,
+        #     )
+
+        #     self._spectra.append(sg)
 
     def write_data(self, path="data", catalog_name="sim_cat.h5"):
 

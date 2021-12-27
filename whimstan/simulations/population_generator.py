@@ -264,6 +264,10 @@ class ObscuredFluxSampler(ps.DerivedLumAuxSampler):
 
         self._plugin_for_counts: Optional[OGIPLike] = plugin_for_counts
 
+        if self._plugin_for_counts is not None:
+
+            self._plugin_for_counts.model_integrate_method = "riemann"
+
         super(ObscuredFluxSampler, self).__init__(
             "obscured_flux", uses_distance=True
         )

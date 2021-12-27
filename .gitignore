@@ -130,3 +130,5 @@ dmypy.json
 *.R
 *.hpp
 yapf*.py
+/docs/md/.virtual_documents/
+/docs/md/*.ipynb
