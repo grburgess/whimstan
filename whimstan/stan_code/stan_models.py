@@ -1,6 +1,7 @@
 import cmdstanpy
 import pkg_resources
 import os
+from pathlib import Path
 
 _available_models = {}
 
@@ -74,7 +75,7 @@ class StanModel:
 
         if self._model is not None:
 
-            os.remove(self._model.exe_file)
+            Path(self._model.exe_file).unlink()
 
 
 def get_model(model_name) -> StanModel:

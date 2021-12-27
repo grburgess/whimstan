@@ -6,7 +6,6 @@ from .database import Database
 from .fit import Fit
 
 from .stan_code.stan_models import get_model, StanModel
-from whimstan import database
 
 
 def make_fit(
@@ -20,22 +19,47 @@ def make_fit(
     use_mw_gas: bool = True,
     use_host_gas: bool = True,
     save_stan_fit: bool = True,
-    clean_model: bool = False
+    clean_model: bool = False,
 ):
 
+    """
+
+    :param model_name:
+    :type model_name: str
+    :param database:
+    :type database: Database
+    :param fit_params:
+    :type fit_params: Dict[str, Any]
+    :param file_name:
+    :type file_name: str
+    :param n_threads:
+    :type n_threads: Optional[int]
+    :param n_chains:
+    :type n_chains: int
+    :param use_absori:
+    :type use_absori: bool
+    :param use_mw_gas:
+    :type use_mw_gas: bool
+    :param use_host_gas:
+    :type use_host_gas: bool
+    :param save_stan_fit:
+    :type save_stan_fit: bool
+    :param clean_model:
+    :type clean_model: bool
+    :returns:
+
+    """
     if n_threads is None:
 
         n_threads = len(database.plugins)
 
     model: StanModel = get_model(model_name)
 
+    model.build_model()
+
     if clean_model:
 
         model.clean_model()
-
-
-    model.build_model()
-
 
     data = database.build_stan_data(
         use_absori=use_absori, use_mw_gas=use_mw_gas, use_host_gas=use_host_gas
