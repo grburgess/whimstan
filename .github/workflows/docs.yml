@@ -21,8 +21,19 @@ jobs:
           pip install --upgrade numpy ipython jupyter cython astropy
           pip install git+https://github.com/EconForge/interpolation.py.git
           pip install jupytext jupyterthemes
-          pip3 install astromodels
-          pip3 install threeml
+
+          git clone https://github.com/threeML/threeML.git
+          cd threeML
+          git checkout dev
+          python setup.py install
+          cd ..
+
+          git clone https://github.com/threeML/astromodels.git
+          cd astromodels
+          git checkout dev
+          python setup.py install
+          cd ..
+
 
           python setup.py develop
 
@@ -60,8 +71,20 @@ jobs:
           pip3 install cython
           pip3 install numpy scipy numba astropy
           pip install git+https://github.com/EconForge/interpolation.py.git
-          pip3 install astromodels
-          pip3 install threeml
+
+          git clone https://github.com/threeML/threeML.git
+          cd threeML
+          git checkout dev
+          python setup.py install
+          cd ..
+
+          git clone https://github.com/threeML/astromodels.git
+          cd astromodels
+          git checkout dev
+          python setup.py install
+          cd ..
+
+
           python setup.py develop
 
 
@@ -105,8 +128,19 @@ jobs:
 
           pip3 install numpy scipy numba astropy
           pip install git+https://github.com/EconForge/interpolation.py.git
-          pip3 install astromodels
-          pip3 install threeml
+
+          git clone https://github.com/threeML/threeML.git
+          cd threeML
+          git checkout dev
+          python setup.py install
+          cd ..
+
+          git clone https://github.com/threeML/astromodels.git
+          cd astromodels
+          git checkout dev
+          python setup.py install
+          cd ..
+
           brew install sphinx-doc pandoc
 
           pip3 install wheel
