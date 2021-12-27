@@ -143,7 +143,7 @@ pop = pop.to_sub_population()
 
 ```
 
-Now we have sampled all the parameters that we need for the population. We can have a look a
+Now we have sampled all the parameters that we need for the population. We can have a look at the implications.
 
 ```python
 test = SpectrumFactory(pop)
