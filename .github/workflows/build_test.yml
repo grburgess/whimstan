@@ -25,10 +25,9 @@ jobs:
     - name: Install dependencies
       run: |
 
-        pip install --upgrade flake8 numba numpy ipython scipy h5py matplotlib coverage pytest pytest-cov cython codecov
-        pip install git+https://github.com/EconForge/interpolation.py.git
+        pip3 install --upgrade flake8 numba numpy ipython scipy h5py matplotlib coverage pytest pytest-cov cython codecov
 
-        pip install astropy
+        pip3 install astropy
 
 
         git clone https://github.com/threeML/astromodels.git
