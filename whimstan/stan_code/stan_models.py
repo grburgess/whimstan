@@ -31,7 +31,6 @@ _available_models["whim"] = "whim.stan"
 _available_models["no_whim"] = "no_whim.stan"
 
 
-
 class StanModel:
     def __init__(self, name, stan_file):
 
@@ -51,7 +50,7 @@ class StanModel:
 
         """
 
-        cpp_options = dict(STAN_THREADS=True)
+        cpp_options = dict(STAN_THREADS=True, STAN_CPP_OPTIMS=True)
 
         self._model = cmdstanpy.CmdStanModel(
             stan_file=self._stan_file,
