@@ -8,9 +8,9 @@ jupyter:
       format_version: '1.3'
       jupytext_version: 1.11.2
   kernelspec:
-    display_name: whimstan
+    display_name: Python 3 (ipykernel)
     language: python
-    name: whimstan
+    name: python3
 ---
 
 # Simulations

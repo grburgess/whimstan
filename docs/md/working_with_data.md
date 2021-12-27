@@ -8,9 +8,9 @@ jupyter:
       format_version: '1.3'
       jupytext_version: 1.11.2
   kernelspec:
-    display_name: whimstan
+	display_name: Python 3 (ipykernel)
     language: python
-    name: whimstan
+    name: python3
 ---
 
 # Working with data
@@ -83,6 +83,3 @@ ba = db.build_3ml_analysis(id=0)
 
 Now we can fit in 3ML!
 
-```python
-
-```
