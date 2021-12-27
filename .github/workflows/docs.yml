@@ -69,6 +69,9 @@ jobs:
       - name: Build the API doc
         run: |
 
+
+          brew install hdf5
+
           pip3 install cython tempita
           pip3 install numpy==1.20.3 scipy numba astropy
 
@@ -127,6 +130,9 @@ jobs:
 
       - name: Install package
         run: |
+
+          brew install hdf5
+
 
           pip3 install tempita
           pip3 install numpy==1.20.3 scipy numba astropy
