@@ -79,12 +79,14 @@ ax.set_xscale('log')
 ax.set_yticks([])
 ax.spines['left'].set_visible(False)
 ax.legend()
-ax.set_xlabel("nH [cm2]")
+ax.set_xlabel("nH [cm2]");
 ```
 
 ### Milky way absorption
 
-The absorption by the local Milky Way gas is computed by looking of the value in the XXX map for each GRB's Ra and Dec.
+The absorption by the local Milky Way gas is computed by looking of the value in the [gdpyc](https://gdpyc.readthedocs.io/en/latest/) map for each GRB's Ra and Dec.
+
+
 
 
 
@@ -116,7 +118,7 @@ warnings.filterwarnings('ignore')
 
 
 pop_gen = create_population(
-    r0=3,
+    r0=10,
     z_max=10,
     Lmin=1e48,
     alpha=1.5,
@@ -142,13 +144,42 @@ pop_gen.set_flux_selection(flux_selector)
 ```
 
 ```python
-pop = pop_gen.draw_survey()
-pop = pop.to_sub_population()
+pop_full = pop_gen.draw_survey()
+pop = pop_full.to_sub_population()
 
 ```
 
-Now we have sampled all the parameters that we need for the population. We can have a look at the implications.
+Now we have sampled all the parameters that we need for the population. We can have a look at the implications. 
 
 ```python
-test = SpectrumFactory(pop)
+pop_full.display_fluxes();
+```
+
+```python
+pop_full.display_distances();
+```
+
+### Creating the spectra and its database
+
+We now want to generate observations from Swift-XRT. While we can generate FITS files for each observation. This is a rather bloated file format, so we can store all the data directly to an HDF5 file which can easily translate this data into 3ML plugins as needed. First we load up the spectrum factory.
+
+```python
+from whimstan import SpectrumFactory
+```
+
+```python
+spec_fac = SpectrumFactory(pop, whim_n0=1e-7, whim_T=1e6)
+                          
+```
+
+Now we can write this to a file.
+
+```python
+spec_fac.create_database("data.h5")
+```
+
+To see how we can work with a database, have a look at the [Working with data]() section.
+
+```python
+
 ```
