@@ -60,6 +60,8 @@ def make_fit(
     if clean_model:
 
         model.clean_model()
+        model.build_model()
+
 
     data = database.build_stan_data(
         use_absori=use_absori, use_mw_gas=use_mw_gas, use_host_gas=use_host_gas
@@ -73,6 +75,7 @@ def make_fit(
         show_progress=True,
         **fit_params,
     )
+
 
     # transfer fit to arviz
 
