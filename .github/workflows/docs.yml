@@ -69,7 +69,7 @@ jobs:
       - name: Build the API doc
         run: |
 
-
+          brew install c-blosc
           brew install hdf5
 
           pip3 install  pip wheel -U
@@ -131,6 +131,7 @@ jobs:
       - name: Install package
         run: |
 
+          brew install c-blosc
           brew install hdf5
 
 
