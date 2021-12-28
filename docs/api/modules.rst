@@ -1,7 +1,7 @@
-xrt_spec_dl
-===========
+whimstan
+========
 
 .. toctree::
    :maxdepth: 4
 
-   xrt_spec_dl
+   whimstan

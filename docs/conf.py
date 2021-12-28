@@ -21,7 +21,7 @@ import sys
 from pathlib import Path
 
 
-project = u"xrt_spec_dl"
+project = u"whimstan"
 copyright = u"2021, J. Michael Burgess"
 author = u"J. Michael Burgess"
 
@@ -47,7 +47,7 @@ def run_apidoc(app):
             "--separate",
             "-o",
             str(DOCS / "api"),
-            str(DOCS / ".." / "xrt_spec_dl"),
+            str(DOCS / ".." / "whimstan"),
         ]
     )
 
@@ -85,7 +85,7 @@ autodoc_default_options = {
 
 
 # # The name of your GitHub repository
-# rtds_action_github_repo = "grburgess/xrt_spec_dl"
+# rtds_action_github_repo = "grburgess/whimstan"
 
 # # The path where the artifact should be extracted
 # # Note: this is relative to the conf.py file!
@@ -194,8 +194,8 @@ master_doc = "index"
 latex_documents = [
     (
         master_doc,
-        "xrt_spec_dl.tex",
-        u"xrt_spec_dl Documentation",
+        "whimstan.tex",
+        u"whimstan Documentation",
         u"J. Michael Burgess",
         "manual",
     ),
@@ -208,8 +208,8 @@ latex_documents = [
 man_pages = [
     (
         master_doc,
-        "xrt_spec_dl",
-        u"xrt_spec_dl Documentation",
+        "whimstan",
+        u"whimstan Documentation",
         [author],
         1,
     )
@@ -223,10 +223,10 @@ man_pages = [
 texinfo_documents = [
     (
         master_doc,
-        "xrt_spec_dl",
-        u"xrt_spec_dl Documentation",
+        "whimstan",
+        u"whimstan Documentation",
         author,
-        "xrt_spec_dl",
+        "whimstan",
         "One line description of project.",
         "Miscellaneous",
     ),
