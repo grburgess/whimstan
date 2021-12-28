@@ -54,7 +54,7 @@ jobs:
 
   api_doc:
     name: "Create the API stubs"
-    runs-on: macos-10.15
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
         with:
@@ -113,7 +113,7 @@ jobs:
 
   build_docs:
     name: "Build the Documentation"
-    runs-on: macos-10.15
+    runs-on: macos-latest
     needs: [notebooks, api_doc]
     steps:
 
