@@ -169,7 +169,7 @@ from whimstan import SpectrumFactory
 ```
 
 ```python
-spec_fac = SpectrumFactory(pop, whim_n0=1e-7, whim_T=1e6)
+spec_fac = SpectrumFactory(pop, whim_n0=1e-7, whim_T=1e6, n_jobs=2)
                           
 ```
 
