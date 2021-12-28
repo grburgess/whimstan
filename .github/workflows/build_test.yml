@@ -25,9 +25,11 @@ jobs:
     - name: Install dependencies
       run: |
 
+        if [ "$RUNNER_OS" == "macOS" ]; then
+
         brew install c-blosc
         brew install hdf5
-
+        endif
 
         pip3 install flake8 numba numpy==1.20.3 ipython scipy h5py matplotlib coverage pytest pytest-cov cython codecov
         pip3 install tempita
