@@ -1,0 +1,18 @@
+whimstan.database package
+=========================
+
+Submodules
+----------
+
+.. toctree::
+
+   whimstan.database.catalog
+   whimstan.database.database
+
+Module contents
+---------------
+
+.. automodule:: whimstan.database
+    :members:
+    :undoc-members:
+    :show-inheritance:

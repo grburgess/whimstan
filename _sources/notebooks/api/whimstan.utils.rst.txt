@@ -1,0 +1,37 @@
+whimstan.utils package
+======================
+
+Submodules
+----------
+
+whimstan.utils.absori\_precalc module
+-------------------------------------
+
+.. automodule:: whimstan.utils.absori_precalc
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+whimstan.utils.format\_conversions module
+-----------------------------------------
+
+.. automodule:: whimstan.utils.format_conversions
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+whimstan.utils.package\_data module
+-----------------------------------
+
+.. automodule:: whimstan.utils.package_data
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: whimstan.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+whimstan.fitter module
+======================
+
+.. automodule:: whimstan.fitter
+    :members:
+    :undoc-members:
+    :show-inheritance:

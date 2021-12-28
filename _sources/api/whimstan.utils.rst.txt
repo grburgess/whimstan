@@ -1,0 +1,19 @@
+whimstan.utils package
+======================
+
+Submodules
+----------
+
+.. toctree::
+
+   whimstan.utils.absori_precalc
+   whimstan.utils.format_conversions
+   whimstan.utils.package_data
+
+Module contents
+---------------
+
+.. automodule:: whimstan.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:

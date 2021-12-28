@@ -1,0 +1,19 @@
+whimstan.simulations package
+============================
+
+Submodules
+----------
+
+.. toctree::
+
+   whimstan.simulations.cloud
+   whimstan.simulations.population_generator
+   whimstan.simulations.simulation
+
+Module contents
+---------------
+
+.. automodule:: whimstan.simulations
+    :members:
+    :undoc-members:
+    :show-inheritance:

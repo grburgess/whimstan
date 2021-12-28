@@ -1,0 +1,451 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>whimstan.simulations.simulation &mdash; whimstan  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^0.21.0-beta.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <link rel="stylesheet" href="../../../_static/pygments/default.css" type="text/css" id="pygments-style">
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css">
+   
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> whimstan
+            <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/simulations.html">Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/API.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/API.html#whimstan">whimstan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">whimstan</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+<div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+  <!--
+  <div class="admonition note">
+    <p><a href="https://github.com/lukelbd">ProPlot author here</a>: Due to my day job as a graduate student, certain <a href="https://github.com/lukelbd/proplot/pulls?q=is%3Aopen+is%3Apr">feature additions</a> may be delayed to the summer of 2020. In the meantime, if you are interested in contributing to ProPlot, please see the <a href="https://proplot.readthedocs.io/en/latest/contributions.html">contribution guide</a>. Any amount of help is welcome!
+    </p>
+  </div>
+  -->
+  <li id="lightdark-li">
+    <label for="lightdark-checkbox" id="lightdark-label">
+      <input type="checkbox" id="lightdark-checkbox"/>
+      <div class="btn-neutral"></div>
+    </label>
+  </li>
+  
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>whimstan.simulations.simulation</li>
+
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+  <script type="text/javascript" src=../../../_static/custom.js></script>
+  
+           <div itemprop="articleBody">
+             
+  <h1>Source code for whimstan.simulations.simulation</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+
+<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+
+<span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="kn">import</span> <span class="nn">popsynth</span>
+<span class="kn">from</span> <span class="nn">astromodels</span> <span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">PointSource</span><span class="p">,</span> <span class="n">Powerlaw_Eflux</span><span class="p">,</span> <span class="n">TbAbs</span>
+<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">SkyCoord</span>
+<span class="kn">from</span> <span class="nn">bb_astromodels</span> <span class="kn">import</span> <span class="n">Integrate_Absori</span>
+<span class="kn">from</span> <span class="nn">gdpyc</span> <span class="kn">import</span> <span class="n">GasMap</span>
+<span class="kn">from</span> <span class="nn">popsynth.utils.progress_bar</span> <span class="kn">import</span> <span class="n">progress_bar</span>
+<span class="kn">from</span> <span class="nn">threeML</span> <span class="kn">import</span> <span class="n">quiet_mode</span>
+<span class="kn">from</span> <span class="nn">threeML.plugins.OGIPLike</span> <span class="kn">import</span> <span class="n">OGIPLike</span>
+
+<span class="kn">from</span> <span class="nn">..database</span> <span class="kn">import</span> <span class="n">Database</span><span class="p">,</span> <span class="n">XRTCatalog</span><span class="p">,</span> <span class="n">XRTCatalogEntry</span>
+<span class="kn">from</span> <span class="nn">..utils.package_data</span> <span class="kn">import</span> <span class="n">get_path_of_data_file</span>
+
+
+<div class="viewcode-block" id="SpectrumGenerator"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.simulation.SpectrumGenerator">[docs]</a><span class="k">class</span> <span class="nc">SpectrumGenerator</span><span class="p">:</span>
+<div class="viewcode-block" id="SpectrumGenerator.__init__"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.simulation.SpectrumGenerator.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">eflux</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">index</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">ra</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">dec</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">z</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">host_nh</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">mw_nh</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">whim_n0</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">whim_T</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">demo_plugin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OGIPLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_mw_gas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">use_host_gas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">exposure</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param name:  the name of the function</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param eflux:</span>
+<span class="sd">        :type eflux: float</span>
+<span class="sd">        :param index:</span>
+<span class="sd">        :type index: float</span>
+<span class="sd">        :param ra:</span>
+<span class="sd">        :type ra: float</span>
+<span class="sd">        :param dec:</span>
+<span class="sd">        :type dec: float</span>
+<span class="sd">        :param z:</span>
+<span class="sd">        :type z: float</span>
+<span class="sd">        :param host_nh: host nH density in 1/10^22 cm2</span>
+<span class="sd">        :type host_nh: float</span>
+<span class="sd">        :param mw_nh: milkyway nH density in 1/10^22 cm2</span>
+<span class="sd">        :type mw_nh: float</span>
+<span class="sd">        :param whim_n0:</span>
+<span class="sd">        :type whim_n0: Optional[float]</span>
+<span class="sd">        :param whim_T:</span>
+<span class="sd">        :type whim_T: Optional[float]</span>
+<span class="sd">        :param demo_plugin:</span>
+<span class="sd">        :type demo_plugin: Optional[OGIPLike]</span>
+<span class="sd">        :param use_mw_gas:</span>
+<span class="sd">        :type use_mw_gas: bool</span>
+<span class="sd">        :param use_host_gas:</span>
+<span class="sd">        :type use_host_gas: bool</span>
+<span class="sd">        :returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_eflux</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">eflux</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ra</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ra</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dec</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">dec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">z</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_host_nh</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">host_nh</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mw_nh</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">mw_nh</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_whim_n0</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">whim_n0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_whim_T</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">whim_T</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_mw_gas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">use_mw_gas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_host_gas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">use_host_gas</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_demo_plugin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OGIPLike</span><span class="p">]</span> <span class="o">=</span> <span class="n">demo_plugin</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exposure</span> <span class="o">=</span> <span class="n">exposure</span>
+
+        <span class="c1"># now this is done in pop synth</span>
+        <span class="c1">#        self._get_mw_nh()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_plugin</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_mw_nh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">coord</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span><span class="n">ra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ra</span><span class="p">,</span> <span class="n">dec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dec</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mw_nh</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">GasMap</span><span class="o">.</span><span class="n">nhf</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="n">nhmap</span><span class="o">=</span><span class="s2">&quot;DL&quot;</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">1</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">/</span> <span class="mf">1e22</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_create_plugin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">quiet_mode</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_demo_plugin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_demo_plugin</span> <span class="o">=</span> <span class="n">OGIPLike</span><span class="p">(</span>
+                <span class="s2">&quot;tmp&quot;</span><span class="p">,</span>
+                <span class="n">observation</span><span class="o">=</span><span class="n">get_path_of_data_file</span><span class="p">(</span><span class="s2">&quot;apc.pi&quot;</span><span class="p">),</span>
+                <span class="n">background</span><span class="o">=</span><span class="n">get_path_of_data_file</span><span class="p">(</span><span class="s2">&quot;apcback.pi&quot;</span><span class="p">),</span>
+                <span class="n">response</span><span class="o">=</span><span class="n">get_path_of_data_file</span><span class="p">(</span><span class="s2">&quot;apc.rmf&quot;</span><span class="p">),</span>
+                <span class="n">arf_file</span><span class="o">=</span><span class="n">get_path_of_data_file</span><span class="p">(</span><span class="s2">&quot;apc.arf&quot;</span><span class="p">),</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_demo_plugin</span><span class="o">.</span><span class="n">model_integrate_method</span> <span class="o">=</span> <span class="s2">&quot;riemann&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_demo_plugin</span><span class="o">.</span><span class="n">_background_spectrum</span><span class="o">.</span><span class="n">_exposure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_demo_plugin</span><span class="o">.</span><span class="n">_observed_spectrum</span><span class="o">.</span><span class="n">_exposure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_demo_plugin</span><span class="o">.</span><span class="n">_precalculations</span><span class="p">()</span>
+
+        <span class="n">spec</span> <span class="o">=</span> <span class="n">Powerlaw_Eflux</span><span class="p">(</span><span class="n">F</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_eflux</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_mw_gas</span><span class="p">:</span>
+            <span class="n">spec</span> <span class="o">*=</span> <span class="n">TbAbs</span><span class="p">(</span><span class="n">NH</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mw_nh</span><span class="p">,</span> <span class="n">redshift</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_host_gas</span><span class="p">:</span>
+            <span class="n">spec</span> <span class="o">*=</span> <span class="n">TbAbs</span><span class="p">(</span><span class="n">NH</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_host_nh</span><span class="p">,</span> <span class="n">redshift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_whim_n0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_whim_T</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+
+            <span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span> <span class="o">*</span> <span class="n">Integrate_Absori</span><span class="p">(</span>
+                <span class="n">n0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_whim_n0</span><span class="p">,</span> <span class="n">temp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_whim_T</span><span class="p">,</span> <span class="n">redshift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_z</span>
+            <span class="p">)</span>
+
+        <span class="n">ps</span> <span class="o">=</span> <span class="n">PointSource</span><span class="p">(</span><span class="s2">&quot;tmp&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ra</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dec</span><span class="p">,</span> <span class="n">spectral_shape</span><span class="o">=</span><span class="n">spec</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">ps</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_demo_plugin</span><span class="o">.</span><span class="n">set_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="n">simulation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_demo_plugin</span><span class="o">.</span><span class="n">get_simulated_dataset</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_simulated_data</span> <span class="o">=</span> <span class="n">simulation</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">simulated_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulated_data</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">xrt_catalog_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="n">XRTCatalogEntry</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;grb&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ra</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dec</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mw_nh</span><span class="p">,</span>
+            <span class="n">nH_host_sim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_host_nh</span><span class="p">,</span>
+            <span class="n">index_sim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="p">,</span>
+            <span class="n">flux_sim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_eflux</span><span class="p">,</span>
+            <span class="n">n0_sim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_whim_n0</span><span class="p">,</span>
+            <span class="n">temp_sim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_whim_T</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SpectrumFactory"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.simulation.SpectrumFactory">[docs]</a><span class="k">class</span> <span class="nc">SpectrumFactory</span><span class="p">:</span>
+<div class="viewcode-block" id="SpectrumFactory.__init__"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.simulation.SpectrumFactory.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">population</span><span class="p">:</span> <span class="n">popsynth</span><span class="o">.</span><span class="n">Population</span><span class="p">,</span>
+        <span class="n">whim_n0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">whim_T</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_mw_gas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">use_host_gas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="c1">#        self._spectra = []</span>
+
+        <span class="k">def</span> <span class="nf">_gen_one_spectrum</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;grb00</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
+
+            <span class="k">if</span> <span class="n">use_mw_gas</span><span class="p">:</span>
+                <span class="n">mw_nh</span> <span class="o">=</span> <span class="n">population</span><span class="o">.</span><span class="n">mw_nh</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1.0e22</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">mw_nh</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="n">use_host_gas</span><span class="p">:</span>
+                <span class="n">host_nh</span> <span class="o">=</span> <span class="n">population</span><span class="o">.</span><span class="n">host_nh</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1.0e22</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">host_nh</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">try</span><span class="p">:</span>
+
+                <span class="n">exposure</span> <span class="o">=</span> <span class="n">population</span><span class="o">.</span><span class="n">exposure</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="k">except</span><span class="p">:</span>
+
+                <span class="n">exposure</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="n">sg</span> <span class="o">=</span> <span class="n">SpectrumGenerator</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">eflux</span><span class="o">=</span><span class="n">population</span><span class="o">.</span><span class="n">fluxes_latent</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="n">index</span><span class="o">=</span><span class="n">population</span><span class="o">.</span><span class="n">spec_idx</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="n">ra</span><span class="o">=</span><span class="n">population</span><span class="o">.</span><span class="n">ra</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="n">dec</span><span class="o">=</span><span class="n">population</span><span class="o">.</span><span class="n">dec</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="n">z</span><span class="o">=</span><span class="n">population</span><span class="o">.</span><span class="n">distances</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="n">host_nh</span><span class="o">=</span><span class="n">host_nh</span><span class="p">,</span>
+                <span class="n">mw_nh</span><span class="o">=</span><span class="n">mw_nh</span><span class="p">,</span>
+                <span class="n">whim_n0</span><span class="o">=</span><span class="n">whim_n0</span><span class="p">,</span>
+                <span class="n">whim_T</span><span class="o">=</span><span class="n">whim_T</span><span class="p">,</span>
+                <span class="n">use_mw_gas</span><span class="o">=</span><span class="n">use_mw_gas</span><span class="p">,</span>
+                <span class="n">use_host_gas</span><span class="o">=</span><span class="n">use_host_gas</span><span class="p">,</span>
+                <span class="n">exposure</span><span class="o">=</span><span class="n">exposure</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">sg</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spectra</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)(</span>
+            <span class="n">delayed</span><span class="p">(</span><span class="n">_gen_one_spectrum</span><span class="p">)(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">progress_bar</span><span class="p">(</span>
+                <span class="nb">range</span><span class="p">(</span><span class="n">population</span><span class="o">.</span><span class="n">n_objects</span><span class="p">),</span>
+                <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Calculating the simulated datasets&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
+
+        <span class="c1"># for i in progress_bar(</span>
+        <span class="c1">#     range(population.n_objects),</span>
+        <span class="c1">#     desc=&quot;Calculating the simulated datasets&quot;,</span>
+        <span class="c1"># ):</span>
+
+        <span class="c1">#     name = f&quot;grb00{i}&quot;</span>
+
+        <span class="c1">#     if use_mw_gas:</span>
+        <span class="c1">#         mw_nh = population.mw_nh[i] / 1.0e22</span>
+        <span class="c1">#     else:</span>
+        <span class="c1">#         mw_nh = None</span>
+
+        <span class="c1">#     if use_host_gas:</span>
+        <span class="c1">#         host_nh = population.host_nh[i] / 1.0e22</span>
+        <span class="c1">#     else:</span>
+        <span class="c1">#         host_nh = None</span>
+
+        <span class="c1">#     try:</span>
+
+        <span class="c1">#         exposure = population.exposure[i]</span>
+
+        <span class="c1">#     except:</span>
+
+        <span class="c1">#         exposure = None</span>
+
+        <span class="c1">#     sg = SpectrumGenerator(</span>
+        <span class="c1">#         name=name,</span>
+        <span class="c1">#         eflux=population.fluxes_latent[i],</span>
+        <span class="c1">#         index=population.spec_idx[i],</span>
+        <span class="c1">#         ra=population.ra[i],</span>
+        <span class="c1">#         dec=population.dec[i],</span>
+        <span class="c1">#         z=population.distances[i],</span>
+        <span class="c1">#         host_nh=host_nh,</span>
+        <span class="c1">#         mw_nh=mw_nh,</span>
+        <span class="c1">#         whim_n0=whim_n0,</span>
+        <span class="c1">#         whim_T=whim_T,</span>
+        <span class="c1">#         use_mw_gas=use_mw_gas,</span>
+        <span class="c1">#         use_host_gas=use_host_gas,</span>
+        <span class="c1">#         exposure=exposure,</span>
+        <span class="c1">#     )</span>
+
+        <span class="c1">#     self._spectra.append(sg)</span>
+
+<div class="viewcode-block" id="SpectrumFactory.write_data"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.simulation.SpectrumFactory.write_data">[docs]</a>    <span class="k">def</span> <span class="nf">write_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">catalog_name</span><span class="o">=</span><span class="s2">&quot;sim_cat.h5&quot;</span><span class="p">):</span>
+
+        <span class="n">cat_entries</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="n">root</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectra</span><span class="p">:</span>
+
+            <span class="n">p</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">pi</span><span class="p">:</span> <span class="n">OGIPLike</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">simulated_data</span>
+            <span class="n">pi</span><span class="o">.</span><span class="n">write_pha</span><span class="p">(</span><span class="n">p</span> <span class="o">/</span> <span class="s2">&quot;apc&quot;</span><span class="p">,</span> <span class="n">force_rsp_write</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">cat_entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">xrt_catalog_entry</span><span class="p">)</span>
+
+        <span class="n">xrt_cat</span> <span class="o">=</span> <span class="n">XRTCatalog</span><span class="p">(</span><span class="o">*</span><span class="n">cat_entries</span><span class="p">)</span>
+
+        <span class="n">xrt_cat</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">catalog_name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SpectrumFactory.create_database"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.simulation.SpectrumFactory.create_database">[docs]</a>    <span class="k">def</span> <span class="nf">create_database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;database.h5&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="n">cat_entries</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;_tmp&quot;</span><span class="p">)</span>
+
+        <span class="n">root</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">root</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;grb*/*apc*&quot;</span><span class="p">):</span>
+
+            <span class="n">f</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectra</span><span class="p">:</span>
+
+            <span class="n">p</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">pi</span><span class="p">:</span> <span class="n">OGIPLike</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">simulated_data</span>
+            <span class="n">pi</span><span class="o">.</span><span class="n">write_pha</span><span class="p">(</span><span class="n">p</span> <span class="o">/</span> <span class="s2">&quot;apc&quot;</span><span class="p">,</span> <span class="n">force_rsp_write</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">cat_entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">xrt_catalog_entry</span><span class="p">)</span>
+
+        <span class="n">xrt_cat</span> <span class="o">=</span> <span class="n">XRTCatalog</span><span class="p">(</span><span class="o">*</span><span class="n">cat_entries</span><span class="p">)</span>
+
+        <span class="n">db</span> <span class="o">=</span> <span class="n">Database</span><span class="o">.</span><span class="n">from_fits_files</span><span class="p">(</span>
+            <span class="n">file_name</span><span class="o">=</span><span class="n">database_name</span><span class="p">,</span>
+            <span class="n">catalog</span><span class="o">=</span><span class="n">xrt_cat</span><span class="p">,</span>
+            <span class="n">cat_path</span><span class="o">=</span><span class="n">root</span><span class="p">,</span>
+            <span class="n">is_sim</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">clean</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectra</span></div>
+</pre></div>
+
+           </div>
+          </div>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, J. Michael Burgess.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

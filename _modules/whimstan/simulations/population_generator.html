@@ -1,0 +1,713 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>whimstan.simulations.population_generator &mdash; whimstan  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^0.21.0-beta.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <link rel="stylesheet" href="../../../_static/pygments/default.css" type="text/css" id="pygments-style">
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css">
+   
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> whimstan
+            <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/simulations.html">Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/API.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/API.html#whimstan">whimstan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">whimstan</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+<div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+  <!--
+  <div class="admonition note">
+    <p><a href="https://github.com/lukelbd">ProPlot author here</a>: Due to my day job as a graduate student, certain <a href="https://github.com/lukelbd/proplot/pulls?q=is%3Aopen+is%3Apr">feature additions</a> may be delayed to the summer of 2020. In the meantime, if you are interested in contributing to ProPlot, please see the <a href="https://proplot.readthedocs.io/en/latest/contributions.html">contribution guide</a>. Any amount of help is welcome!
+    </p>
+  </div>
+  -->
+  <li id="lightdark-li">
+    <label for="lightdark-checkbox" id="lightdark-label">
+      <input type="checkbox" id="lightdark-checkbox"/>
+      <div class="btn-neutral"></div>
+    </label>
+  </li>
+  
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>whimstan.simulations.population_generator</li>
+
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+  <script type="text/javascript" src=../../../_static/custom.js></script>
+  
+           <div itemprop="articleBody">
+             
+  <h1>Source code for whimstan.simulations.population_generator</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="kn">import</span> <span class="nn">numba</span> <span class="k">as</span> <span class="nn">nb</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">popsynth</span> <span class="k">as</span> <span class="nn">ps</span>
+<span class="kn">import</span> <span class="nn">scipy.special</span> <span class="k">as</span> <span class="nn">sf</span>
+<span class="kn">from</span> <span class="nn">astromodels</span> <span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">PointSource</span><span class="p">,</span> <span class="n">Powerlaw_Eflux</span><span class="p">,</span> <span class="n">TbAbs</span>
+<span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">SkyCoord</span>
+<span class="kn">from</span> <span class="nn">bb_astromodels</span> <span class="kn">import</span> <span class="n">Integrate_Absori</span>
+<span class="kn">from</span> <span class="nn">gdpyc</span> <span class="kn">import</span> <span class="n">GasMap</span>
+<span class="kn">from</span> <span class="nn">popsynth.utils.progress_bar</span> <span class="kn">import</span> <span class="n">progress_bar</span>
+<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <span class="n">quad</span>
+<span class="kn">from</span> <span class="nn">threeML.plugins.OGIPLike</span> <span class="kn">import</span> <span class="n">OGIPLike</span>
+
+<span class="kn">from</span> <span class="nn">.cloud</span> <span class="kn">import</span> <span class="n">Cloud</span>
+
+
+<div class="viewcode-block" id="SchechterSampler"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.SchechterSampler">[docs]</a><span class="k">class</span> <span class="nc">SchechterSampler</span><span class="p">(</span><span class="n">ps</span><span class="o">.</span><span class="n">AuxiliarySampler</span><span class="p">):</span>
+
+    <span class="n">_auxiliary_sampler_name</span> <span class="o">=</span> <span class="s2">&quot;SchechterSampler&quot;</span>
+
+    <span class="n">Lmin</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">auxiliary_sampler</span><span class="o">.</span><span class="n">AuxiliaryParameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">auxiliary_sampler</span><span class="o">.</span><span class="n">AuxiliaryParameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SchechterSampler.__init__"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.SchechterSampler.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;plaw_flux&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A Schechter luminosity function</span>
+<span class="sd">        :param name: the name</span>
+<span class="sd">        :returns: None</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">SchechterSampler</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SchechterSampler.true_sampler"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.SchechterSampler.true_sampler">[docs]</a>    <span class="k">def</span> <span class="nf">true_sampler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;FIXME! briefly describe function</span>
+<span class="sd">        :param size:</span>
+<span class="sd">        :returns:</span>
+<span class="sd">        :rtype:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">xs</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_true_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Lmin</span> <span class="o">*</span> <span class="n">sf</span><span class="o">.</span><span class="n">gammaincinv</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="n">xs</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="HostGas"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.HostGas">[docs]</a><span class="k">class</span> <span class="nc">HostGas</span><span class="p">(</span><span class="n">ps</span><span class="o">.</span><span class="n">AuxiliarySampler</span><span class="p">):</span>
+    <span class="n">_auxiliary_sampler_name</span> <span class="o">=</span> <span class="s2">&quot;HostGas&quot;</span>
+
+    <span class="n">nh_mean</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">auxiliary_sampler</span><span class="o">.</span><span class="n">AuxiliaryParameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">zratio</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">auxiliary_sampler</span><span class="o">.</span><span class="n">AuxiliaryParameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<div class="viewcode-block" id="HostGas.__init__"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.HostGas.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The value of the host gas density in 1/cm2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># pass up to the super class</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">HostGas</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;host_nh&quot;</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="HostGas.true_sampler"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.HostGas.true_sampler">[docs]</a>    <span class="k">def</span> <span class="nf">true_sampler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+
+        <span class="c1"># create a cloud with this simulation</span>
+        <span class="n">cloud</span> <span class="o">=</span> <span class="n">Cloud</span><span class="p">(</span><span class="n">zr_ratio</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">zratio</span><span class="p">)</span>
+
+        <span class="c1"># sample the latent values for this property</span>
+
+        <span class="n">path_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cloud</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">)])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_true_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nh_mean</span><span class="p">)</span> <span class="o">*</span> <span class="n">path_length</span></div></div>
+
+
+<div class="viewcode-block" id="HostGasVari"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.HostGasVari">[docs]</a><span class="k">class</span> <span class="nc">HostGasVari</span><span class="p">(</span><span class="n">ps</span><span class="o">.</span><span class="n">AuxiliarySampler</span><span class="p">):</span>
+    <span class="n">_auxiliary_sampler_name</span> <span class="o">=</span> <span class="s2">&quot;HostGasVari&quot;</span>
+
+<div class="viewcode-block" id="HostGasVari.__init__"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.HostGasVari.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The value of the host gas density in 1/cm2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># pass up to the super class</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">HostGasVari</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;host_nh&quot;</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="HostGasVari.true_sampler"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.HostGasVari.true_sampler">[docs]</a>    <span class="k">def</span> <span class="nf">true_sampler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+
+        <span class="n">zr_ratios</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">secondary_samplers</span><span class="p">[</span><span class="s2">&quot;zr_ratio&quot;</span><span class="p">]</span>
+        <span class="n">nh_local</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">secondary_samplers</span><span class="p">[</span><span class="s2">&quot;nh_local&quot;</span><span class="p">]</span>
+
+        <span class="c1"># create a cloud with this simulation</span>
+        <span class="n">clouds</span> <span class="o">=</span> <span class="p">[</span><span class="n">Cloud</span><span class="p">(</span><span class="n">zr_ratio</span><span class="o">=</span><span class="n">zr</span><span class="p">)</span> <span class="k">for</span> <span class="n">zr</span> <span class="ow">in</span> <span class="n">zr_ratios</span><span class="o">.</span><span class="n">true_values</span><span class="p">]</span>
+
+        <span class="c1"># sample the latent values for this property</span>
+
+        <span class="n">path_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cloud</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span> <span class="k">for</span> <span class="n">cloud</span> <span class="ow">in</span> <span class="n">clouds</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_true_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">nh_local</span><span class="o">.</span><span class="n">true_values</span><span class="p">)</span> <span class="o">*</span> <span class="n">path_length</span></div></div>
+
+
+<div class="viewcode-block" id="ZRSampler"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.ZRSampler">[docs]</a><span class="k">class</span> <span class="nc">ZRSampler</span><span class="p">(</span><span class="n">ps</span><span class="o">.</span><span class="n">AuxiliarySampler</span><span class="p">):</span>
+    <span class="n">_auxiliary_sampler_name</span> <span class="o">=</span> <span class="s2">&quot;ZRSampler&quot;</span>
+    <span class="n">zmin</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">AuxiliaryParameter</span><span class="p">(</span><span class="n">vmin</span><span class="o">=-</span><span class="mi">99</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ZRSampler.__init__"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.ZRSampler.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Log uniform sampler for the Z/R ratio</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># pass up to the super class</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">ZRSampler</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;zr_ratio&quot;</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ZRSampler.true_sampler"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.ZRSampler.true_sampler">[docs]</a>    <span class="k">def</span> <span class="nf">true_sampler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_true_values</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="o">**</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zmin</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="MilkyWayGas"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.MilkyWayGas">[docs]</a><span class="k">class</span> <span class="nc">MilkyWayGas</span><span class="p">(</span><span class="n">ps</span><span class="o">.</span><span class="n">AuxiliarySampler</span><span class="p">):</span>
+    <span class="n">_auxiliary_sampler_name</span> <span class="o">=</span> <span class="s2">&quot;MilkyWayGas&quot;</span>
+
+<div class="viewcode-block" id="MilkyWayGas.__init__"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.MilkyWayGas.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The value of the milky way gas density in 1/cm2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># pass up to the super class</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">MilkyWayGas</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;mw_nh&quot;</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">uses_sky_position</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="MilkyWayGas.true_sampler"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.MilkyWayGas.true_sampler">[docs]</a>    <span class="k">def</span> <span class="nf">true_sampler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+
+        <span class="n">mw_nh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+
+        <span class="n">coord</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span><span class="n">ra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ra</span><span class="p">,</span> <span class="n">dec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dec</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">coord</span><span class="p">):</span>
+
+            <span class="n">mw_nh</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">GasMap</span><span class="o">.</span><span class="n">nhf</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">nhmap</span><span class="o">=</span><span class="s2">&quot;DL&quot;</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">1</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_true_values</span> <span class="o">=</span> <span class="n">mw_nh</span></div></div>
+
+
+<div class="viewcode-block" id="MWGasSelection"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.MWGasSelection">[docs]</a><span class="k">class</span> <span class="nc">MWGasSelection</span><span class="p">(</span><span class="n">ps</span><span class="o">.</span><span class="n">SelectionProbability</span><span class="p">):</span>
+
+    <span class="n">_selection_name</span> <span class="o">=</span> <span class="s2">&quot;MWGasSelection&quot;</span>
+
+    <span class="n">gas_limit</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">SelectionParameter</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MWGasSelection.__init__"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.MWGasSelection.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mw gas selector&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        places a limit on the amount of MW gas allowed for</span>
+<span class="sd">        each object in the sample</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">MWGasSelection</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">use_obs_value</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MWGasSelection.draw"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.MWGasSelection.draw">[docs]</a>    <span class="k">def</span> <span class="nf">draw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_selection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observed_value</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas_limit</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="CountsSelector"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.CountsSelector">[docs]</a><span class="k">class</span> <span class="nc">CountsSelector</span><span class="p">(</span><span class="n">ps</span><span class="o">.</span><span class="n">SelectionProbability</span><span class="p">):</span>
+
+    <span class="n">_selection_name</span> <span class="o">=</span> <span class="s2">&quot;CountsSelector&quot;</span>
+
+    <span class="n">counts_limit</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">SelectionParameter</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CountsSelector.__init__"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.CountsSelector.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;counts selector&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        places a min limit on the number of counts</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">CountsSelector</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">use_obs_value</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CountsSelector.draw"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.CountsSelector.draw">[docs]</a>    <span class="k">def</span> <span class="nf">draw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_selection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observed_value</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">counts_limit</span></div></div>
+
+
+<div class="viewcode-block" id="GalacticPlaceDistanceSelection"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.GalacticPlaceDistanceSelection">[docs]</a><span class="k">class</span> <span class="nc">GalacticPlaceDistanceSelection</span><span class="p">(</span><span class="n">ps</span><span class="o">.</span><span class="n">SpatialSelection</span><span class="p">):</span>
+
+    <span class="n">_selection_name</span> <span class="o">=</span> <span class="s2">&quot;GalacticPlaceDistanceSelection&quot;</span>
+
+    <span class="n">b_limit</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">SelectionParameter</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+    <span class="n">z_min</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">SelectionParameter</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GalacticPlaceDistanceSelection.__init__"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.GalacticPlaceDistanceSelection.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mw plane selector&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        places a limit above the galactic plane for objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GalacticPlaceDistanceSelection.draw"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.GalacticPlaceDistanceSelection.draw">[docs]</a>    <span class="k">def</span> <span class="nf">draw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+
+        <span class="n">g_coor</span> <span class="o">=</span> <span class="n">SkyCoord</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_spatial_distribution</span><span class="o">.</span><span class="n">ra</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_spatial_distribution</span><span class="o">.</span><span class="n">dec</span><span class="p">,</span>
+            <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">,</span>
+            <span class="n">frame</span><span class="o">=</span><span class="s2">&quot;icrs&quot;</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">transform_to</span><span class="p">(</span><span class="s2">&quot;galactic&quot;</span><span class="p">)</span>
+
+        <span class="n">selection</span> <span class="o">=</span> <span class="p">(</span><span class="n">g_coor</span><span class="o">.</span><span class="n">b</span><span class="o">.</span><span class="n">deg</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">b_limit</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span>
+            <span class="n">g_coor</span><span class="o">.</span><span class="n">b</span><span class="o">.</span><span class="n">deg</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">b_limit</span>
+        <span class="p">)</span>
+
+        <span class="n">selection2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spatial_distribution</span><span class="o">.</span><span class="n">distances</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_min</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_selection</span> <span class="o">=</span> <span class="n">selection</span> <span class="o">&amp;</span> <span class="n">selection2</span></div></div>
+
+
+<div class="viewcode-block" id="ExposureSampler"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.ExposureSampler">[docs]</a><span class="k">class</span> <span class="nc">ExposureSampler</span><span class="p">(</span><span class="n">ps</span><span class="o">.</span><span class="n">AuxiliarySampler</span><span class="p">):</span>
+
+    <span class="n">_auxiliary_sampler_name</span> <span class="o">=</span> <span class="s2">&quot;ExposureSampler&quot;</span>
+
+<div class="viewcode-block" id="ExposureSampler.__init__"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.ExposureSampler.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_low</span> <span class="o">=</span> <span class="n">low</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_high</span> <span class="o">=</span> <span class="n">high</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;exposure&quot;</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExposureSampler.true_sampler"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.ExposureSampler.true_sampler">[docs]</a>    <span class="k">def</span> <span class="nf">true_sampler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_true_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_low</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_high</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ObscuredFluxSampler"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.ObscuredFluxSampler">[docs]</a><span class="k">class</span> <span class="nc">ObscuredFluxSampler</span><span class="p">(</span><span class="n">ps</span><span class="o">.</span><span class="n">DerivedLumAuxSampler</span><span class="p">):</span>
+
+    <span class="n">_auxiliary_sampler_name</span> <span class="o">=</span> <span class="s2">&quot;ObscuredFluxSampler&quot;</span>
+
+<div class="viewcode-block" id="ObscuredFluxSampler.__init__"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.ObscuredFluxSampler.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">a</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.4</span><span class="p">,</span>
+        <span class="n">b</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">15</span><span class="p">,</span>
+        <span class="n">whim_n0</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">whim_T</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_mw_gas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">use_host_gas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">plugin_for_counts</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OGIPLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        computes the obscured flux from the GRB by integrating the spectra</span>
+
+
+<span class="sd">        :param a: lower bound of integration</span>
+<span class="sd">        :param b: upper bound of integration</span>
+<span class="sd">        :param whim_n0: the optional whim particle density</span>
+<span class="sd">        :param whim_T: the optional whim temperature in K</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">=</span> <span class="n">a</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="n">b</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_whim_T</span> <span class="o">=</span> <span class="n">whim_T</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_whim_n0</span> <span class="o">=</span> <span class="n">whim_n0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_mw_gas</span> <span class="o">=</span> <span class="n">use_mw_gas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_host_gas</span> <span class="o">=</span> <span class="n">use_host_gas</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_for_counts</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OGIPLike</span><span class="p">]</span> <span class="o">=</span> <span class="n">plugin_for_counts</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_for_counts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_for_counts</span><span class="o">.</span><span class="n">model_integrate_method</span> <span class="o">=</span> <span class="s2">&quot;riemann&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">ObscuredFluxSampler</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;obscured_flux&quot;</span><span class="p">,</span> <span class="n">uses_distance</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObscuredFluxSampler.true_sampler"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.ObscuredFluxSampler.true_sampler">[docs]</a>    <span class="k">def</span> <span class="nf">true_sampler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+
+        <span class="c1"># kev to erg</span>
+        <span class="n">kev2erg</span> <span class="o">=</span> <span class="mf">1.6021766339999998e-09</span>
+
+        <span class="n">n_energies_for_intergration</span> <span class="o">=</span> <span class="mi">50</span>
+
+        <span class="n">intergration_energies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">geomspace</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">n_energies_for_intergration</span>
+        <span class="p">)</span>
+
+        <span class="n">fluxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+
+        <span class="c1"># we want to have the flux measured in the XRT so</span>
+        <span class="c1"># we need to integrate the obscured flux</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">progress_bar</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;computing obscured fluxes&quot;</span><span class="p">):</span>
+
+            <span class="n">spec</span> <span class="o">=</span> <span class="n">Powerlaw_Eflux</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_secondary_samplers</span><span class="p">[</span><span class="s2">&quot;plaw_flux&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">true_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">luminosity_distance</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)),</span>
+                <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_secondary_samplers</span><span class="p">[</span><span class="s2">&quot;spec_idx&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">true_values</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="n">a</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_a</span><span class="p">,</span>
+                <span class="n">b</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_b</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_mw_gas</span><span class="p">:</span>
+                <span class="n">spec</span> <span class="o">*=</span> <span class="n">TbAbs</span><span class="p">(</span>
+                    <span class="n">NH</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_secondary_samplers</span><span class="p">[</span><span class="s2">&quot;mw_nh&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">true_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="o">/</span> <span class="p">(</span><span class="mf">1.0e22</span><span class="p">),</span>
+                    <span class="n">redshift</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_host_gas</span><span class="p">:</span>
+
+                <span class="n">tmp</span> <span class="o">=</span> <span class="n">TbAbs</span><span class="p">(</span><span class="n">redshift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_distance</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+                <span class="n">tmp</span><span class="o">.</span><span class="n">NH</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+                <span class="n">tmp</span><span class="o">.</span><span class="n">NH</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_secondary_samplers</span><span class="p">[</span><span class="s2">&quot;host_nh&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">true_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span>
+                    <span class="mf">1.0e22</span>
+                <span class="p">)</span>
+
+                <span class="n">spec</span> <span class="o">*=</span> <span class="n">tmp</span>
+            <span class="c1"># add on the WHIM if needed</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_whim_n0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_whim_T</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+
+                <span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span> <span class="o">*</span> <span class="n">Integrate_Absori</span><span class="p">(</span>
+                    <span class="n">n0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_whim_n0</span><span class="p">,</span>
+                    <span class="n">temp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_whim_T</span><span class="p">,</span>
+                    <span class="n">redshift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_distance</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="p">)</span>
+
+            <span class="c1"># now compute the energy integral.</span>
+            <span class="c1"># using the slower quad here because</span>
+            <span class="c1"># the gas models have a shit load of lines</span>
+
+            <span class="c1"># flux = quad(lambda x: x * spec(x), self._a, self._b)[0] * kev2erg</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_for_counts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+                <span class="c1"># self._plugin_for_counts._background_spectrum._exposure = new_exposure</span>
+                <span class="c1"># self._plugin_for_counts._background_spectrum._exposure = new_exposure</span>
+
+                <span class="n">ps</span> <span class="o">=</span> <span class="n">PointSource</span><span class="p">(</span><span class="s2">&quot;tmp&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">spectral_shape</span><span class="o">=</span><span class="n">spec</span><span class="p">)</span>
+
+                <span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">ps</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_for_counts</span><span class="o">.</span><span class="n">set_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_for_counts</span><span class="o">.</span><span class="n">set_active_measurements</span><span class="p">(</span><span class="s2">&quot;0.3-10&quot;</span><span class="p">)</span>
+
+                <span class="n">count_spectrum</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_for_counts</span><span class="o">.</span><span class="n">_evaluate_model</span><span class="p">()</span>
+                    <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_secondary_samplers</span><span class="p">[</span><span class="s2">&quot;exposure&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">true_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="p">)</span>
+
+                <span class="n">total_counts</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">count_spectrum</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plugin_for_counts</span><span class="o">.</span><span class="n">mask</span><span class="p">]</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+                <span class="n">counts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_counts</span>
+
+            <span class="n">flux</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span>
+                    <span class="n">intergration_energies</span> <span class="o">*</span> <span class="n">spec</span><span class="p">(</span><span class="n">intergration_energies</span><span class="p">),</span>
+                    <span class="n">intergration_energies</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="o">*</span> <span class="n">kev2erg</span>
+            <span class="p">)</span>
+
+            <span class="n">fluxes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">flux</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_for_counts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_true_values</span> <span class="o">=</span> <span class="n">fluxes</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_true_values</span> <span class="o">=</span> <span class="n">counts</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fluxes</span> <span class="o">=</span> <span class="n">fluxes</span></div>
+
+<div class="viewcode-block" id="ObscuredFluxSampler.compute_luminosity"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.ObscuredFluxSampler.compute_luminosity">[docs]</a>    <span class="k">def</span> <span class="nf">compute_luminosity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># have to compute back to a luminosity</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="mf">4.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">luminosity_distance</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fluxes</span></div></div>
+
+
+<div class="viewcode-block" id="create_population"><a class="viewcode-back" href="../../../notebooks/api/whimstan.simulations.html#whimstan.simulations.population_generator.create_population">[docs]</a><span class="k">def</span> <span class="nf">create_population</span><span class="p">(</span>
+    <span class="n">r0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">a</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0157</span><span class="p">,</span>
+    <span class="n">rise</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.118</span><span class="p">,</span>
+    <span class="n">decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4.2</span><span class="p">,</span>
+    <span class="n">peak</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">3.4</span><span class="p">,</span>
+    <span class="n">z_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span>
+    <span class="n">Lmin</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e46</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span>
+    <span class="n">host_gas_mean</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">23</span><span class="p">,</span>
+    <span class="n">host_gas_sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">host_gas_cloud_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">mw_nh_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">b_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">use_clouds</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">vari_clouds</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">spec_idx_mean</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">spec_idx_std</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">use_mw_gas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">use_host_gas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">whim_n0</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">whim_T</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">demo_plugin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OGIPLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">counts_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">exposure_high</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">exposure_low</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">z_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ps</span><span class="o">.</span><span class="n">PopulationSynth</span><span class="p">:</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    create a population syn</span>
+
+<span class="sd">    :param r0:</span>
+<span class="sd">    :type r0: float</span>
+<span class="sd">    :param a:</span>
+<span class="sd">    :type a: float</span>
+<span class="sd">    :param rise:</span>
+<span class="sd">    :type rise: float</span>
+<span class="sd">    :param decay:</span>
+<span class="sd">    :type decay: float</span>
+<span class="sd">    :param peak:</span>
+<span class="sd">    :type peak: float</span>
+<span class="sd">    :param z_max:</span>
+<span class="sd">    :type z_max: float</span>
+<span class="sd">    :param Lmin:</span>
+<span class="sd">    :type Lmin: float</span>
+<span class="sd">    :param alpha:</span>
+<span class="sd">    :type alpha: float</span>
+<span class="sd">    :param host_gas_mean:</span>
+<span class="sd">    :type host_gas_mean: float</span>
+<span class="sd">    :param host_gas_sigma:</span>
+<span class="sd">    :type host_gas_sigma: float</span>
+<span class="sd">    :param host_gas_cloud_ratio:</span>
+<span class="sd">    :type host_gas_cloud_ratio: float</span>
+<span class="sd">    :param mw_nh_limit:</span>
+<span class="sd">    :type mw_nh_limit: Optional[float]</span>
+<span class="sd">    :param b_limit:</span>
+<span class="sd">    :type b_limit: Optional[float]</span>
+<span class="sd">    :param use_clouds:</span>
+<span class="sd">    :type use_clouds: bool</span>
+<span class="sd">    :param vari_clouds:</span>
+<span class="sd">    :type vari_clouds: bool</span>
+<span class="sd">    :param spec_idx_mean:</span>
+<span class="sd">    :type spec_idx_mean: float</span>
+<span class="sd">    :param spec_idx_std:</span>
+<span class="sd">    :type spec_idx_std: float</span>
+<span class="sd">    :param use_mw_gas:</span>
+<span class="sd">    :type use_mw_gas: bool</span>
+<span class="sd">    :param use_host_gas:</span>
+<span class="sd">    :type use_host_gas: bool</span>
+<span class="sd">    :param whim_n0:</span>
+<span class="sd">    :type whim_n0: Optional[float]</span>
+<span class="sd">    :param whim_T:</span>
+<span class="sd">    :type whim_T: Optional[float]</span>
+<span class="sd">    :param demo_plugin:</span>
+<span class="sd">    :type demo_plugin: Optional[OGIPLike]</span>
+<span class="sd">    :param counts_limit:</span>
+<span class="sd">    :type counts_limit: Optional[float]</span>
+<span class="sd">    :param exposure_high:</span>
+<span class="sd">    :type exposure_high: Optional[float]</span>
+<span class="sd">    :param exposure_low:</span>
+<span class="sd">    :type exposure_low: Optional[float]</span>
+<span class="sd">    :param z_min:</span>
+<span class="sd">    :type z_min: float</span>
+<span class="sd">    :returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">use_host_gas</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">use_clouds</span><span class="p">:</span>
+
+            <span class="c1"># the host galaxy gas will be</span>
+            <span class="c1"># created by embedding GRBs in</span>
+            <span class="c1"># clouds</span>
+
+            <span class="k">if</span> <span class="n">vari_clouds</span><span class="p">:</span>
+
+                <span class="n">host_nh</span> <span class="o">=</span> <span class="n">HostGasVari</span><span class="p">()</span>
+
+                <span class="n">zr_sampler</span> <span class="o">=</span> <span class="n">ZRSampler</span><span class="p">()</span>
+
+                <span class="n">zr_sampler</span><span class="o">.</span><span class="n">zmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">host_gas_cloud_ratio</span><span class="p">)</span>
+
+                <span class="n">nh_local</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">TruncatedNormalAuxSampler</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;nh_local&quot;</span><span class="p">)</span>
+                <span class="n">nh_local</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="n">host_gas_mean</span>
+                <span class="n">nh_local</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">host_gas_sigma</span>
+                <span class="n">nh_local</span><span class="o">.</span><span class="n">lower</span> <span class="o">=</span> <span class="mi">20</span>
+                <span class="n">nh_local</span><span class="o">.</span><span class="n">upper</span> <span class="o">=</span> <span class="mi">26</span>
+
+                <span class="n">host_nh</span><span class="o">.</span><span class="n">set_secondary_sampler</span><span class="p">(</span><span class="n">nh_local</span><span class="p">)</span>
+                <span class="n">host_nh</span><span class="o">.</span><span class="n">set_secondary_sampler</span><span class="p">(</span><span class="n">zr_sampler</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+
+                <span class="n">host_nh</span> <span class="o">=</span> <span class="n">HostGas</span><span class="p">()</span>
+                <span class="n">host_nh</span><span class="o">.</span><span class="n">nh_mean</span> <span class="o">=</span> <span class="n">host_gas_mean</span>
+                <span class="n">host_nh</span><span class="o">.</span><span class="n">zratio</span> <span class="o">=</span> <span class="n">host_gas_cloud_ratio</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="c1"># the host gas will be drawn from</span>
+            <span class="c1"># a log normal which is empirical</span>
+
+            <span class="n">host_nh</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">aux_samplers</span><span class="o">.</span><span class="n">Log10NormalAuxSampler</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;host_nh&quot;</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+            <span class="n">host_nh</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="n">host_gas_mean</span>
+            <span class="n">host_nh</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+    <span class="k">if</span> <span class="n">use_mw_gas</span><span class="p">:</span>
+        <span class="c1"># there are no random variables for the milky way gas</span>
+        <span class="n">mw_nh</span> <span class="o">=</span> <span class="n">MilkyWayGas</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">mw_nh_limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="n">mws</span> <span class="o">=</span> <span class="n">MWGasSelection</span><span class="p">()</span>
+
+            <span class="n">mws</span><span class="o">.</span><span class="n">gas_limit</span> <span class="o">=</span> <span class="n">mw_nh_limit</span>
+
+            <span class="n">mw_nh</span><span class="o">.</span><span class="n">set_selection_probability</span><span class="p">(</span><span class="n">mws</span><span class="p">)</span>
+
+    <span class="c1"># GRB spectrum</span>
+
+    <span class="c1"># sample the spectral index</span>
+    <span class="c1"># of the power law</span>
+
+    <span class="n">spec_idx</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">aux_samplers</span><span class="o">.</span><span class="n">NormalAuxSampler</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;spec_idx&quot;</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">spec_idx</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="n">spec_idx_mean</span>
+    <span class="n">spec_idx</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">spec_idx_std</span>
+
+    <span class="c1"># sample the the intergral energy flux of</span>
+    <span class="c1"># the power law</span>
+    <span class="n">powerlaw</span> <span class="o">=</span> <span class="n">SchechterSampler</span><span class="p">()</span>
+    <span class="n">powerlaw</span><span class="o">.</span><span class="n">Lmin</span> <span class="o">=</span> <span class="n">Lmin</span>
+    <span class="n">powerlaw</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+
+    <span class="c1"># now we compute the &quot;obscured&quot; luminosity</span>
+    <span class="c1"># that would lead to the flux actually observed</span>
+    <span class="c1"># by the XRT</span>
+
+    <span class="c1"># if we include a plugin here, then the selection is on the counts</span>
+
+    <span class="n">ls</span> <span class="o">=</span> <span class="n">ObscuredFluxSampler</span><span class="p">(</span>
+        <span class="n">whim_n0</span><span class="o">=</span><span class="n">whim_n0</span><span class="p">,</span>
+        <span class="n">whim_T</span><span class="o">=</span><span class="n">whim_T</span><span class="p">,</span>
+        <span class="n">use_mw_gas</span><span class="o">=</span><span class="n">use_mw_gas</span><span class="p">,</span>
+        <span class="n">use_host_gas</span><span class="o">=</span><span class="n">use_host_gas</span><span class="p">,</span>
+        <span class="n">plugin_for_counts</span><span class="o">=</span><span class="n">demo_plugin</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">ls</span><span class="o">.</span><span class="n">set_secondary_sampler</span><span class="p">(</span><span class="n">spec_idx</span><span class="p">)</span>
+    <span class="n">ls</span><span class="o">.</span><span class="n">set_secondary_sampler</span><span class="p">(</span><span class="n">powerlaw</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">use_host_gas</span><span class="p">:</span>
+        <span class="n">ls</span><span class="o">.</span><span class="n">set_secondary_sampler</span><span class="p">(</span><span class="n">host_nh</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">use_mw_gas</span><span class="p">:</span>
+        <span class="n">ls</span><span class="o">.</span><span class="n">set_secondary_sampler</span><span class="p">(</span><span class="n">mw_nh</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">demo_plugin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="n">exposure</span> <span class="o">=</span> <span class="n">ExposureSampler</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="n">exposure_low</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="n">exposure_high</span><span class="p">)</span>
+
+        <span class="n">ls</span><span class="o">.</span><span class="n">set_secondary_sampler</span><span class="p">(</span><span class="n">exposure</span><span class="p">)</span>
+
+        <span class="n">count_selector</span> <span class="o">=</span> <span class="n">CountsSelector</span><span class="p">()</span>
+
+        <span class="n">count_selector</span><span class="o">.</span><span class="n">counts_limit</span> <span class="o">=</span> <span class="n">counts_limit</span>
+
+        <span class="n">ls</span><span class="o">.</span><span class="n">set_selection_probability</span><span class="p">(</span><span class="n">count_selector</span><span class="p">)</span>
+
+    <span class="n">pop_gen</span><span class="p">:</span> <span class="n">ps</span><span class="o">.</span><span class="n">PopulationSynth</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">populations</span><span class="o">.</span><span class="n">SFRPopulation</span><span class="p">(</span>
+        <span class="n">r0</span><span class="o">=</span><span class="n">r0</span><span class="p">,</span>
+        <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span>
+        <span class="n">rise</span><span class="o">=</span><span class="n">rise</span><span class="p">,</span>
+        <span class="n">decay</span><span class="o">=</span><span class="n">decay</span><span class="p">,</span>
+        <span class="n">peak</span><span class="o">=</span><span class="n">peak</span><span class="p">,</span>
+        <span class="n">r_max</span><span class="o">=</span><span class="n">z_max</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">pop_gen</span><span class="o">.</span><span class="n">add_observed_quantity</span><span class="p">(</span><span class="n">ls</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">b_limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="n">gps</span> <span class="o">=</span> <span class="n">GalacticPlaceDistanceSelection</span><span class="p">()</span>
+        <span class="n">gps</span><span class="o">.</span><span class="n">b_limit</span> <span class="o">=</span> <span class="n">b_limit</span>
+        <span class="n">gps</span><span class="o">.</span><span class="n">z_min</span> <span class="o">=</span> <span class="n">z_min</span>
+
+        <span class="n">pop_gen</span><span class="o">.</span><span class="n">add_spatial_selector</span><span class="p">(</span><span class="n">gps</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pop_gen</span></div>
+</pre></div>
+
+           </div>
+          </div>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, J. Michael Burgess.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

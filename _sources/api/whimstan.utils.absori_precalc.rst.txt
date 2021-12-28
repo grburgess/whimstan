@@ -1,0 +1,7 @@
+whimstan.utils.absori_precalc module
+====================================
+
+.. automodule:: whimstan.utils.absori_precalc
+    :members:
+    :undoc-members:
+    :show-inheritance:

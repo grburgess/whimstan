@@ -1,0 +1,37 @@
+whimstan.simulations package
+============================
+
+Submodules
+----------
+
+whimstan.simulations.cloud module
+---------------------------------
+
+.. automodule:: whimstan.simulations.cloud
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+whimstan.simulations.population\_generator module
+-------------------------------------------------
+
+.. automodule:: whimstan.simulations.population_generator
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+whimstan.simulations.simulation module
+--------------------------------------
+
+.. automodule:: whimstan.simulations.simulation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: whimstan.simulations
+   :members:
+   :undoc-members:
+   :show-inheritance:

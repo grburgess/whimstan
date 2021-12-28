@@ -1,0 +1,290 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>whimstan.spectral_plot &mdash; whimstan  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^0.21.0-beta.1/dist/embed-amd.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <link rel="stylesheet" href="../../_static/pygments/default.css" type="text/css" id="pygments-style">
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css">
+   
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> whimstan
+            <img src="../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/simulations.html">Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/API.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/API.html#whimstan">whimstan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">whimstan</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+<div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+  <!--
+  <div class="admonition note">
+    <p><a href="https://github.com/lukelbd">ProPlot author here</a>: Due to my day job as a graduate student, certain <a href="https://github.com/lukelbd/proplot/pulls?q=is%3Aopen+is%3Apr">feature additions</a> may be delayed to the summer of 2020. In the meantime, if you are interested in contributing to ProPlot, please see the <a href="https://proplot.readthedocs.io/en/latest/contributions.html">contribution guide</a>. Any amount of help is welcome!
+    </p>
+  </div>
+  -->
+  <li id="lightdark-li">
+    <label for="lightdark-checkbox" id="lightdark-label">
+      <input type="checkbox" id="lightdark-checkbox"/>
+      <div class="btn-neutral"></div>
+    </label>
+  </li>
+  
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>whimstan.spectral_plot</li>
+
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+  <script type="text/javascript" src=../../_static/custom.js></script>
+  
+           <div itemprop="articleBody">
+             
+  <h1>Source code for whimstan.spectral_plot</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">threeML</span>
+<span class="c1">#from threeML import threeML_config</span>
+<span class="c1">#from threeML.io.plotting.cmap_cycle import cmap_intervals</span>
+<span class="kn">from</span> <span class="nn">threeML.io.plotting.data_residual_plot</span> <span class="kn">import</span> <span class="n">ResidualPlot</span>
+
+<span class="c1">#from threeML_utils.colors import Colors</span>
+
+<span class="n">NO_REBIN</span> <span class="o">=</span> <span class="mf">1E-99</span>
+
+
+<span class="c1"># def scale_colour(self, colour, scalefactor):    # pragma: no cover</span>
+<span class="c1">#     if isinstance(colour, np.ndarray):</span>
+<span class="c1">#         r, g, b = colour[:3] * 255.0</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         hexx = colour.strip(&#39;#&#39;)</span>
+<span class="c1">#         if scalefactor &lt; 0 or len(hexx) != 6:</span>
+<span class="c1">#             return hexx</span>
+<span class="c1">#         r, g, b = int(hexx[:2], 16), int(hexx[2:4], 16), int(hexx[4:], 16)</span>
+<span class="c1">#     r = self._clamp(int(r * scalefactor))</span>
+<span class="c1">#     g = self._clamp(int(g * scalefactor))</span>
+<span class="c1">#     b = self._clamp(int(b * scalefactor))</span>
+<span class="c1">#     return &quot;#%02x%02x%02x&quot; % (r, g, b)</span>
+
+
+<div class="viewcode-block" id="display_posterior_model_counts"><a class="viewcode-back" href="../../notebooks/api/whimstan.html#whimstan.spectral_plot.display_posterior_model_counts">[docs]</a><span class="k">def</span> <span class="nf">display_posterior_model_counts</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span>
+                                   <span class="n">model</span><span class="p">,</span>
+                                   <span class="n">samples</span><span class="p">,</span>
+                                   <span class="n">data_color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span>
+                                   <span class="n">model_color</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span>
+                                   <span class="n">thin</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                                   <span class="n">min_rate</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                   <span class="n">shade</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                   <span class="n">q_level</span><span class="o">=</span><span class="mi">68</span><span class="p">,</span>
+                                   <span class="n">gradient</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+                                   <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                   <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+
+    <span class="n">show_residuals</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">axes</span><span class="o">!=</span><span class="kc">None</span><span class="p">:</span>
+        <span class="n">residual_plot</span> <span class="o">=</span> <span class="n">ResidualPlot</span><span class="p">(</span><span class="n">show_residuals</span><span class="o">=</span><span class="n">show_residuals</span><span class="p">,</span> <span class="n">model_subplot</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">residual_plot</span> <span class="o">=</span> <span class="n">ResidualPlot</span><span class="p">(</span><span class="n">show_residuals</span><span class="o">=</span><span class="n">show_residuals</span><span class="p">)</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="n">residual_plot</span><span class="o">.</span><span class="n">data_axis</span>
+
+    <span class="n">plugin</span><span class="o">.</span><span class="n">set_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="n">show_legend</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">for</span> <span class="n">params</span> <span class="ow">in</span> <span class="n">samples</span><span class="p">:</span>
+
+        <span class="n">model</span><span class="o">.</span><span class="n">set_free_parameters</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        
+        <span class="c1"># for i, (k, v) in enumerate(model.free_parameters.items()):</span>
+
+        <span class="c1">#     v.value = params[i]</span>
+
+        <span class="c1"># first with no data</span>
+        <span class="k">if</span> <span class="n">shade</span><span class="p">:</span>
+            <span class="n">per_det_y</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">per_det_x</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">shade</span><span class="p">:</span>
+
+            <span class="n">plugin</span><span class="o">.</span><span class="n">display_model</span><span class="p">(</span>
+                <span class="n">data_color</span><span class="o">=</span><span class="n">data_color</span><span class="p">,</span>
+                <span class="n">model_color</span><span class="o">=</span><span class="n">model_color</span><span class="p">,</span>
+                <span class="n">min_rate</span><span class="o">=</span><span class="n">min_rate</span><span class="p">,</span>
+                <span class="n">step</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">show_residuals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">show_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">show_legend</span><span class="o">=</span><span class="n">show_legend</span><span class="p">,</span>
+                <span class="n">ratio_residuals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">model_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">model_subplot</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span>
+                <span class="n">model_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">kwargs</span>
+                <span class="c1">#                model_subplot=axes,</span>
+                <span class="c1">#                data_kwargs=data_kwargs,</span>
+                
+            <span class="p">)</span>
+    <span class="c1">#     else:</span>
+
+    <span class="c1">#         # this is private for now</span>
+    <span class="c1">#         rebinned_quantities = plugin._construct_counts_arrays(min_rate, ratio_residuals)</span>
+
+    <span class="c1">#         if step:</span>
+
+    <span class="c1">#             pass</span>
+
+    <span class="c1">#         else:</span>
+
+    <span class="c1">#             y = (rebinned_quantities[&#39;expected_model_rate&#39;] / rebinned_quantities[&#39;chan_width&#39;])[plugin.mask]</span>
+
+    <span class="c1">#             x = np.mean(</span>
+    <span class="c1">#                 [rebinned_quantities[&#39;energy_min&#39;], rebinned_quantities[&#39;energy_max&#39;]], axis=0)[plugin.mask]</span>
+
+    <span class="c1">#             per_det_y.append(y)</span>
+    <span class="c1">#             per_det_x.append(x)</span>
+
+    <span class="c1"># if shade:</span>
+    <span class="c1">#     shade_y.append(per_det_y)</span>
+    <span class="c1">#     shade_x.append(per_det_x)</span>
+
+    <span class="c1"># if shade:</span>
+
+    <span class="c1">#     # convert to per detector</span>
+    <span class="c1">#     shade_y = np.array(shade_y).T</span>
+    <span class="c1">#     shade_x = np.array(shade_x).T</span>
+    <span class="c1">#     model_kwargs.pop(&#39;zorder&#39;)</span>
+    <span class="c1">#     for key, data_color, model_color, min_rate, model_label, x, y, in zip(</span>
+    <span class="c1">#             data_keys, data_colors, model_colors, min_rates, model_labels, shade_x, shade_y):</span>
+
+    <span class="c1">#         # we have to do a little reshaping because... life</span>
+
+    <span class="c1">#         y = np.array([yy.tolist() for yy in y])</span>
+
+    <span class="c1">#         q_levels = np.atleast_1d(q_level)</span>
+    <span class="c1">#         q_levels.sort()</span>
+
+    <span class="c1">#         scale = 1.</span>
+    <span class="c1">#         zorder = -100</span>
+    <span class="c1">#         for level in q_levels:</span>
+
+    <span class="c1">#             color = color_config.format(model_color)</span>
+    <span class="c1">#             color_scale = color_config.scale_colour(color, scale)</span>
+
+    <span class="c1">#             # first we need to get the quantiles along the energy axis</span>
+    <span class="c1">#             low = np.percentile(y, 50 - level * 0.5, axis=0)</span>
+    <span class="c1">#             high = np.percentile(y, 50 + level * 0.5, axis=0)</span>
+
+    <span class="c1">#             residual_plot.data_axis.fill_between(x[0], low, high, color=color_scale, zorder=zorder, **model_kwargs)</span>
+
+    <span class="c1">#             scale *= gradient</span>
+
+    <span class="c1">#             zorder -= 1</span>
+
+    <span class="c1"># for key, data_color, model_color, min_rate, model_label in zip(data_keys, data_colors, model_colors, min_rates,</span>
+    <span class="c1">#                                                                model_labels):</span>
+
+    <span class="c1">#     # NOTE: we use the original (unmasked) vectors because we need to rebin ourselves the data later on</span>
+
+    <span class="c1">#     data = bayesian_analysis.data_list[key]    # type: threeML.plugins.SpectrumLike.SpectrumLike</span>
+
+    <span class="n">plugin</span><span class="o">.</span><span class="n">display_model</span><span class="p">(</span>
+        <span class="n">data_color</span><span class="o">=</span><span class="n">data_color</span><span class="p">,</span>
+        <span class="n">model_color</span><span class="o">=</span><span class="n">model_color</span><span class="p">,</span>
+        <span class="n">min_rate</span><span class="o">=</span><span class="n">min_rate</span><span class="p">,</span>
+        <span class="n">step</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">show_residuals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">show_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">show_legend</span><span class="o">=</span><span class="n">show_legend</span><span class="p">,</span>
+        <span class="n">ratio_residuals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="c1">#        model_label=model_label,</span>
+        <span class="n">model_subplot</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span>
+        <span class="n">model_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.</span><span class="p">),</span>    <span class="c1"># no model</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+
+        <span class="c1">#    data_kwargs=data_kwargs</span>
+
+        
+
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">residual_plot</span><span class="o">.</span><span class="n">figure</span></div>
+</pre></div>
+
+           </div>
+          </div>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, J. Michael Burgess.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

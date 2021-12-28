@@ -1,0 +1,7 @@
+whimstan.simulations.simulation module
+======================================
+
+.. automodule:: whimstan.simulations.simulation
+    :members:
+    :undoc-members:
+    :show-inheritance:

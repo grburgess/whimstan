@@ -1,0 +1,55 @@
+whimstan package
+================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   whimstan.database
+   whimstan.simulations
+   whimstan.utils
+
+Submodules
+----------
+
+whimstan.fit module
+-------------------
+
+.. automodule:: whimstan.fit
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+whimstan.fitter module
+----------------------
+
+.. automodule:: whimstan.fitter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+whimstan.prep module
+--------------------
+
+.. automodule:: whimstan.prep
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+whimstan.spectral\_plot module
+------------------------------
+
+.. automodule:: whimstan.spectral_plot
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: whimstan
+   :members:
+   :undoc-members:
+   :show-inheritance:

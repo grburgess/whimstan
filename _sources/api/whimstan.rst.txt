@@ -1,0 +1,29 @@
+whimstan package
+================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    whimstan.database
+    whimstan.simulations
+    whimstan.utils
+
+Submodules
+----------
+
+.. toctree::
+
+   whimstan.fit
+   whimstan.fitter
+   whimstan.prep
+   whimstan.spectral_plot
+
+Module contents
+---------------
+
+.. automodule:: whimstan
+    :members:
+    :undoc-members:
+    :show-inheritance:

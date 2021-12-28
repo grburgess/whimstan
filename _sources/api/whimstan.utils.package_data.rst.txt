@@ -1,0 +1,7 @@
+whimstan.utils.package_data module
+==================================
+
+.. automodule:: whimstan.utils.package_data
+    :members:
+    :undoc-members:
+    :show-inheritance:

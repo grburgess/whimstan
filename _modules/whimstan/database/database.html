@@ -1,0 +1,573 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>whimstan.database.database &mdash; whimstan  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^0.21.0-beta.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <link rel="stylesheet" href="../../../_static/pygments/default.css" type="text/css" id="pygments-style">
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css">
+   
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> whimstan
+            <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/simulations.html">Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/API.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/API.html#whimstan">whimstan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">whimstan</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+<div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+  <!--
+  <div class="admonition note">
+    <p><a href="https://github.com/lukelbd">ProPlot author here</a>: Due to my day job as a graduate student, certain <a href="https://github.com/lukelbd/proplot/pulls?q=is%3Aopen+is%3Apr">feature additions</a> may be delayed to the summer of 2020. In the meantime, if you are interested in contributing to ProPlot, please see the <a href="https://proplot.readthedocs.io/en/latest/contributions.html">contribution guide</a>. Any amount of help is welcome!
+    </p>
+  </div>
+  -->
+  <li id="lightdark-li">
+    <label for="lightdark-checkbox" id="lightdark-label">
+      <input type="checkbox" id="lightdark-checkbox"/>
+      <div class="btn-neutral"></div>
+    </label>
+  </li>
+  
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>whimstan.database.database</li>
+
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+  <script type="text/javascript" src=../../../_static/custom.js></script>
+  
+           <div itemprop="articleBody">
+             
+  <h1>Source code for whimstan.database.database</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">h5py</span>
+
+<span class="kn">from</span> <span class="nn">tqdm.auto</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span> <span class="nn">astropy.io.fits</span> <span class="k">as</span> <span class="nn">fits</span>
+
+<span class="kn">from</span> <span class="nn">threeML.plugins.DispersionSpectrumLike</span> <span class="kn">import</span> <span class="n">DispersionSpectrumLike</span>
+<span class="kn">from</span> <span class="nn">threeML.plugins.OGIPLike</span> <span class="kn">import</span> <span class="n">OGIPLike</span>
+<span class="kn">from</span> <span class="nn">threeML</span> <span class="kn">import</span> <span class="n">BayesianAnalysis</span><span class="p">,</span> <span class="n">DataList</span>
+<span class="kn">from</span> <span class="nn">threeML</span> <span class="kn">import</span> <span class="n">silence_warnings</span><span class="p">,</span> <span class="n">update_logging_level</span>
+<span class="kn">from</span> <span class="nn">astromodels.utils.data_files</span> <span class="kn">import</span> <span class="n">_get_data_file_path</span>
+<span class="kn">from</span> <span class="nn">astromodels</span> <span class="kn">import</span> <span class="n">Uniform_prior</span><span class="p">,</span> <span class="n">Log_uniform_prior</span>
+
+
+<span class="kn">from</span> <span class="nn">..utils.format_conversions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">plugin_to_hdf_group</span><span class="p">,</span>
+    <span class="n">build_spectrum_like_from_hdf</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.catalog</span> <span class="kn">import</span> <span class="n">XRTCatalog</span><span class="p">,</span> <span class="n">XRTObs</span>
+
+<span class="kn">from</span> <span class="nn">..utils.absori_precalc</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_abundance</span><span class="p">,</span>
+    <span class="n">load_absori_base</span><span class="p">,</span>
+    <span class="n">get_spec</span><span class="p">,</span>
+    <span class="n">sum_sigma_interp_precalc</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="n">silence_warnings</span><span class="p">()</span>
+<span class="n">update_logging_level</span><span class="p">(</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="build_tbabs_arg"><a class="viewcode-back" href="../../../notebooks/api/whimstan.database.html#whimstan.database.database.build_tbabs_arg">[docs]</a><span class="k">def</span> <span class="nf">build_tbabs_arg</span><span class="p">(</span><span class="n">ene</span><span class="p">):</span>
+
+    <span class="n">file_name</span> <span class="o">=</span> <span class="n">_get_data_file_path</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;xsect/xsect_tbabs_wilm.fits&quot;</span><span class="p">))</span>
+    <span class="n">fxs</span> <span class="o">=</span> <span class="n">fits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+    <span class="n">dxs</span> <span class="o">=</span> <span class="n">fxs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+    <span class="n">xsect_ene</span> <span class="o">=</span> <span class="n">dxs</span><span class="p">[</span><span class="s2">&quot;ENERGY&quot;</span><span class="p">]</span>
+    <span class="n">xsect_val</span> <span class="o">=</span> <span class="n">dxs</span><span class="p">[</span><span class="s2">&quot;SIGMA&quot;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">ene</span><span class="p">,</span> <span class="n">xsect_ene</span><span class="p">,</span> <span class="n">xsect_val</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Database"><a class="viewcode-back" href="../../../notebooks/api/whimstan.database.html#whimstan.database.database.Database">[docs]</a><span class="k">class</span> <span class="nc">Database</span><span class="p">:</span>
+<div class="viewcode-block" id="Database.__init__"><a class="viewcode-back" href="../../../notebooks/api/whimstan.database.html#whimstan.database.database.Database.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">grb_database</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DispersionSpectrumLike</span><span class="p">],</span>
+        <span class="n">catalog</span><span class="p">:</span> <span class="n">XRTCatalog</span><span class="p">,</span>
+        <span class="n">is_sim</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plugins</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DispersionSpectrumLike</span><span class="p">]</span> <span class="o">=</span> <span class="n">grb_database</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_catalog</span><span class="p">:</span> <span class="n">XRTCatalog</span> <span class="o">=</span> <span class="n">catalog</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_sim</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">is_sim</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_sim</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_sim</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">plugins</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DispersionSpectrumLike</span><span class="p">]:</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugins</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">catalog</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">XRTCatalog</span><span class="p">:</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_catalog</span>
+
+<div class="viewcode-block" id="Database.read"><a class="viewcode-back" href="../../../notebooks/api/whimstan.database.html#whimstan.database.database.Database.read">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        create a database from a file</span>
+<span class="sd">        or HDF group</span>
+
+<span class="sd">        :param cls:</span>
+<span class="sd">        :type cls:</span>
+<span class="sd">        :param file_name:</span>
+<span class="sd">        :type file_name:</span>
+<span class="sd">        :returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+
+            <span class="n">is_file</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Group</span><span class="p">):</span>
+
+            <span class="n">f</span> <span class="o">=</span> <span class="n">file_name</span>
+
+            <span class="n">is_file</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">()</span>
+
+        <span class="n">catalog</span> <span class="o">=</span> <span class="n">XRTCatalog</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s2">&quot;catalog&quot;</span><span class="p">])</span>
+
+        <span class="n">grb_database</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">grb</span> <span class="ow">in</span> <span class="n">catalog</span><span class="o">.</span><span class="n">grbs</span><span class="p">:</span>
+
+            <span class="n">grb_database</span><span class="p">[</span><span class="n">grb</span><span class="p">]</span> <span class="o">=</span> <span class="n">build_spectrum_like_from_hdf</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="n">grb</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">is_file</span><span class="p">:</span>
+
+            <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">grb_database</span><span class="p">,</span> <span class="n">catalog</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Database.write"><a class="viewcode-back" href="../../../notebooks/api/whimstan.database.html#whimstan.database.database.Database.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        write the database to a file or</span>
+<span class="sd">        HDF group</span>
+
+<span class="sd">        :param file_name:</span>
+<span class="sd">        :type file_name:</span>
+<span class="sd">        :returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+
+            <span class="n">is_file</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Group</span><span class="p">):</span>
+
+            <span class="n">f</span> <span class="o">=</span> <span class="n">file_name</span>
+
+            <span class="n">is_file</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">()</span>
+
+        <span class="n">cat_grp</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;catalog&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_catalog</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cat_grp</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">grb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">grbs</span><span class="p">:</span>
+
+            <span class="n">grb_grp</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
+
+            <span class="n">plugin_to_hdf_group</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plugins</span><span class="p">[</span><span class="n">grb</span><span class="p">],</span> <span class="n">grb_grp</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">is_file</span><span class="p">:</span>
+
+            <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Database.from_fits_files"><a class="viewcode-back" href="../../../notebooks/api/whimstan.database.html#whimstan.database.database.Database.from_fits_files">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_fits_files</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">catalog</span><span class="p">:</span> <span class="n">XRTCatalog</span><span class="p">,</span>
+        <span class="n">cat_path</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">,</span>
+        <span class="n">is_sim</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">clean</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="n">grbs</span> <span class="o">=</span> <span class="n">catalog</span><span class="o">.</span><span class="n">grbs</span>
+
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+
+            <span class="k">for</span> <span class="n">grb</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">grbs</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="s2">&quot;#33F0B4&quot;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Reading GRBs&quot;</span><span class="p">):</span>
+
+                <span class="n">cat_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cat_path</span><span class="p">)</span>
+                <span class="n">bpath</span> <span class="o">=</span> <span class="n">cat_path</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;grb</span><span class="si">{</span><span class="n">grb</span><span class="si">}</span><span class="s2">&quot;</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">is_sim</span><span class="p">:</span>
+
+                    <span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">pc&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">]]</span>
+                    <span class="n">options</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">wt&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">]])</span>
+
+                    <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+
+                        <span class="k">try</span><span class="p">:</span>
+
+                            <span class="n">observation</span> <span class="o">=</span> <span class="n">bpath</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">opt</span><span class="si">}</span><span class="s2">.pi&quot;</span>
+                            <span class="n">background</span> <span class="o">=</span> <span class="n">bpath</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">opt</span><span class="si">}</span><span class="s2">back.pi&quot;</span>
+                            <span class="n">response</span> <span class="o">=</span> <span class="n">bpath</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">opt</span><span class="si">}</span><span class="s2">.rmf&quot;</span>
+                            <span class="n">arf_file</span> <span class="o">=</span> <span class="n">bpath</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">opt</span><span class="si">}</span><span class="s2">.arf&quot;</span>
+
+                            <span class="k">break</span>
+
+                        <span class="k">except</span><span class="p">:</span>
+
+                            <span class="k">pass</span>
+                    <span class="k">else</span><span class="p">:</span>
+
+                        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No data for GRB </span><span class="si">{</span><span class="n">grb</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                    <span class="n">plugin</span> <span class="o">=</span> <span class="n">OGIPLike</span><span class="p">(</span>
+                        <span class="s2">&quot;tmp&quot;</span><span class="p">,</span>
+                        <span class="n">observation</span><span class="o">=</span><span class="n">observation</span><span class="p">,</span>
+                        <span class="n">background</span><span class="o">=</span><span class="n">background</span><span class="p">,</span>
+                        <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">,</span>
+                        <span class="n">arf_file</span><span class="o">=</span><span class="n">arf_file</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">opt</span> <span class="o">=</span> <span class="s2">&quot;apc&quot;</span>
+
+                    <span class="n">observation</span> <span class="o">=</span> <span class="n">bpath</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">opt</span><span class="si">}</span><span class="s2">.pha&quot;</span>
+                    <span class="n">background</span> <span class="o">=</span> <span class="n">bpath</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">opt</span><span class="si">}</span><span class="s2">_bak.pha&quot;</span>
+                    <span class="n">response</span> <span class="o">=</span> <span class="n">bpath</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">opt</span><span class="si">}</span><span class="s2">.rsp&quot;</span>
+                    <span class="n">arf_file</span> <span class="o">=</span> <span class="kc">None</span>
+
+                    <span class="n">plugin</span> <span class="o">=</span> <span class="n">OGIPLike</span><span class="p">(</span>
+                        <span class="s2">&quot;tmp&quot;</span><span class="p">,</span>
+                        <span class="n">observation</span><span class="o">=</span><span class="n">observation</span><span class="p">,</span>
+                        <span class="n">background</span><span class="o">=</span><span class="n">background</span><span class="p">,</span>
+                        <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">,</span>
+                        <span class="n">arf_file</span><span class="o">=</span><span class="n">arf_file</span><span class="p">,</span>
+                        <span class="n">spectrum_number</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+                <span class="n">grb_grp</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">grb</span><span class="p">)</span>
+
+                <span class="n">plugin_to_hdf_group</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="n">grb_grp</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">clean</span> <span class="ow">and</span> <span class="n">is_sim</span><span class="p">:</span>
+                    <span class="n">observation</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+                    <span class="n">background</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+                    <span class="n">response</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+
+                    <span class="n">bpath</span><span class="o">.</span><span class="n">rmdir</span><span class="p">()</span>
+
+            <span class="c1"># Now save the catalog</span>
+
+            <span class="n">cat_grp</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;catalog&quot;</span><span class="p">)</span>
+
+            <span class="n">catalog</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cat_grp</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">file_name</span><span class="o">=</span><span class="n">file_name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Database.build_stan_data"><a class="viewcode-back" href="../../../notebooks/api/whimstan.database.html#whimstan.database.database.Database.build_stan_data">[docs]</a>    <span class="k">def</span> <span class="nf">build_stan_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">use_absori</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">use_mw_gas</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">use_host_gas</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param catalog:</span>
+<span class="sd">        :type catalog:</span>
+<span class="sd">        :param cat_path:</span>
+<span class="sd">        :type cat_path:</span>
+<span class="sd">        :param is_sim:</span>
+<span class="sd">        :type is_sim:</span>
+<span class="sd">        :param use_absori:</span>
+<span class="sd">        :type use_absori:</span>
+<span class="sd">        :param use_mw_gas:</span>
+<span class="sd">        :type use_mw_gas:</span>
+<span class="sd">        :param use_host_gas:</span>
+<span class="sd">        :type use_host_gas:</span>
+<span class="sd">        :returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">z</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">use_mw_gas</span><span class="p">:</span>
+            <span class="n">nH_mw</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">exposure_ratio</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">bkg</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">n_chans_used</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">rsp</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">N_ene</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">N_chan</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">pca</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">pcaz</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ene_avg</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ene_width</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">exposure</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">grbs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_catalog</span><span class="o">.</span><span class="n">grbs</span>
+
+        <span class="n">N_grbs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">grbs</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">grb</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">grbs</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="s2">&quot;#3DFF6C&quot;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;building GRBs&quot;</span><span class="p">):</span>
+
+            <span class="n">z</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="p">[</span><span class="n">grb</span><span class="p">]</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">use_mw_gas</span><span class="p">:</span>
+                <span class="n">nH_mw</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="p">[</span><span class="n">grb</span><span class="p">]</span><span class="o">.</span><span class="n">nH_mw</span><span class="p">)</span>
+
+            <span class="c1"># extract data from the plugin associated with</span>
+            <span class="c1"># this GRB plugin</span>
+
+            <span class="n">x</span><span class="p">:</span> <span class="n">XRTObs</span> <span class="o">=</span> <span class="n">XRTObs</span><span class="o">.</span><span class="n">extract_xrt_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plugins</span><span class="p">[</span><span class="n">grb</span><span class="p">])</span>
+
+            <span class="n">N_ene</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">n_ene</span><span class="p">))</span>
+            <span class="n">N_chan</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">n_chan</span><span class="p">))</span>
+
+            <span class="n">n_chans_used</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">n_chans_used</span><span class="p">))</span>
+
+            <span class="n">rsp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">rsp</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            <span class="n">exposure_ratio</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">scale_factor</span><span class="p">))</span>
+            <span class="n">counts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">obs_count</span><span class="p">)</span>
+            <span class="n">bkg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">bkg_count</span><span class="p">)</span>
+
+            <span class="n">mask</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span>
+
+            <span class="n">exposure</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">exposure</span><span class="p">)</span>
+            <span class="n">ene_avg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">ene_avg</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            <span class="n">ene_width</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">ene_width</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+            <span class="k">if</span> <span class="n">use_mw_gas</span><span class="p">:</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">build_tbabs_arg</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">ene_avg</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="n">pca</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">use_host_gas</span><span class="p">:</span>
+                <span class="n">pz</span> <span class="o">=</span> <span class="n">build_tbabs_arg</span><span class="p">(</span>
+                    <span class="n">x</span><span class="o">.</span><span class="n">ene_avg</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="p">[</span><span class="n">grb</span><span class="p">]</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">pcaz</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pz</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+            <span class="c1"># absori stuff</span>
+
+        <span class="c1"># absori stuff</span>
+        <span class="k">if</span> <span class="n">use_absori</span><span class="p">:</span>
+
+            <span class="n">ion</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">atomicnumber</span><span class="p">,</span> <span class="n">absori_base_energy</span> <span class="o">=</span> <span class="n">load_absori_base</span><span class="p">()</span>
+            <span class="n">abundance</span> <span class="o">=</span> <span class="n">get_abundance</span><span class="p">()</span>
+            <span class="n">sum_sigma_interp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N_grbs</span><span class="p">,</span> <span class="n">N_ene</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">26</span><span class="p">))</span>
+
+            <span class="c1"># calc ionizing spectrum - for fixed gamma=2 at the moment</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="n">get_spec</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">zval</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+                <span class="n">sum_sigma_interp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sum_sigma_interp_precalc</span><span class="p">(</span>
+                    <span class="n">zval</span><span class="p">,</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ene_avg</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+                    <span class="n">absori_base_energy</span><span class="p">,</span>
+                    <span class="n">sigma</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+                    <span class="mf">0.02</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="n">absori_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="c1"># absori</span>
+                <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span>
+                <span class="n">ion</span><span class="o">=</span><span class="n">ion</span><span class="p">,</span>
+                <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span>
+                <span class="n">atomicnumber</span><span class="o">=</span><span class="n">atomicnumber</span><span class="p">,</span>
+                <span class="n">sum_sigma_interp</span><span class="o">=</span><span class="n">sum_sigma_interp</span><span class="p">,</span>
+                <span class="n">abundance</span><span class="o">=</span><span class="n">abundance</span><span class="p">,</span>
+                <span class="n">xi</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># fixed at the moment</span>
+            <span class="p">)</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">N_grbs</span><span class="o">=</span><span class="n">N_grbs</span><span class="p">,</span>
+            <span class="n">N_chan</span><span class="o">=</span><span class="n">N_chan</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">N_ene</span><span class="o">=</span><span class="n">N_ene</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">rsp</span><span class="o">=</span><span class="n">rsp</span><span class="p">,</span>
+            <span class="n">exposure_ratio</span><span class="o">=</span><span class="n">exposure_ratio</span><span class="p">,</span>
+            <span class="n">ene_avg</span><span class="o">=</span><span class="n">ene_avg</span><span class="p">,</span>
+            <span class="n">ene_width</span><span class="o">=</span><span class="n">ene_width</span><span class="p">,</span>
+            <span class="n">counts</span><span class="o">=</span><span class="n">counts</span><span class="p">,</span>
+            <span class="n">bkg</span><span class="o">=</span><span class="n">bkg</span><span class="p">,</span>
+            <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+            <span class="n">n_chans_used</span><span class="o">=</span><span class="n">n_chans_used</span><span class="p">,</span>
+            <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span>
+            <span class="n">precomputed_absorp</span><span class="o">=</span><span class="n">pca</span><span class="p">,</span>
+            <span class="n">host_precomputed_absorp</span><span class="o">=</span><span class="n">pcaz</span><span class="p">,</span>
+            <span class="n">exposure</span><span class="o">=</span><span class="n">exposure</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">use_mw_gas</span><span class="p">:</span>
+            <span class="n">res</span><span class="p">[</span><span class="s2">&quot;nH_mw&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nH_mw</span>
+            <span class="n">res</span><span class="p">[</span><span class="s2">&quot;precomputed_absorp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pca</span>
+
+        <span class="k">if</span> <span class="n">use_host_gas</span><span class="p">:</span>
+            <span class="n">res</span><span class="p">[</span><span class="s2">&quot;host_precomputed_absorp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pcaz</span>
+
+        <span class="k">if</span> <span class="n">use_absori</span><span class="p">:</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">absori_dict</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">res</span></div>
+
+<div class="viewcode-block" id="Database.build_3ml_analysis"><a class="viewcode-back" href="../../../notebooks/api/whimstan.database.html#whimstan.database.database.Database.build_3ml_analysis">[docs]</a>    <span class="k">def</span> <span class="nf">build_3ml_analysis</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">with_whim</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BayesianAnalysis</span><span class="p">:</span>
+
+        <span class="n">grb</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_catalog</span><span class="o">.</span><span class="n">grbs</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>
+
+        <span class="n">plugin</span><span class="p">:</span> <span class="n">DispersionSpectrumLike</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugins</span><span class="p">[</span><span class="n">grb</span><span class="p">]</span>
+
+        <span class="n">plugin</span><span class="o">.</span><span class="n">set_active_measurements</span><span class="p">(</span><span class="s2">&quot;0.3-10.&quot;</span><span class="p">)</span>
+
+        <span class="n">model_container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_catalog</span><span class="o">.</span><span class="n">catalog</span><span class="p">[</span><span class="n">grb</span><span class="p">]</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span>
+            <span class="n">with_host</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">with_whim</span><span class="o">=</span><span class="n">with_whim</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">with_whim</span><span class="p">:</span>
+
+            <span class="n">model</span> <span class="o">=</span> <span class="n">model_container</span><span class="o">.</span><span class="n">model_all</span>
+            <span class="n">model_name</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span>
+
+            <span class="n">model</span><span class="o">.</span><span class="n">point_sources</span><span class="p">[</span>
+                <span class="n">model_name</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">composite</span><span class="o">.</span><span class="n">n0_4</span><span class="o">.</span><span class="n">prior</span> <span class="o">=</span> <span class="n">Log_uniform_prior</span><span class="p">(</span>
+                <span class="n">lower_bound</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mf">1e-4</span>
+            <span class="p">)</span>
+
+            <span class="n">model</span><span class="o">.</span><span class="n">point_sources</span><span class="p">[</span>
+                <span class="n">model_name</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">composite</span><span class="o">.</span><span class="n">temp_4</span><span class="o">.</span><span class="n">prior</span> <span class="o">=</span> <span class="n">Log_uniform_prior</span><span class="p">(</span>
+                <span class="n">lower_bound</span><span class="o">=</span><span class="mf">1e4</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mf">1e7</span>
+            <span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="n">model</span> <span class="o">=</span> <span class="n">model_container</span><span class="o">.</span><span class="n">model_host</span>
+            <span class="n">model_name</span> <span class="o">=</span> <span class="s2">&quot;host&quot;</span>
+
+        <span class="n">model</span><span class="o">.</span><span class="n">point_sources</span><span class="p">[</span>
+            <span class="n">model_name</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">composite</span><span class="o">.</span><span class="n">F_1</span><span class="o">.</span><span class="n">prior</span> <span class="o">=</span> <span class="n">Log_uniform_prior</span><span class="p">(</span>
+            <span class="n">lower_bound</span><span class="o">=</span><span class="mf">1e-20</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mf">1e-2</span>
+        <span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">point_sources</span><span class="p">[</span>
+            <span class="n">model_name</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">composite</span><span class="o">.</span><span class="n">index_1</span><span class="o">.</span><span class="n">prior</span> <span class="o">=</span> <span class="n">Uniform_prior</span><span class="p">(</span>
+            <span class="n">lower_bound</span><span class="o">=-</span><span class="mi">3</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=-</span><span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">point_sources</span><span class="p">[</span>
+            <span class="n">model_name</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">composite</span><span class="o">.</span><span class="n">NH_3</span><span class="o">.</span><span class="n">prior</span> <span class="o">=</span> <span class="n">Log_uniform_prior</span><span class="p">(</span>
+            <span class="n">lower_bound</span><span class="o">=</span><span class="mf">1.0e19</span> <span class="o">/</span> <span class="mf">1.0e22</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mf">1.0e26</span> <span class="o">/</span> <span class="mf">1.0e22</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">BayesianAnalysis</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">DataList</span><span class="p">(</span><span class="n">plugin</span><span class="p">))</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, J. Michael Burgess.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

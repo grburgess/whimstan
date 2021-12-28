@@ -1,0 +1,7 @@
+whimstan.spectral_plot module
+=============================
+
+.. automodule:: whimstan.spectral_plot
+    :members:
+    :undoc-members:
+    :show-inheritance:

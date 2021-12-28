@@ -1,0 +1,447 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>whimstan.simulations.population_generator module &mdash; whimstan  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^0.21.0-beta.1/dist/embed-amd.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="whimstan.simulations.simulation module" href="whimstan.simulations.simulation.html" />
+    <link rel="prev" title="whimstan.simulations.cloud module" href="whimstan.simulations.cloud.html" />
+  <link rel="stylesheet" href="../_static/pygments/default.css" type="text/css" id="pygments-style">
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css">
+   
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> whimstan
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/simulations.html">Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="API.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="API.html#whimstan">whimstan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">whimstan</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+<div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+  <!--
+  <div class="admonition note">
+    <p><a href="https://github.com/lukelbd">ProPlot author here</a>: Due to my day job as a graduate student, certain <a href="https://github.com/lukelbd/proplot/pulls?q=is%3Aopen+is%3Apr">feature additions</a> may be delayed to the summer of 2020. In the meantime, if you are interested in contributing to ProPlot, please see the <a href="https://proplot.readthedocs.io/en/latest/contributions.html">contribution guide</a>. Any amount of help is welcome!
+    </p>
+  </div>
+  -->
+  <li id="lightdark-li">
+    <label for="lightdark-checkbox" id="lightdark-label">
+      <input type="checkbox" id="lightdark-checkbox"/>
+      <div class="btn-neutral"></div>
+    </label>
+  </li>
+  
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="API.html">API</a> &raquo;</li>
+          <li><a href="whimstan.html">whimstan package</a> &raquo;</li>
+          <li><a href="whimstan.simulations.html">whimstan.simulations package</a> &raquo;</li>
+      <li>whimstan.simulations.population_generator module</li>
+
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+  <script type="text/javascript" src=../_static/custom.js></script>
+  
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="module-whimstan.simulations.population_generator">
+<span id="whimstan-simulations-population-generator-module"></span><h1>whimstan.simulations.population_generator module<a class="headerlink" href="#module-whimstan.simulations.population_generator" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.SchechterSampler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">whimstan.simulations.population_generator.</span></span><span class="sig-name descname"><span class="pre">SchechterSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'plaw_flux'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#SchechterSampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.SchechterSampler" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">popsynth.auxiliary_sampler.AuxiliarySampler</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.SchechterSampler.Lmin">
+<span class="sig-name descname"><span class="pre">Lmin</span></span><a class="headerlink" href="#whimstan.simulations.population_generator.SchechterSampler.Lmin" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.SchechterSampler.alpha">
+<span class="sig-name descname"><span class="pre">alpha</span></span><a class="headerlink" href="#whimstan.simulations.population_generator.SchechterSampler.alpha" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.SchechterSampler.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'plaw_flux'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#SchechterSampler.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.SchechterSampler.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>A Schechter luminosity function
+:param name: the name
+:returns: None
+:rtype:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.SchechterSampler.true_sampler">
+<span class="sig-name descname"><span class="pre">true_sampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#SchechterSampler.true_sampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.SchechterSampler.true_sampler" title="Permalink to this definition"></a></dt>
+<dd><p>FIXME! briefly describe function
+:param size:
+:returns:
+:rtype:</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.HostGas">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">whimstan.simulations.population_generator.</span></span><span class="sig-name descname"><span class="pre">HostGas</span></span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#HostGas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.HostGas" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">popsynth.auxiliary_sampler.AuxiliarySampler</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.HostGas.nh_mean">
+<span class="sig-name descname"><span class="pre">nh_mean</span></span><a class="headerlink" href="#whimstan.simulations.population_generator.HostGas.nh_mean" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.HostGas.zratio">
+<span class="sig-name descname"><span class="pre">zratio</span></span><a class="headerlink" href="#whimstan.simulations.population_generator.HostGas.zratio" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.HostGas.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#HostGas.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.HostGas.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>The value of the host gas density in 1/cm2</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.HostGas.true_sampler">
+<span class="sig-name descname"><span class="pre">true_sampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#HostGas.true_sampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.HostGas.true_sampler" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.HostGasVari">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">whimstan.simulations.population_generator.</span></span><span class="sig-name descname"><span class="pre">HostGasVari</span></span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#HostGasVari"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.HostGasVari" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">popsynth.auxiliary_sampler.AuxiliarySampler</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.HostGasVari.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#HostGasVari.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.HostGasVari.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>The value of the host gas density in 1/cm2</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.HostGasVari.true_sampler">
+<span class="sig-name descname"><span class="pre">true_sampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#HostGasVari.true_sampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.HostGasVari.true_sampler" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.ZRSampler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">whimstan.simulations.population_generator.</span></span><span class="sig-name descname"><span class="pre">ZRSampler</span></span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#ZRSampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.ZRSampler" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">popsynth.auxiliary_sampler.AuxiliarySampler</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.ZRSampler.zmin">
+<span class="sig-name descname"><span class="pre">zmin</span></span><a class="headerlink" href="#whimstan.simulations.population_generator.ZRSampler.zmin" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.ZRSampler.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#ZRSampler.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.ZRSampler.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Log uniform sampler for the Z/R ratio</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.ZRSampler.true_sampler">
+<span class="sig-name descname"><span class="pre">true_sampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#ZRSampler.true_sampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.ZRSampler.true_sampler" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.MilkyWayGas">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">whimstan.simulations.population_generator.</span></span><span class="sig-name descname"><span class="pre">MilkyWayGas</span></span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#MilkyWayGas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.MilkyWayGas" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">popsynth.auxiliary_sampler.AuxiliarySampler</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.MilkyWayGas.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#MilkyWayGas.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.MilkyWayGas.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>The value of the milky way gas density in 1/cm2</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.MilkyWayGas.true_sampler">
+<span class="sig-name descname"><span class="pre">true_sampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#MilkyWayGas.true_sampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.MilkyWayGas.true_sampler" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.MWGasSelection">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">whimstan.simulations.population_generator.</span></span><span class="sig-name descname"><span class="pre">MWGasSelection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mw</span> <span class="pre">gas</span> <span class="pre">selector'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#MWGasSelection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.MWGasSelection" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">popsynth.selection_probability.selection_probability.SelectionProbability</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.MWGasSelection.gas_limit">
+<span class="sig-name descname"><span class="pre">gas_limit</span></span><a class="headerlink" href="#whimstan.simulations.population_generator.MWGasSelection.gas_limit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.MWGasSelection.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mw</span> <span class="pre">gas</span> <span class="pre">selector'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#MWGasSelection.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.MWGasSelection.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>places a limit on the amount of MW gas allowed for
+each object in the sample</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.MWGasSelection.draw">
+<span class="sig-name descname"><span class="pre">draw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#MWGasSelection.draw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.MWGasSelection.draw" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.CountsSelector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">whimstan.simulations.population_generator.</span></span><span class="sig-name descname"><span class="pre">CountsSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'counts</span> <span class="pre">selector'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#CountsSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.CountsSelector" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">popsynth.selection_probability.selection_probability.SelectionProbability</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.CountsSelector.counts_limit">
+<span class="sig-name descname"><span class="pre">counts_limit</span></span><a class="headerlink" href="#whimstan.simulations.population_generator.CountsSelector.counts_limit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.CountsSelector.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'counts</span> <span class="pre">selector'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#CountsSelector.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.CountsSelector.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>places a min limit on the number of counts</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.CountsSelector.draw">
+<span class="sig-name descname"><span class="pre">draw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#CountsSelector.draw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.CountsSelector.draw" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.GalacticPlaceDistanceSelection">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">whimstan.simulations.population_generator.</span></span><span class="sig-name descname"><span class="pre">GalacticPlaceDistanceSelection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mw</span> <span class="pre">plane</span> <span class="pre">selector'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#GalacticPlaceDistanceSelection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.GalacticPlaceDistanceSelection" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">popsynth.selection_probability.spatial_selection.SpatialSelection</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.GalacticPlaceDistanceSelection.b_limit">
+<span class="sig-name descname"><span class="pre">b_limit</span></span><a class="headerlink" href="#whimstan.simulations.population_generator.GalacticPlaceDistanceSelection.b_limit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.GalacticPlaceDistanceSelection.z_min">
+<span class="sig-name descname"><span class="pre">z_min</span></span><a class="headerlink" href="#whimstan.simulations.population_generator.GalacticPlaceDistanceSelection.z_min" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.GalacticPlaceDistanceSelection.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mw</span> <span class="pre">plane</span> <span class="pre">selector'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#GalacticPlaceDistanceSelection.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.GalacticPlaceDistanceSelection.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>places a limit above the galactic plane for objects</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.GalacticPlaceDistanceSelection.draw">
+<span class="sig-name descname"><span class="pre">draw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#GalacticPlaceDistanceSelection.draw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.GalacticPlaceDistanceSelection.draw" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.ExposureSampler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">whimstan.simulations.population_generator.</span></span><span class="sig-name descname"><span class="pre">ExposureSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">low</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#ExposureSampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.ExposureSampler" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">popsynth.auxiliary_sampler.AuxiliarySampler</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.ExposureSampler.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">low</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#ExposureSampler.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.ExposureSampler.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Base class for auxiliary samplers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of the sampler</p></li>
+<li><p><strong>observed</strong> (<em>bool</em>) – <cite>True</cite> if the property is observed,
+<cite>False</cite> if it is latent. Defaults to <cite>True</cite></p></li>
+<li><p><strong>uses_distance</strong> (<em>bool</em>) – <cite>True</cite> if sampler uses distance values</p></li>
+<li><p><strong>uses_luminosity</strong> (<em>bool</em>) – <cite>True</cite> if sampler uses luminosities</p></li>
+<li><p><strong>uses_sky_position</strong> (<em>bool</em>) – <cite>True</cite> if sampler uses sky positions</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.ExposureSampler.true_sampler">
+<span class="sig-name descname"><span class="pre">true_sampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#ExposureSampler.true_sampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.ExposureSampler.true_sampler" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.ObscuredFluxSampler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">whimstan.simulations.population_generator.</span></span><span class="sig-name descname"><span class="pre">ObscuredFluxSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">whim_n0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">whim_T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_mw_gas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_host_gas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plugin_for_counts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">threeML.plugins.OGIPLike.OGIPLike</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#ObscuredFluxSampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.ObscuredFluxSampler" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">popsynth.auxiliary_sampler.DerivedLumAuxSampler</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.ObscuredFluxSampler.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">whim_n0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">whim_T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_mw_gas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_host_gas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plugin_for_counts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">threeML.plugins.OGIPLike.OGIPLike</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#ObscuredFluxSampler.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.ObscuredFluxSampler.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>computes the obscured flux from the GRB by integrating the spectra</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> – lower bound of integration</p></li>
+<li><p><strong>b</strong> – upper bound of integration</p></li>
+<li><p><strong>whim_n0</strong> – the optional whim particle density</p></li>
+<li><p><strong>whim_T</strong> – the optional whim temperature in K</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.ObscuredFluxSampler.true_sampler">
+<span class="sig-name descname"><span class="pre">true_sampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#ObscuredFluxSampler.true_sampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.ObscuredFluxSampler.true_sampler" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.ObscuredFluxSampler.compute_luminosity">
+<span class="sig-name descname"><span class="pre">compute_luminosity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#ObscuredFluxSampler.compute_luminosity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.ObscuredFluxSampler.compute_luminosity" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="whimstan.simulations.population_generator.create_population">
+<span class="sig-prename descclassname"><span class="pre">whimstan.simulations.population_generator.</span></span><span class="sig-name descname"><span class="pre">create_population</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0157</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rise</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.118</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peak</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e+46</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host_gas_mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">23</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host_gas_sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host_gas_cloud_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mw_nh_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_clouds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vari_clouds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec_idx_mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-</span> <span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec_idx_std</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_mw_gas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_host_gas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">whim_n0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">whim_T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">demo_plugin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">threeML.plugins.OGIPLike.OGIPLike</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">counts_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_high</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_low</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">popsynth.population_synth.PopulationSynth</span></span></span><a class="reference internal" href="../_modules/whimstan/simulations/population_generator.html#create_population"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#whimstan.simulations.population_generator.create_population" title="Permalink to this definition"></a></dt>
+<dd><p>create a population syn</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r0</strong> (<em>float</em>) – </p></li>
+<li><p><strong>a</strong> (<em>float</em>) – </p></li>
+<li><p><strong>rise</strong> (<em>float</em>) – </p></li>
+<li><p><strong>decay</strong> (<em>float</em>) – </p></li>
+<li><p><strong>peak</strong> (<em>float</em>) – </p></li>
+<li><p><strong>z_max</strong> (<em>float</em>) – </p></li>
+<li><p><strong>Lmin</strong> (<em>float</em>) – </p></li>
+<li><p><strong>alpha</strong> (<em>float</em>) – </p></li>
+<li><p><strong>host_gas_mean</strong> (<em>float</em>) – </p></li>
+<li><p><strong>host_gas_sigma</strong> (<em>float</em>) – </p></li>
+<li><p><strong>host_gas_cloud_ratio</strong> (<em>float</em>) – </p></li>
+<li><p><strong>mw_nh_limit</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – </p></li>
+<li><p><strong>b_limit</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – </p></li>
+<li><p><strong>use_clouds</strong> (<em>bool</em>) – </p></li>
+<li><p><strong>vari_clouds</strong> (<em>bool</em>) – </p></li>
+<li><p><strong>spec_idx_mean</strong> (<em>float</em>) – </p></li>
+<li><p><strong>spec_idx_std</strong> (<em>float</em>) – </p></li>
+<li><p><strong>use_mw_gas</strong> (<em>bool</em>) – </p></li>
+<li><p><strong>use_host_gas</strong> (<em>bool</em>) – </p></li>
+<li><p><strong>whim_n0</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – </p></li>
+<li><p><strong>whim_T</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – </p></li>
+<li><p><strong>demo_plugin</strong> (<em>Optional</em><em>[</em><em>OGIPLike</em><em>]</em>) – </p></li>
+<li><p><strong>counts_limit</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – </p></li>
+<li><p><strong>exposure_high</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – </p></li>
+<li><p><strong>exposure_low</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – </p></li>
+<li><p><strong>z_min</strong> (<em>float</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="whimstan.simulations.cloud.html" class="btn btn-neutral float-left" title="whimstan.simulations.cloud module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="whimstan.simulations.simulation.html" class="btn btn-neutral float-right" title="whimstan.simulations.simulation module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, J. Michael Burgess.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+whimstan.database.catalog module
+================================
+
+.. automodule:: whimstan.database.catalog
+    :members:
+    :undoc-members:
+    :show-inheritance:

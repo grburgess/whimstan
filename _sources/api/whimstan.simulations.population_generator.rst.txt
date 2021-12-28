@@ -1,0 +1,7 @@
+whimstan.simulations.population_generator module
+================================================
+
+.. automodule:: whimstan.simulations.population_generator
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,271 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>whimstan.utils.absori_precalc &mdash; whimstan  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^0.21.0-beta.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <link rel="stylesheet" href="../../../_static/pygments/default.css" type="text/css" id="pygments-style">
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css">
+   
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> whimstan
+            <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/simulations.html">Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/API.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/API.html#whimstan">whimstan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">whimstan</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+<div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+  <!--
+  <div class="admonition note">
+    <p><a href="https://github.com/lukelbd">ProPlot author here</a>: Due to my day job as a graduate student, certain <a href="https://github.com/lukelbd/proplot/pulls?q=is%3Aopen+is%3Apr">feature additions</a> may be delayed to the summer of 2020. In the meantime, if you are interested in contributing to ProPlot, please see the <a href="https://proplot.readthedocs.io/en/latest/contributions.html">contribution guide</a>. Any amount of help is welcome!
+    </p>
+  </div>
+  -->
+  <li id="lightdark-li">
+    <label for="lightdark-checkbox" id="lightdark-label">
+      <input type="checkbox" id="lightdark-checkbox"/>
+      <div class="btn-neutral"></div>
+    </label>
+  </li>
+  
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>whimstan.utils.absori_precalc</li>
+
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+  <script type="text/javascript" src=../../../_static/custom.js></script>
+  
+           <div itemprop="articleBody">
+             
+  <h1>Source code for whimstan.utils.absori_precalc</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="kn">import</span> <span class="n">fits</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">get_path_of_data_file</span>
+
+
+<span class="n">absori_elements</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;He&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;Ne&quot;</span><span class="p">,</span> <span class="s2">&quot;Mg&quot;</span><span class="p">,</span> <span class="s2">&quot;Si&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;Fe&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="get_abundance"><a class="viewcode-back" href="../../../notebooks/api/whimstan.utils.html#whimstan.utils.absori_precalc.get_abundance">[docs]</a><span class="k">def</span> <span class="nf">get_abundance</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;angr&quot;</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">get_path_of_data_file</span><span class="p">(</span><span class="s2">&quot;abundances.dat&quot;</span><span class="p">))</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+        <span class="n">ele</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+        <span class="n">ele</span> <span class="o">=</span> <span class="n">ele</span><span class="p">[</span><span class="n">ele</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="c1"># get rid of \n at the end</span>
+        <span class="n">ele</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">ele</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">7</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ele</span><span class="p">)))</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rows</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">8</span><span class="p">]):</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="n">l</span><span class="p">[</span><span class="n">l</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
+            <span class="c1"># get rid of \n at the end</span>
+            <span class="k">if</span> <span class="n">l</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="o">==</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">:</span>
+                <span class="n">l</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">l</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="mi">2</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">l</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">:</span>
+                <span class="n">l</span> <span class="o">=</span> <span class="n">l</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+    <span class="n">vals_all</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">absori_elements</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">absori_elements</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">element</span> <span class="ow">in</span> <span class="n">ele</span>
+        <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">element</span><span class="si">}</span><span class="s2"> not a valid element. Valid elements: </span><span class="si">{</span><span class="n">ele</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">ele</span> <span class="o">==</span> <span class="n">element</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">assert</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> not a valid name. Valid names: </span><span class="si">{</span><span class="n">keys</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="n">idy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">keys</span> <span class="o">==</span> <span class="n">name</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">vals_all</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="n">idy</span><span class="p">,</span> <span class="n">idx</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">vals_all</span></div>
+
+
+<div class="viewcode-block" id="load_absori_base"><a class="viewcode-back" href="../../../notebooks/api/whimstan.utils.html#whimstan.utils.absori_precalc.load_absori_base">[docs]</a><span class="k">def</span> <span class="nf">load_absori_base</span><span class="p">():</span>
+    <span class="n">ion</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">721</span><span class="p">))</span>
+    <span class="n">atomicnumber</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">fits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">get_path_of_data_file</span><span class="p">(</span><span class="s2">&quot;mansig.fits&quot;</span><span class="p">))</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">znumber</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;SIGMAS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;Z&quot;</span><span class="p">]</span>
+        <span class="n">ionnumber</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;SIGMAS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;ION&quot;</span><span class="p">]</span>
+        <span class="n">sigmadata</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;SIGMAS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;SIGMA&quot;</span><span class="p">]</span>
+        <span class="n">iondata</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;SIGMAS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;IONDATA&quot;</span><span class="p">]</span>
+
+        <span class="n">energy</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;ENERGIES&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;ENERGY&quot;</span><span class="p">]</span>
+
+    <span class="n">currentZ</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">iZ</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">iIon</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">znumber</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">znumber</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">currentZ</span><span class="p">:</span>
+            <span class="n">iZ</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">atomicnumber</span><span class="p">[</span><span class="n">iZ</span><span class="p">]</span> <span class="o">=</span> <span class="n">znumber</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">currentZ</span> <span class="o">=</span> <span class="n">znumber</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">iIon</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">iIon</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+            <span class="n">ion</span><span class="p">[</span><span class="n">iZ</span><span class="p">,</span> <span class="n">iIon</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">iondata</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+
+        <span class="c1"># change units of coef</span>
+
+        <span class="n">ion</span><span class="p">[</span><span class="n">iZ</span><span class="p">][</span><span class="n">iIon</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="mf">1.0e10</span>
+        <span class="n">ion</span><span class="p">[</span><span class="n">iZ</span><span class="p">][</span><span class="n">iIon</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">*=</span> <span class="mf">1.0e04</span>
+        <span class="n">ion</span><span class="p">[</span><span class="n">iZ</span><span class="p">][</span><span class="n">iIon</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">*=</span> <span class="mf">1.0e-04</span>
+        <span class="n">ion</span><span class="p">[</span><span class="n">iZ</span><span class="p">][</span><span class="n">iIon</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span> <span class="o">*=</span> <span class="mf">1.0e-04</span>
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">721</span><span class="p">):</span>
+            <span class="n">sigma</span><span class="p">[</span><span class="n">iZ</span><span class="p">][</span><span class="n">iIon</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigmadata</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">/</span> <span class="mf">6.6e-27</span>
+
+    <span class="n">elementname</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;He&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;Ne&quot;</span><span class="p">,</span> <span class="s2">&quot;Mg&quot;</span><span class="p">,</span> <span class="s2">&quot;Si&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;Fe&quot;</span><span class="p">]</span>
+
+    <span class="n">ion</span> <span class="o">=</span> <span class="n">ion</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span>
+    <span class="n">atomicnumber</span> <span class="o">=</span> <span class="n">atomicnumber</span>
+    <span class="n">energy</span> <span class="o">=</span> <span class="n">energy</span>
+
+    <span class="k">return</span> <span class="n">ion</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">atomicnumber</span><span class="p">,</span> <span class="n">energy</span></div>
+
+
+<div class="viewcode-block" id="get_spec"><a class="viewcode-back" href="../../../notebooks/api/whimstan.utils.html#whimstan.utils.absori_precalc.get_spec">[docs]</a><span class="k">def</span> <span class="nf">get_spec</span><span class="p">(</span><span class="n">gamma</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">gamma</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Only for gamma=2 at the moment&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">get_path_of_data_file</span><span class="p">(</span><span class="s2">&quot;spec_gamma2.npy&quot;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="interpolate_sigma"><a class="viewcode-back" href="../../../notebooks/api/whimstan.utils.html#whimstan.utils.absori_precalc.interpolate_sigma">[docs]</a><span class="k">def</span> <span class="nf">interpolate_sigma</span><span class="p">(</span><span class="n">ekeV</span><span class="p">,</span> <span class="n">energy_base</span><span class="p">,</span> <span class="n">sigma_base</span><span class="p">):</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="mi">1000</span> <span class="o">*</span> <span class="n">ekeV</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">e</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">e</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+    <span class="n">mask1</span> <span class="o">=</span> <span class="n">e</span> <span class="o">&gt;</span> <span class="n">energy_base</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">mask2</span> <span class="o">=</span> <span class="n">e</span> <span class="o">&lt;</span> <span class="n">energy_base</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">mask3</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">mask1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="o">~</span><span class="n">mask2</span><span class="p">)</span>
+
+    <span class="n">sigma_interp</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">energy_base</span><span class="p">,</span> <span class="n">sigma_base</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">res</span><span class="p">[</span><span class="n">mask3</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigma_interp</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="n">mask3</span><span class="p">])</span>
+
+    <span class="n">res</span><span class="p">[</span><span class="n">mask1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">sigma_base</span><span class="p">[</span><span class="mi">720</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">res</span><span class="p">[</span><span class="n">mask1</span><span class="p">]</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">((</span><span class="n">e</span><span class="p">[</span><span class="n">mask1</span><span class="p">]</span> <span class="o">/</span> <span class="n">energy_base</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="o">-</span><span class="mf">3.0</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">res</span><span class="p">[</span><span class="n">mask2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">sigma_base</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+<span class="c1"># Constants</span>
+<span class="n">omegam</span> <span class="o">=</span> <span class="mf">0.307</span>
+<span class="n">omegal</span> <span class="o">=</span> <span class="mf">0.693</span>
+<span class="n">h0</span> <span class="o">=</span> <span class="mf">67.7</span>
+<span class="n">c</span> <span class="o">=</span> <span class="mf">2.99792458e5</span>
+<span class="n">cmpermpc</span> <span class="o">=</span> <span class="mf">3.08568e24</span>
+
+
+<div class="viewcode-block" id="sum_sigma_interp_precalc"><a class="viewcode-back" href="../../../notebooks/api/whimstan.utils.html#whimstan.utils.absori_precalc.sum_sigma_interp_precalc">[docs]</a><span class="k">def</span> <span class="nf">sum_sigma_interp_precalc</span><span class="p">(</span>
+    <span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">energy_base</span><span class="p">,</span> <span class="n">sigma_base</span><span class="p">,</span> <span class="n">zshell_thickness</span><span class="o">=</span><span class="mf">0.02</span>
+<span class="p">):</span>
+    <span class="n">nz</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">z</span> <span class="o">/</span> <span class="n">zshell_thickness</span><span class="p">)</span>
+    <span class="n">zsam</span> <span class="o">=</span> <span class="n">z</span> <span class="o">/</span> <span class="n">nz</span>
+    <span class="n">zz</span> <span class="o">=</span> <span class="n">zsam</span> <span class="o">*</span> <span class="mf">0.5</span>
+
+    <span class="c1"># all the different redshifted energies in the</span>
+    <span class="c1"># z shells</span>
+    <span class="n">energy_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">nz</span><span class="p">))</span>
+    <span class="c1"># weight factors from z integral and constants</span>
+    <span class="n">zf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nz</span><span class="p">)</span>
+
+    <span class="c1"># loop through shells</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nz</span><span class="p">):</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">zz</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">energy_z</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">z1</span> <span class="o">*</span> <span class="n">x</span>
+        <span class="n">zf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">z1</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">omegam</span> <span class="o">*</span> <span class="p">(</span><span class="n">z1</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="n">omegal</span><span class="p">)</span>
+        <span class="n">zz</span> <span class="o">+=</span> <span class="n">zsam</span>
+    <span class="n">zf</span> <span class="o">*=</span> <span class="n">zsam</span> <span class="o">*</span> <span class="n">c</span> <span class="o">*</span> <span class="n">cmpermpc</span> <span class="o">/</span> <span class="n">h0</span> <span class="o">*</span> <span class="mf">6.6e-5</span> <span class="o">*</span> <span class="mf">1e-22</span>
+    <span class="n">sigma_inter</span> <span class="o">=</span> <span class="n">interpolate_sigma</span><span class="p">(</span><span class="n">energy_z</span><span class="p">,</span> <span class="n">energy_base</span><span class="p">,</span> <span class="n">sigma_base</span><span class="p">)</span>
+    <span class="n">sigma_inter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="n">sigma_inter</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">sigma_inter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="n">sigma_inter</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sigma_inter</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">zf</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
+</pre></div>
+
+           </div>
+          </div>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, J. Michael Burgess.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
