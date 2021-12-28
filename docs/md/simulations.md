@@ -37,7 +37,7 @@ The photons from the GRB first must pass through the local gas in its their host
 
 
 ```python
-%matplotlib inline
+
 import matplotlib.pyplot as plt
 from jupyterthemes import jtplot
 jtplot.style(context="talk", fscale=1, ticks=True, grid=False)
@@ -45,7 +45,7 @@ jtplot.style(context="talk", fscale=1, ticks=True, grid=False)
 from whimstan.simulations.cloud import Cloud
 import numpy as np
 
-
+%matplotlib inline
 ```
 
 ```python

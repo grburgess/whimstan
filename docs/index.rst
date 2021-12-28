@@ -21,5 +21,6 @@ with what different parameters would imply for observations.
    :caption: Contents:
 
    notebooks/simulations.ipynb
+   notebooks/working_with_data.ipynb
    api/API.rst
 	     
