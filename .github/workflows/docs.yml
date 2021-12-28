@@ -31,7 +31,7 @@ jobs:
 
           git clone https://github.com/threeML/threeML.git
           cd threeML
-          git checkout dev
+          git checkout feature-riemann-integral
           python setup.py install
           cd ..
 
@@ -85,7 +85,7 @@ jobs:
 
           git clone https://github.com/threeML/threeML.git
           cd threeML
-          git checkout dev
+          git checkout feature-riemann-integral
           python setup.py install
           cd ..
 
@@ -146,7 +146,7 @@ jobs:
 
           git clone https://github.com/threeML/threeML.git
           cd threeML
-          git checkout dev
+          git checkout feature-riemann-integral
           python setup.py install
           cd ..
 
