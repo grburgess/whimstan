@@ -42,7 +42,8 @@ jobs:
       - name: Execute the notebooks
         run: |
 
-          jupytext --to ipynb --pipe black --execute docs/md/*.md
+          jupytext --to ipynb --pipe black --execute docs/md/simulations.md
+          jupytext --to ipynb --pipe black --execute docs/md/working_with_data.md
           mv docs/md/*.ipynb docs/notebooks
 
       - uses: actions/upload-artifact@v2
