@@ -181,6 +181,3 @@ spec_fac.create_database("data.h5")
 
 To see how we can work with a database, have a look at the [Working with data]() section.
 
-```python
-
-```

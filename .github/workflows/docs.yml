@@ -16,27 +16,27 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip wheel
+          python3 -m pip install --upgrade pip wheel
           pip3 install black tempita
-          pip3 install numpy==1.20.3 numba ipython jupyter cython astropy pandas tables
+          pip3 install numpy numba ipython jupyter cython astropy pandas tables
 
           pip3 install jupytext jupyterthemes
 
           git clone https://github.com/threeML/astromodels.git
           cd astromodels
           git checkout dev
-          python setup.py install
+          python3 setup.py install
           cd ..
 
 
           git clone https://github.com/threeML/threeML.git
           cd threeML
           git checkout feature-riemann-integral
-          python setup.py install
+          python3 setup.py install
           cd ..
 
 
-          python setup.py develop
+          python3 setup.py develop
 
 
       - name: Execute the notebooks
