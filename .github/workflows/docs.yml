@@ -72,8 +72,8 @@ jobs:
 
           brew install hdf5
 
-          pip3 install cython tempita -U
-          pip3 install numpy scipy numba astropy pandas -U
+          pip3 install  pip wheel -U
+          pip3 install cython tempita numpy scipy numba astropy pandas -U
 
 
           git clone https://github.com/threeML/astromodels.git
