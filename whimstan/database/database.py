@@ -85,7 +85,7 @@ class Database:
 
         :param cls:
         :type cls:
-        :param file_name:
+        :param file_name: name of the file
         :type file_name:
         :returns:
 
@@ -397,7 +397,7 @@ class Database:
         return res
 
     def build_3ml_analysis(
-        self, id: int, with_whim: bool = False
+        self, id: int, with_whim: bool = False, integration_method: str = "trapz"
     ) -> BayesianAnalysis:
 
         grb: str = self._catalog.grbs[id]
@@ -405,6 +405,8 @@ class Database:
         plugin: DispersionSpectrumLike = self._plugins[grb]
 
         plugin.set_active_measurements("0.3-10.")
+
+        plugin.model_integrate_method = integration_method
 
         model_container = self._catalog.catalog[grb].get_spectrum(
             with_host=True, with_whim=with_whim

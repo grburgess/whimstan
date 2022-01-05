@@ -1,13 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import threeML
-#from threeML import threeML_config
-#from threeML.io.plotting.cmap_cycle import cmap_intervals
+
+# from threeML import threeML_config
+# from threeML.io.plotting.cmap_cycle import cmap_intervals
 from threeML.io.plotting.data_residual_plot import ResidualPlot
 
-#from threeML_utils.colors import Colors
+# from threeML_utils.colors import Colors
 
-NO_REBIN = 1E-99
+NO_REBIN = 1e-99
 
 
 # def scale_colour(self, colour, scalefactor):    # pragma: no cover
@@ -24,24 +25,27 @@ NO_REBIN = 1E-99
 #     return "#%02x%02x%02x" % (r, g, b)
 
 
-def display_posterior_model_counts(plugin,
-                                   model,
-                                   samples,
-                                   data_color="k",
-                                   model_color="r",
-                                   thin=100,
-                                   min_rate=1,
-                                   shade=True,
-                                   q_level=68,
-                                   gradient=0.6,
-                                   axes=None,
-                                   **kwargs):
-
+def display_posterior_model_counts(
+    plugin,
+    model,
+    samples,
+    data_color="k",
+    model_color="r",
+    thin=100,
+    min_rate=1,
+    shade=True,
+    q_level=68,
+    gradient=0.6,
+    axes=None,
+    **kwargs
+):
 
     show_residuals = False
 
-    if axes!=None:
-        residual_plot = ResidualPlot(show_residuals=show_residuals, model_subplot=axes)
+    if axes != None:
+        residual_plot = ResidualPlot(
+            show_residuals=show_residuals, model_subplot=axes
+        )
     else:
         residual_plot = ResidualPlot(show_residuals=show_residuals)
         axes = residual_plot.data_axis
@@ -53,7 +57,7 @@ def display_posterior_model_counts(plugin,
     for params in samples:
 
         model.set_free_parameters(params)
-        
+
         # for i, (k, v) in enumerate(model.free_parameters.items()):
 
         #     v.value = params[i]
@@ -80,7 +84,6 @@ def display_posterior_model_counts(plugin,
                 **kwargs
                 #                model_subplot=axes,
                 #                data_kwargs=data_kwargs,
-                
             )
     #     else:
 
@@ -154,15 +157,11 @@ def display_posterior_model_counts(plugin,
         show_data=True,
         show_legend=show_legend,
         ratio_residuals=False,
-#        model_label=model_label,
+        #        model_label=model_label,
         model_subplot=axes,
-        model_kwargs=dict(alpha=0.),    # no model
+        model_kwargs=dict(alpha=0.0),  # no model
         **kwargs
-
         #    data_kwargs=data_kwargs
-
-        
-
     )
 
     return residual_plot.figure

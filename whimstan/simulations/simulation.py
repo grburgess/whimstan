@@ -140,18 +140,18 @@ class SpectrumGenerator:
 
         simulation = self._demo_plugin.get_simulated_dataset()
 
-        self._simulated_data = simulation
+        self._simulated_data: OGIPLike = simulation
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @property
-    def simulated_data(self):
+    def simulated_data(self) -> OGIPLike:
         return self._simulated_data
 
     @property
-    def xrt_catalog_entry(self):
+    def xrt_catalog_entry(self) -> XRTCatalogEntry:
 
         return XRTCatalogEntry(
             self._name.replace("grb", ""),
@@ -171,8 +171,8 @@ class SpectrumFactory:
     def __init__(
         self,
         population: popsynth.Population,
-        whim_n0=None,
-        whim_T=None,
+        whim_n0: Optional[float] = None,
+        whim_T: Optional[float] = None,
         use_mw_gas: bool = True,
         use_host_gas: bool = True,
         n_jobs: int = 8,
@@ -219,7 +219,7 @@ class SpectrumFactory:
 
             return sg
 
-        self._spectra = Parallel(n_jobs=n_jobs)(
+        self._spectra: List[SpectrumGenerator] = Parallel(n_jobs=n_jobs)(
             delayed(_gen_one_spectrum)(i)
             for i in progress_bar(
                 range(population.n_objects),
@@ -227,51 +227,18 @@ class SpectrumFactory:
             )
         )
 
-        # for i in progress_bar(
-        #     range(population.n_objects),
-        #     desc="Calculating the simulated datasets",
-        # ):
-
-        #     name = f"grb00{i}"
-
-        #     if use_mw_gas:
-        #         mw_nh = population.mw_nh[i] / 1.0e22
-        #     else:
-        #         mw_nh = None
-
-        #     if use_host_gas:
-        #         host_nh = population.host_nh[i] / 1.0e22
-        #     else:
-        #         host_nh = None
-
-        #     try:
-
-        #         exposure = population.exposure[i]
-
-        #     except:
-
-        #         exposure = None
-
-        #     sg = SpectrumGenerator(
-        #         name=name,
-        #         eflux=population.fluxes_latent[i],
-        #         index=population.spec_idx[i],
-        #         ra=population.ra[i],
-        #         dec=population.dec[i],
-        #         z=population.distances[i],
-        #         host_nh=host_nh,
-        #         mw_nh=mw_nh,
-        #         whim_n0=whim_n0,
-        #         whim_T=whim_T,
-        #         use_mw_gas=use_mw_gas,
-        #         use_host_gas=use_host_gas,
-        #         exposure=exposure,
-        #     )
-
-        #     self._spectra.append(sg)
-
     def write_data(self, path="data", catalog_name="sim_cat.h5"):
 
+        """
+        Write the data to PHA files and save teh catalog
+
+        :param path:
+        :type path:
+        :param catalog_name:
+        :type catalog_name:
+        :returns:
+
+        """
         cat_entries = []
 
         root = Path(path)
@@ -294,6 +261,14 @@ class SpectrumFactory:
 
     def create_database(self, database_name: str = "database.h5") -> None:
 
+        """
+        write the data to an HDF5 file including the catalog
+
+        :param database_name:
+        :type database_name: str
+        :returns:
+
+        """
         cat_entries = []
 
         root = Path("_tmp")
@@ -325,5 +300,5 @@ class SpectrumFactory:
         )
 
     @property
-    def spectra(self) -> List:
+    def spectra(self) -> List[SpectrumGenerator]:
         return self._spectra

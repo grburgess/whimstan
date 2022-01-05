@@ -78,6 +78,9 @@ class StanModel:
             Path(self._model.exe_file).unlink()
 
 
+
+
+
 def get_model(model_name) -> StanModel:
     """
     Retrieve the stan model

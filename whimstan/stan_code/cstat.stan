@@ -76,6 +76,8 @@ real cstat_optimized(vector observed_counts,
   vector[N] loglike;
 
 
+  //  vector[N] sqr =
+
   for (n in 1:N) {
 
 
