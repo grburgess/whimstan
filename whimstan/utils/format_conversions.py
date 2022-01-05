@@ -38,12 +38,7 @@ def plugin_to_hdf_group(plugin: DispersionSpectrumLike, hdf_group: h5py.Group):
 
         rmf = plugin.response.matrix
 
-
-
-    rsp_grp.create_dataset(
-        "matrix", data=plugin.response.rmf, compression="gzip"
-    )
-
+    rsp_grp.create_dataset("matrix", data=rmf, compression="gzip")
 
     if plugin.response.arf is not None:
 
@@ -53,9 +48,7 @@ def plugin_to_hdf_group(plugin: DispersionSpectrumLike, hdf_group: h5py.Group):
 
         arf = np.ones_like(plugin.response.monte_carlo_energies)
 
-    rsp_grp.create_dataset(
-        "arf", data=arf, compression="gzip"
-    )
+    rsp_grp.create_dataset("arf", data=arf, compression="gzip")
 
     rsp_grp.create_dataset(
         "ebounds", data=plugin.response.ebounds, compression="gzip"
@@ -104,7 +97,6 @@ def build_spectrum_like_from_hdf(hdf_grp: h5py.Group) -> DispersionSpectrumLike:
 
     response_grp: h5py.Group = hdf_grp["response"]
 
-
     matrix = response_grp["matrix"][()] * response_grp["arf"][()]
 
     response = InstrumentResponse(
@@ -117,7 +109,6 @@ def build_spectrum_like_from_hdf(hdf_grp: h5py.Group) -> DispersionSpectrumLike:
 
     response.arf = response_grp["arf"][()]
     response.rmf = response_grp["matrix"][()]
-
 
     # get the source group
 
