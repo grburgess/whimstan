@@ -46,7 +46,7 @@ def plugin_to_hdf_group(plugin: DispersionSpectrumLike, hdf_group: h5py.Group):
 
     else:
 
-        arf = np.ones_like(plugin.response.monte_carlo_energies)
+        arf = np.ones(len(plugin.response.monte_carlo_energies) - 1)
 
     rsp_grp.create_dataset("arf", data=arf, compression="gzip")
 
