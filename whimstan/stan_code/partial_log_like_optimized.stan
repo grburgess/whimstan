@@ -13,7 +13,9 @@ real pll_no_whim(int [] n_slice,
                  vector index,
                  vector nH_host,
                  vector[] mw_abs,
-                 matrix[] rsp ,
+                 //matrix[] rsp ,
+		 matrix rmf,
+		 vector[] arf,
                  vector exposure,
                  vector exposure_ratio,
                  vector[] counts,
@@ -40,13 +42,24 @@ real pll_no_whim(int [] n_slice,
 
     loglike[i] = cstat_optimized(counts[n,mask[n,:n_chans_used[n]]],
                                  bkg[n,mask[n,:n_chans_used[n]]],
-                                 ((rsp[n] * ((powerlaw_flux(ene_avg[n], K[n], index[n], 0.4, 15) .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n]) .* ene_width[n])  * exposure[n]))[mask[n,:n_chans_used[n]]],
+                                 ((rmf[n] * (( arf[n] .*  powerlaw_flux(ene_avg[n], index[n], 0.4, 15) .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n]) .* ene_width[n])))[mask[n,:n_chans_used[n]]] * exposure[n] * K[n],
                                  exposure_ratio[n],
                                  o_plus_b[n,mask[n,:n_chans_used[n]]],
                                  alpha_bkg_factor[n,mask[n,:n_chans_used[n]]],
                                  log_fact_obs[n,mask[n,:n_chans_used[n]]],
                                  log_fact_bkg[n,mask[n,:n_chans_used[n]]]
                                  );
+
+
+    // loglike[i] = cstat_optimized(counts[n,mask[n,:n_chans_used[n]]],
+    //                              bkg[n,mask[n,:n_chans_used[n]]],
+    //                              ((rsp[n] * ((powerlaw_flux(ene_avg[n], K[n], index[n], 0.4, 15) .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n]) .* ene_width[n])  * exposure[n]))[mask[n,:n_chans_used[n]]],
+    //                              exposure_ratio[n],
+    //                              o_plus_b[n,mask[n,:n_chans_used[n]]],
+    //                              alpha_bkg_factor[n,mask[n,:n_chans_used[n]]],
+    //                              log_fact_obs[n,mask[n,:n_chans_used[n]]],
+    //                              log_fact_bkg[n,mask[n,:n_chans_used[n]]]
+    //                              );
 
 
 

@@ -9,7 +9,7 @@ vector powerlaw(vector ene, real K, real index) {
 }
 
 
-vector powerlaw_flux(vector ene, real K, real index, real a, real b) {
+vector powerlaw_flux(vector ene, real index, real a, real b) {
 
 
  
@@ -23,7 +23,7 @@ vector powerlaw_flux(vector ene, real K, real index, real a, real b) {
 
 
        
-  return  K * inv_int_flux * erg2keV * pow(ene, index);
+  return inv_int_flux * erg2keV * pow(ene, index);
 
 
 }

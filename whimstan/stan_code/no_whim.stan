@@ -13,7 +13,10 @@ data{
   int N_grbs;
   int N_ene;
   int N_chan;
-  array[N_grbs] matrix[N_chan, N_ene] rsp;
+  //array[N_grbs] matrix[N_chan, N_ene] rsp;
+
+  matrix[N_chan, N_ene] rmf;
+  array[N_grbs] vector[N_ene] arf;
   vector[N_grbs] z; //redshift
   vector[N_grbs] nH_mw;
   vector[N_grbs] exposure_ratio;
@@ -176,7 +179,10 @@ model{
                        index,
                        nH_host_norm,
                        mw_abs,
-                       rsp,
+                       //rsp,
+		       rmf,
+		       arf,
+
                        exposure,
                        exposure_ratio,
                        counts,

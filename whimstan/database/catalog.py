@@ -33,6 +33,7 @@ class XRTObs:
     n_chans_used: int
     scale_factor: float
     rsp: np.array
+    arf: np.array
     exposure: float
 
     @classmethod
@@ -48,7 +49,8 @@ class XRTObs:
 
         n_ene = len(plugin.response.monte_carlo_energies) - 1
         n_chan = len(plugin.response.ebounds) - 1
-        rsp = plugin.response.matrix
+        rsp = plugin.response.rmf
+        arf = plugin.response.arf
         scale_factor = plugin.scale_factor
 
         ene_lo = plugin.response.monte_carlo_energies[:-1]
@@ -65,6 +67,7 @@ class XRTObs:
             obs_count=[int(x) for x in plugin.observed_counts],
             bkg_count=[int(x) for x in plugin.background_counts],
             rsp=rsp,
+            arf=arf,
             scale_factor=float(scale_factor),
             mask=[int(x) for x in mask],
             n_chans_used=int(n_chans_used),
