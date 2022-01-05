@@ -316,7 +316,9 @@ class Database:
             n_chans_used.append(int(x.n_chans_used))
 
             # the rmf does NOT change
-            rmf = x.rsp
+            rmf = x.rsp.tolist()
+
+
 
             arf.append(x.arf.tolist())
 
