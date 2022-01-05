@@ -42,7 +42,7 @@ real pll_no_whim(int [] n_slice,
 
     loglike[i] = cstat_optimized(counts[n,mask[n,:n_chans_used[n]]],
                                  bkg[n,mask[n,:n_chans_used[n]]],
-                                 ((rmf[n] * (( arf[n] .*  powerlaw_flux(ene_avg[n], index[n], 0.4, 15) .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n]) .* ene_width[n]))[mask[n,:n_chans_used[n]]]) * exposure[n] * K[n],
+                                 ((rmf[n] * ( arf[n] .*  powerlaw_flux(ene_avg[n], index[n], 0.4, 15) .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n]) .* ene_width[n])[mask[n,:n_chans_used[n]]]) * exposure[n] * K[n],
                                  exposure_ratio[n],
                                  o_plus_b[n,mask[n,:n_chans_used[n]]],
                                  alpha_bkg_factor[n,mask[n,:n_chans_used[n]]],
