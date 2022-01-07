@@ -1,10 +1,9 @@
 functions {
-  //#include constants.stan
+#include constants.stan
 #include tbabs.stan
 #include powerlaw.stan
 #include cstat.stan
 #include partial_log_like_optimized.stan
-
 }
 
 
@@ -13,7 +12,7 @@ data{
   int N_grbs;
   int N_ene;
   int N_chan;
-  //array[N_grbs] matrix[N_chan, N_ene] rsp;
+
 
   matrix[N_chan, N_ene] rmf;
   array[N_grbs] vector[N_ene] arf;

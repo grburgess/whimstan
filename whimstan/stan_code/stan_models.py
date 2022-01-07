@@ -36,9 +36,6 @@ class StanModel:
     def __init__(self, name: str, stan_file: str):
 
         self._name = name
-
-        file_stem:str = stan_file.split(".")[0]
-
         self._stan_file = pkg_resources.resource_filename(
             "whimstan", os.path.join("stan_code", stan_file)
         )

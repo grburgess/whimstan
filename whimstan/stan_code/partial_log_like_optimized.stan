@@ -23,7 +23,6 @@ real pll_no_whim(array[] int  n_slice,
                  array[] vector log_fact_bkg,
                  array[] vector o_plus_b,
                  array[] vector alpha_bkg_factor
-
                  ){
 
   // host and mw ONLY absorption, fixed MW
