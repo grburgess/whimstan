@@ -166,7 +166,7 @@ model{
   index_sigma ~ std_normal();
 
 
-  target += reduce_sum_static(pll_no_whim,
+  target += reduce_sum(pll_no_whim,
                        all_N,
                        grainsize,
                        N_ene, N_chan,
