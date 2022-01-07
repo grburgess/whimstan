@@ -1,4 +1,4 @@
-matrix calc_num(vector spec, real temp, real xi, int[] atomicnumber, real[,,] sigma, real[,,] ion){
+matrix calc_num(vector spec, real temp, real xi, array[] int atomicnumber, array[,,] real sigma, array[,,] real ion){
 
     real mult;
     real ratsum;
@@ -81,7 +81,7 @@ matrix calc_num(vector spec, real temp, real xi, int[] atomicnumber, real[,,] si
 
 // precalc sigma interpolation for all z we need => 0.02 z steps up to z=max(z) of all GRBs
 matrix log_absori_shells(int nz_shells, real zshell_thickness, real n0, matrix num,
-                         matrix[,] sigma_interp, int num_e_edges, int[] atomicnumber){
+                         array[,] matrix sigma_interp, int num_e_edges, array[] int atomicnumber){
 
        matrix[nz_shells,num_e_edges] taus=rep_matrix(0.0, nz_shells, num_e_edges);
 
@@ -115,7 +115,7 @@ vector integrate_absori_precalc(matrix[] sum_sigma_interp, matrix num, int num_e
 }
 
 
-vector integrate_absori(matrix[] sum_sigma_interp, matrix num, real n0, int num_e_edges){
+vector integrate_absori(array[] matrix sum_sigma_interp, matrix num, real n0, int num_e_edges){
   vector[num_e_edges] taus;
   for (j in 1:num_e_edges){
     taus[j] = -n0*sum(sum_sigma_interp[j].*num);
