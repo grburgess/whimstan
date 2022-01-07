@@ -1,6 +1,5 @@
 functions {
 #include constants.stan
-#include absori.stan
 #include tbabs.stan
 #include powerlaw.stan
 #include cstat.stan
