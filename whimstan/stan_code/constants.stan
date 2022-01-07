@@ -1,3 +1,6 @@
+real elo(){return 0.4;}
+real ehi(){return 10.;}
+
 real erg2keV(){
 
   return 6.24151e8;
