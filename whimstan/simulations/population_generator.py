@@ -236,7 +236,7 @@ class ObscuredFluxSampler(ps.DerivedLumAuxSampler):
     def __init__(
         self,
         a: float = 0.4,
-        b: float = 15,
+        b: float = 10,
         whim_n0: Optional[float] = None,
         whim_T: Optional[float] = None,
         use_mw_gas: bool = True,

@@ -124,7 +124,7 @@ class SpectrumGenerator:
 
                 self._demo_plugin._precalculations()
 
-            spec = Powerlaw_Eflux(F=self._eflux, index=self._index, a=0.4, b=15)
+            spec = Powerlaw_Eflux(F=self._eflux, index=self._index, a=0.4, b=10)
             if self._use_mw_gas:
                 spec *= TbAbs(NH=self._mw_nh, redshift=0)
             if self._use_host_gas:
