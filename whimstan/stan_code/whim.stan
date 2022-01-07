@@ -1,4 +1,5 @@
 functions {
+#include constants.stan
 #include absori.stan
 #include tbabs.stan
 #include powerlaw.stan
@@ -11,7 +12,9 @@ data{
   int N_grbs;
   int N_ene;
   int N_chan;
-  array [N_grbs] matrix[N_chan, N_ene] rsp;
+  //array [N_grbs] matrix[N_chan, N_ene] rsp;
+  matrix[N_chan, N_ene] rmf;
+  array[N_grbs] vector[N_ene] arf;
   vector[N_grbs] z; //redshift
   vector[N_grbs] nH_mw;
   array[N_grbs] vector[N_ene] precomputed_absorp;
@@ -62,7 +65,7 @@ transformed data{
 
   }
 
-    // now do some static calculations for CSTAT
+  // now do some static calculations for CSTAT
 
 
   for (n in 1:N_grbs) {
@@ -74,7 +77,7 @@ transformed data{
 
       if (bkg[n,m] >0) {
 
-	log_fact_bkg[n,m] = logfactorial(bkg[n,m]);
+        log_fact_bkg[n,m] = logfactorial(bkg[n,m]);
 
       }
 
@@ -194,31 +197,35 @@ model{
   log_t_whim ~ normal(6, 2);
 
   target += reduce_sum(pll_whim,
-		       all_N,
-		       grainsize,
-		       N_ene,
-		       N_chan,
-		       ene_avg,
-		       ene_width,
-		       mask,
-		       n_chans_used,
-		       mw_abs,
-		       K,
-		       index,
-		       n0_whim,
-		       num,
-		       sum_sigma_interp,
-		       nH_host_norm,
-		       host_precomputed_absorp,
-		       rsp,
-		       exposure,
-		       exposure_ratio,
-		       counts,
-		       bkg,
-		       log_fact_obs,
-		       log_fact_bkg,
-		       o_plus_b,
-		       alpha_bkg_factor);
+                       all_N,
+                       grainsize,
+                       N_ene,
+                       N_chan,
+                       ene_avg,
+                       ene_width,
+                       mask,
+                       n_chans_used,
+                       mw_abs,
+                       K,
+                       index,
+                       n0_whim,
+                       num,
+                       sum_sigma_interp,
+                       nH_host_norm,
+                       host_precomputed_absorp,
+
+                       //rsp,
+                       rmf,
+                       arf,
+
+                       exposure,
+                       exposure_ratio,
+                       counts,
+                       bkg,
+                       log_fact_obs,
+                       log_fact_bkg,
+                       o_plus_b,
+                       alpha_bkg_factor);
 
 }
 
