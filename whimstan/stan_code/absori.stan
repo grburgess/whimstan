@@ -48,7 +48,7 @@ matrix calc_num(vector spec, real temp, real xi, int[] atomicnumber, real[,,] si
                         e1*(1.0+ion[i,j,6]*e2));
                 }
             else {
-                z2 = pow(Ne,2.0);
+                z2 = Ne*Ne;
                 y = 15.8*z2/t4;
                 arec = tfact*z2*(1.735+log(y)+1.0/(6.*y));
                 }
