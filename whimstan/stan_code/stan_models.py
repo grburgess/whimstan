@@ -33,12 +33,24 @@ _available_models["no_whim"] = "no_whim.stan"
 
 
 class StanModel:
-    def __init__(self, name, stan_file):
+    def __init__(self, name: str, stan_file: str):
 
         self._name = name
+
+        file_stem:str = stan_file.split(".")[0]
+
         self._stan_file = pkg_resources.resource_filename(
             "whimstan", os.path.join("stan_code", stan_file)
         )
+
+        self._hpp_file = pkg_resources.resource_filename(
+            "whimstan", os.path.join("stan_code", file_stem, ".hpp")
+        )
+
+        self._o_file = pkg_resources.resource_filename(
+            "whimstan", os.path.join("stan_code", file_stem, ".o")
+        )
+
 
         self._model = None
 
@@ -77,8 +89,21 @@ class StanModel:
 
             Path(self._model.exe_file).unlink()
 
+            try:
 
+                Path(self._hpp_file).unlink()
 
+            except:
+
+                pass
+
+            try:
+
+                Path(self._o_file).unlink()
+
+            except:
+
+                pass
 
 
 def get_model(model_name) -> StanModel:

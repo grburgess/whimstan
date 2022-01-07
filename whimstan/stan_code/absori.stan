@@ -48,7 +48,7 @@ matrix calc_num(vector spec, real temp, real xi, array[] int atomicnumber, array
                         e1*(1.0+ion[i,j,6]*e2));
                 }
             else {
-                z2 = pow(Ne,2.0);
+                z2 =Ne*Ne;
                 y = 15.8*z2/t4;
                 arec = tfact*z2*(1.735+log(y)+1.0/(6.*y));
                 }
@@ -93,7 +93,7 @@ matrix log_absori_shells(int nz_shells, real zshell_thickness, real n0, matrix n
            // "slab approximation" in this z "shell"
            z1 = ((i-0.5)*zshell_thickness)+1.0;
            // zf from z integral (see eq. 1 in arxiv 2102.02530)
-           zf = (pow(z1,2)/sqrt(omegam()*(z1*z1*z1)+omegal() ));
+           zf = ((z1*z1)/sqrt(omegam()*(z1*z1*z1)+omegal() ));
 
            // for every energy
            for (j in 1:num_e_edges){
@@ -106,7 +106,7 @@ matrix log_absori_shells(int nz_shells, real zshell_thickness, real n0, matrix n
 }
 
 //if t is fixed we can use this to precalc most of it
-vector integrate_absori_precalc(matrix[] sum_sigma_interp, matrix num, int num_e_edges){
+vector integrate_absori_precalc(array[] matrix sum_sigma_interp, matrix num, int num_e_edges){
   vector[num_e_edges] taus;
   for (j in 1:num_e_edges){
     taus[j] = -sum(sum_sigma_interp[j].*num);
