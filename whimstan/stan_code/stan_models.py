@@ -63,7 +63,7 @@ class StanModel:
 
         """
 
-        cpp_options = dict(STAN_THREADS=True, STAN_CPP_OPTIMS=True)
+        cpp_options = dict(STAN_THREADS=True)
 
         self._model = cmdstanpy.CmdStanModel(
             stan_file=self._stan_file,
