@@ -1,4 +1,9 @@
-matrix calc_num(vector spec, real temp, real xi, array[] int atomicnumber, array[,,] real sigma, array[,,] real ion){
+matrix calc_num(vector spec,
+		real temp,
+		real xi,
+		array[] int atomicnumber,
+		array[,,] real sigma,
+		array[,,] real ion){
 
     real mult;
     real ratsum;
@@ -80,8 +85,13 @@ matrix calc_num(vector spec, real temp, real xi, array[] int atomicnumber, array
 
 
 // precalc sigma interpolation for all z we need => 0.02 z steps up to z=max(z) of all GRBs
-matrix log_absori_shells(int nz_shells, real zshell_thickness, real n0, matrix num,
-                         array[,] matrix sigma_interp, int num_e_edges, array[] int atomicnumber){
+matrix log_absori_shells(int nz_shells,
+			 real zshell_thickness,
+			 real n0,
+			 matrix num,
+                         array[,] matrix sigma_interp,
+			 int num_e_edges,
+			 array[] int atomicnumber){
 
        matrix[nz_shells,num_e_edges] taus=rep_matrix(0.0, nz_shells, num_e_edges);
 
@@ -106,7 +116,9 @@ matrix log_absori_shells(int nz_shells, real zshell_thickness, real n0, matrix n
 }
 
 //if t is fixed we can use this to precalc most of it
-vector integrate_absori_precalc(array[] matrix sum_sigma_interp, matrix num, int num_e_edges){
+vector integrate_absori_precalc(array[] matrix sum_sigma_interp,
+				matrix num,
+				int num_e_edges){
   vector[num_e_edges] taus;
   for (j in 1:num_e_edges){
     taus[j] = -sum(sum_sigma_interp[j].*num);
@@ -115,7 +127,10 @@ vector integrate_absori_precalc(array[] matrix sum_sigma_interp, matrix num, int
 }
 
 
-vector integrate_absori(array[] matrix sum_sigma_interp, matrix num, real n0, int num_e_edges){
+vector integrate_absori(array[] matrix sum_sigma_interp,
+			matrix num,
+			real n0,
+			int num_e_edges){
   vector[num_e_edges] taus;
   for (j in 1:num_e_edges){
     taus[j] = -n0*sum(sum_sigma_interp[j].*num);
@@ -124,8 +139,11 @@ vector integrate_absori(array[] matrix sum_sigma_interp, matrix num, real n0, in
 }
 
 
-vector integrate_absori2(real z, matrix logabso_shells, real zshell_thickness,
-                         int num_e_edges, int n_spectra){
+vector integrate_absori2(real z,
+			 matrix logabso_shells,
+			 real zshell_thickness,
+                         int num_e_edges,
+			 int n_spectra){
 
   vector[num_e_edges] taus;
   int nz;
