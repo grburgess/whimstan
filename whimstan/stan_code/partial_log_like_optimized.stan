@@ -36,7 +36,6 @@ real pll_no_whim(array[] int  n_slice,
     int n = n_slice[i];
 
 
-
     loglike[i] = cstat_optimized(counts[n,mask[n,:n_chans_used[n]]],
                                  bkg[n,mask[n,:n_chans_used[n]]],
                                  ((rmf * ( arf[n] .*  powerlaw_flux(ene_avg[n], index[n], 0.4, 15.) .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n] .* ene_width[n]))[mask[n,:n_chans_used[n]]]) * exposure[n] * K[n],
