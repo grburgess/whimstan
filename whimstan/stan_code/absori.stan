@@ -89,24 +89,18 @@ matrix log_absori_shells(int nz_shells, real zshell_thickness, real n0, matrix n
        real z1;
        real zf;
 
-       real omegam=0.3;
-       real omegal=0.7;
-       real h0=70;
-       real c=2.99792458e5;
-       real cmpermpc=3.08568e24;
-
        for (i in 1:nz_shells){
            // "slab approximation" in this z "shell"
            z1 = ((i-0.5)*zshell_thickness)+1.0;
            // zf from z integral (see eq. 1 in arxiv 2102.02530)
-           zf = (pow(z1,2)/sqrt(omegam*pow(z1,3)+omegal));
+           zf = (pow(z1,2)/sqrt(omegam()*(z1*z1*z1)+omegal() ));
 
            // for every energy
            for (j in 1:num_e_edges){
              taus[i,j] = sum(num.*sigma_interp[i,j])*zf;
            }
        }
-       taus = zshell_thickness*c*n0*cmpermpc/h0*6.6e-5*1e-22*taus;
+       taus = zshell_thickness*c()*n0*cmpermpc()/h0()*6.6e-5*1e-22*taus;
 
        return taus;
 }
