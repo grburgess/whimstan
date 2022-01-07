@@ -1,3 +1,9 @@
+real erg2keV(){
+
+  return 6.24151e8;
+
+  }
+
 real omegam(){
   return 0.3;
 }

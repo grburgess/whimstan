@@ -11,19 +11,13 @@ vector powerlaw(vector ene, real K, real index) {
 
 vector powerlaw_flux(vector ene, real index, real a, real b) {
 
-
- 
- 
-
-  real erg2keV = 6.24151e8;	
-
   real dp2 = 2 + index;
 
   real inv_int_flux =  inv((pow(b, dp2) - pow(a, dp2))) * dp2;
 
 
        
-  return inv_int_flux * erg2keV * pow(ene, index);
+  return inv_int_flux * erg2keV() * pow(ene, index);
 
 
 }
