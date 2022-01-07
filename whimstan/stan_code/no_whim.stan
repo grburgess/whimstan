@@ -179,10 +179,8 @@ model{
                        index,
                        nH_host_norm,
                        mw_abs,
-                       //rsp,
 		       rmf,
 		       arf,
-
                        exposure,
                        exposure_ratio,
                        counts,
