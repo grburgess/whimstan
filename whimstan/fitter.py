@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 from typing import Dict, Any, Optional
 
 import arviz as av
@@ -55,6 +57,8 @@ def make_fit(
 
     model: StanModel = get_model(model_name)
 
+    cur_dir = Path().cwd()
+
     model.build_model()
 
     if clean_model:
@@ -76,6 +80,7 @@ def make_fit(
         **fit_params,
     )
 
+    os.chdir(cur_dir)
 
     # transfer fit to arviz
 

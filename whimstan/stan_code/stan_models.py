@@ -62,11 +62,19 @@ class StanModel:
 
         cpp_options = dict(STAN_THREADS=True)
 
+
+        # get the current working dir
+
+        cur_dir = Path.cwd()
+
         self._model = cmdstanpy.CmdStanModel(
             stan_file=self._stan_file,
             model_name=self._name,
             cpp_options=cpp_options,
         )
+
+
+        os.chdir(cur_dir)
 
     @property
     def model(self) -> cmdstanpy.CmdStanModel:
