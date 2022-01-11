@@ -26,7 +26,7 @@ from .utils.dist_plotter import dist_plotter
 
 green = "#00D584"
 purple = "#985CFC"
-dark_purple = "#653CA9"
+dark_purple = "#381C66"
 yellow = "#EDE966"
 grey = "#385656"
 lightgrey = "#839393"
@@ -485,7 +485,7 @@ class Fit:
         return self._log_nh_host_sigma
 
     def plot_nh_host_distribution(
-        self, hist_color=grey, dist_color=green, ax=None
+        self, hist_color=grey, dist_color=green, ax=None, n_bins: int = 10
     ) -> plt.Figure:
 
         if ax is None:
@@ -505,11 +505,12 @@ class Fit:
 
             ax.hist(
                 np.log10(self._catalog.nH_host_sim) + 22,
-                bins=10,
+                bins=n_bins,
                 density=True,
-                histtype="step",
                 lw=2,
-                color=hist_color,
+                fc=hist_color,
+                ec=black,
+                alpha=0.75
             )
 
             # ax.plot(xgrid, stats.norm.pdf(xgrid, loc=, scale=0.5),  color="b")
@@ -550,7 +551,7 @@ class Fit:
                 #     color=dist_color,
                 # )
 
-        dist_plotter(xgrid, y, ax, alpha=0.5, color=dist_color)
+        dist_plotter(xgrid, y, ax, alpha=0.75, color=dist_color)
 
         ax.set_xlabel("log10(nH host)")
 
@@ -719,7 +720,9 @@ class Fit:
 
         return samples
 
-    def plot_ppc(self, id: int, n_sims: int = 100) -> plt.Figure:
+    def plot_ppc(
+        self, id: int, n_sims: int = 100, min_rate: Optional[float] = None
+    ) -> plt.Figure:
 
         samples = self._extract_samples(id)
 
@@ -744,6 +747,7 @@ class Fit:
             levels=[95, 68],
             colors=[purple, dark_purple],
             lc=green,
+            min_rate=min_rate,
         )
 
         ax = fig.get_axes()[0]
