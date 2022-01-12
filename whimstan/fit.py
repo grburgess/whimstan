@@ -510,7 +510,7 @@ class Fit:
                 lw=2,
                 fc=hist_color,
                 ec=black,
-                alpha=0.75
+                alpha=0.75,
             )
 
             # ax.plot(xgrid, stats.norm.pdf(xgrid, loc=, scale=0.5),  color="b")
@@ -551,7 +551,7 @@ class Fit:
                 #     color=dist_color,
                 # )
 
-        dist_plotter(xgrid, y, ax, alpha=0.75, color=dist_color)
+        dist_plotter(xgrid, y, ax, alpha=0.75, color=dist_color, lw=0)
 
         ax.set_xlabel("log10(nH host)")
 
