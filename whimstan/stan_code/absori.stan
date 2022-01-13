@@ -118,10 +118,20 @@ matrix log_absori_shells(int nz_shells,
 vector integrate_absori_precalc(array[] matrix sum_sigma_interp,
 				matrix num,
 				int num_e_edges){
+
+
+  
   vector[num_e_edges] taus;
+
+  profile("inside") {
+  
   for (j in 1:num_e_edges){
     taus[j] = -sum(sum_sigma_interp[j] .* num);
   }
+
+  }
+
+
   return taus;
 }
 
