@@ -397,7 +397,7 @@ class Fit:
 
     def write(self, file_name: str) -> None:
 
-        out = Path(file_name).absolute()
+        out = Path(file_name)  #.absolute()
 
         with h5py.File(str(out), "w") as f:
 
