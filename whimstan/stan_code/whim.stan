@@ -50,7 +50,7 @@ transformed data{
   int num_atomicnumber=size(atomicnumber);
   int max_atomicnumber=max(atomicnumber);
 
-  matrix[num_atomicnumber, max_atomicnumber] = rep_matrix(0., num_atomicnumber, max_atomicnumber);
+  matrix[num_atomicnumber, max_atomicnumber] zero_matrix = rep_matrix(0., num_atomicnumber, max_atomicnumber);
 
 
 
