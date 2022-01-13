@@ -202,7 +202,8 @@ model{
   log_t_whim ~ normal(6, 2);
 
   profile("loglike") {
-  target += reduce_sum(pll_whim,
+
+    target += reduce_sum(pll_whim,
                        all_N,
                        grainsize,
                        N_ene,
@@ -233,7 +234,7 @@ model{
                        o_plus_b,
                        alpha_bkg_factor);
 
-}
+  }
 
 }
 
