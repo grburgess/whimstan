@@ -144,6 +144,8 @@ transformed parameters{
   matrix[10,26] num;
   real t_whim=pow(10,log_t_whim);
 
+  array[N_grbs] vector[N_ene] whim_abs;
+
   profile("num") {
 
   num = calc_num(spec, t_whim, xi, atomicnumber, sigma, ion);
@@ -152,7 +154,19 @@ transformed parameters{
 
   for (i in 1:10){
     num[i] = abundance[i]*num[i];
+
   }
+
+  profile('whim_abs') {
+
+  for (n in 1:N_grbs) {
+
+    whim_abs[n] = exp(integrate_absori_precalc(sum_sigma_interp[n], num, N_ene)* n0_whim);
+
+
+  }
+  }
+
 
   // non centered parameterizartion
 
@@ -217,9 +231,10 @@ model{
                        mw_abs,
                        K,
                        index,
-                       n0_whim,
-                       num,
-                       sum_sigma_interp,
+			 //                       n0_whim,
+			 //num,
+			 //sum_sigma_interp,
+			 whim_abs,
                        nH_host_norm,
                        host_precomputed_absorp,
 

@@ -68,10 +68,11 @@ real pll_whim(array[] int  n_slice,
               array[] vector mw_abs,
               vector K,
               vector index,
-              real n0,
-              matrix num,
-              array[,] matrix sum_sigma_interp,
-              vector nH_host,
+              //real n0,
+              //matrix num,
+              //array[,] matrix sum_sigma_interp,
+	      array[] vector whim_abs,
+	      vector nH_host,
               array[] vector host_precomputed_absorp,
               //array[] matrix rsp ,
               matrix rmf,
@@ -96,7 +97,7 @@ real pll_whim(array[] int  n_slice,
 
     int n = n_slice[i];
 
-    vector[N_ene] source_spectrum = powerlaw_flux(ene_avg[n], index[n]) .* exp(integrate_absori_precalc(sum_sigma_interp[n], num, N_ene)*n0) .* mw_abs[n] .* absorption(nH_host[n], host_precomputed_absorp[n]);
+    vector[N_ene] source_spectrum = powerlaw_flux(ene_avg[n], index[n]) .* whim_abs .* mw_abs[n] .* absorption(nH_host[n], host_precomputed_absorp[n]);
 
 
     vector[N_chan] predicted_counts =  (rmf * ( arf[n]  .* source_spectrum .* ene_width[n]));
