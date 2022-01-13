@@ -97,7 +97,7 @@ real pll_whim(array[] int  n_slice,
 
     int n = n_slice[i];
 
-    vector[N_ene] source_spectrum = powerlaw_flux(ene_avg[n], index[n]) .* whim_abs .* mw_abs[n] .* absorption(nH_host[n], host_precomputed_absorp[n]);
+    vector[N_ene] source_spectrum = powerlaw_flux(ene_avg[n], index[n]) .* whim_abs[n] .* mw_abs[n] .* absorption(nH_host[n], host_precomputed_absorp[n]);
 
 
     vector[N_chan] predicted_counts =  (rmf * ( arf[n]  .* source_spectrum .* ene_width[n]));
