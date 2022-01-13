@@ -142,7 +142,12 @@ transformed parameters{
   matrix[10,26] num;
   real t_whim=pow(10,log_t_whim);
 
+  profile("num") {
+
   num = calc_num(spec, t_whim, xi, atomicnumber, sigma, ion);
+
+  }
+
   for (i in 1:10){
     num[i] = abundance[i]*num[i];
   }
@@ -196,6 +201,7 @@ model{
 
   log_t_whim ~ normal(6, 2);
 
+  profile("loglike") {
   target += reduce_sum(pll_whim,
                        all_N,
                        grainsize,
@@ -226,6 +232,8 @@ model{
                        log_fact_bkg,
                        o_plus_b,
                        alpha_bkg_factor);
+
+}
 
 }
 
