@@ -157,7 +157,7 @@ transformed parameters{
 
   }
 
-  profile('whim_abs') {
+  profile("whim_abs") {
 
   for (n in 1:N_grbs) {
 
