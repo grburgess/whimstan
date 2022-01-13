@@ -30,8 +30,8 @@ data{
   array[10] int atomicnumber;
   array[10,26,10] real ion;
   array[10,26,721] real sigma;
-  array[721] vector spec;
-  array[10] vector abundance;
+  vector[721] spec;
+  vector[10] abundance;
   array[N_grbs, N_ene] matrix[10,26] sum_sigma_interp;
 }
 
