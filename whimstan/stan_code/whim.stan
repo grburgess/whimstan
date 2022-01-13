@@ -47,6 +47,12 @@ transformed data{
   array[N_grbs] vector[N_chan] o_plus_b;
   array[N_grbs] vector[N_chan] alpha_bkg_factor;
 
+  int num_atomicnumber=size(atomicnumber);
+  int max_atomicnumber=max(atomicnumber);
+
+  matrix[num_atomicnumber, max_atomicnumber] = rep_matrix(0., num_atomicnumber, max_atomicnumber);
+
+
 
   int grainsize = 1;
 
@@ -148,7 +154,7 @@ transformed parameters{
 
   profile("num") {
 
-  num = calc_num(spec, t_whim, xi, atomicnumber, sigma, ion);
+    num = calc_num(spec, t_whim, xi, atomicnumber, sigma, ion, zero_matrix);
 
   }
 
