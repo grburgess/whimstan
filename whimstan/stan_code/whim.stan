@@ -61,7 +61,7 @@ transformed data{
 
 
   // precalc for num
-
+  profile("num_pre") {
   for (i in 1:num_atomicnumber){
 
     int Ne = atomicnumber[i];
@@ -74,7 +74,7 @@ transformed data{
     }
   }
 
-
+  }
   //mw abs is fixed
   array[N_grbs] vector[N_ene] mw_abs;
 
@@ -171,11 +171,11 @@ transformed parameters{
 
   profile("num") {
 
-    num = calc_num(spec,
+    num = calc_num(//spec,
 		   t_whim,
 		   xi,
 		   atomicnumber,
-		   sigma,
+		   //sigma,
 		   ion,
 		   zero_matrix,
 		   zero_vector,
