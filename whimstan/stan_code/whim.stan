@@ -68,7 +68,7 @@ transformed data{
   int grainsize = 1;
 
   array[N_grbs , N_ene * num_atomicnumber * max_atomicnumber] real sum_sigma_interp_vec;
-  array[N_grbs , N_ene * num_atomicnumber * max_atomicnumber] int x_i = {}; // dummy
+  array[N_grbs , N_ene * num_atomicnumber * max_atomicnumber] int x_i = {0}; // dummy
   array[N_grbs] vector[0] theta;
   // fill the array
   for (i in 1:N_grbs) {
