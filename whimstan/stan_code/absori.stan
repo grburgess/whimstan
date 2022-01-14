@@ -258,9 +258,9 @@ vector integrate_absori_vec(vector num,
         for (j in 1:26){
 
 	  print(n,i,j);
-
-          taus[n] += -(x_r[(n-1)*10*26 + (i-1)*26 + j] * num[(i-1)*26 + j]);
-
+	  print( (n-1)*10*26 + (i-1)*26 + j);
+          //taus[n] += -(x_r[(n-1)*10*26 + (i-1)*26 + j] * num[(i-1)*26 + j]);
+	  taus[n] = 0;
         }
 
       }
