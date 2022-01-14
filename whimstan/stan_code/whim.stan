@@ -232,6 +232,8 @@ transformed parameters{
 
   }
 
+  print(num);
+
   profile("whim_abs") {
 
     // for (n in 1:N_grbs) {
@@ -244,7 +246,7 @@ transformed parameters{
 
     whim_abs = exp(map_rect(integrate_absori_vec,num,theta,sum_sigma_interp_vec, x_i));
 
-    print(whim_abs);
+    //    print(whim_abs);
 
   }
 
