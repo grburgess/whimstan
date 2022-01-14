@@ -64,7 +64,7 @@ transformed data{
 
   for (i in 1:num_atomicnumber){
 
-    Ne = atomicnumber[i];
+    int Ne = atomicnumber[i];
 
     for (j in 1:Ne){
       intgral[i][j] = 0.0;
