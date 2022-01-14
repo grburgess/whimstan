@@ -67,13 +67,11 @@ transformed data{
     int Ne = atomicnumber[i];
 
     for (j in 1:Ne){
-      intgral[i][j] = 0.0;
+      precalc_intgral[i][j] = 0.0;
       for (k in 1:num_energy_base){
-        intgral[i][j] += sigma[i,j,k]*spec[k];
-
+        precalc_intgral[i][j] += sigma[i,j,k]*spec[k];
       }
     }
-
   }
 
 
