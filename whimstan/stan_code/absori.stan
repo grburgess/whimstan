@@ -247,7 +247,7 @@ vector integrate_absori_vec(vector num,
 
   int N_e_edges = size(x_r);
 
-  vector[num_e_edges] taus;
+  vector[N_e_edges] taus;
 
   for (n in 1:N_e_edges){
 
