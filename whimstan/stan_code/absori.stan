@@ -245,7 +245,7 @@ vector integrate_absori_vec(vector num,
                             data array[] int x_i // not used
                             ){
 
-  int N_e_edges = size(x_r);
+  int N_e_edges = 2400;
 
   vector[N_e_edges] taus;
 
@@ -254,7 +254,7 @@ vector integrate_absori_vec(vector num,
     profile("inside"){
 
       for (i in 1:10) {
-	print(i);
+
 
         for (j in 1:26){
 
