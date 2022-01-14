@@ -53,7 +53,7 @@ transformed data{
 
   matrix[num_atomicnumber, max_atomicnumber] zero_matrix = rep_matrix(0., num_atomicnumber, max_atomicnumber);
 
-  zero_vector[max_atomicnumber] = rep_vector(0., max_atomicnumber);
+  vector[max_atomicnumber] zero_vector  = rep_vector(0., max_atomicnumber);
 
   array[num_atomicnumber] vector[max_atomicnumber] precalc_intgral;
 
