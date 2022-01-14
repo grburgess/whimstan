@@ -237,8 +237,6 @@ transformed parameters{
     // for (n in 1:N_grbs) {
 
     //   whim_abs[n] = exp(integrate_absori_precalc(sum_sigma_interp[n], num, N_ene)* n0_whim);
-
-
     // }
 
 

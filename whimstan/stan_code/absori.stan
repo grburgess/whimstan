@@ -236,9 +236,6 @@ vector integrate_absori_precalc(array[] matrix sum_sigma_interp,
 }
 
 
-
-
-
 vector integrate_absori_vec(vector num,
                             vector theta, // not used
                             data array[] real x_r,
@@ -250,27 +247,19 @@ vector integrate_absori_vec(vector num,
   vector[N_e_edges] taus;
 
   for (n in 1:N_e_edges){
-
     profile("inside_vec"){
 
       for (i in 1:10) {
-
-
         for (j in 1:26){
 
-	  //print(n,i,j);
-	  //print( (n-1)*10*26 + (i-1)*26 + j);
-          taus[n] += x_r[(n-1)*10*26 + (i-1)*26 + j] * num[(i-1)*26 + j];
-	  //taus[n] = 0;
-        }
+	  taus[n] += x_r[(n-1)*10*26 + (i-1)*26 + j] * num[(i-1)*26 + j];
 
+	}
       }
     }
   }
 
-
-
-  return taus;
+  return taus';
 }
 
 
