@@ -73,7 +73,7 @@ transformed data{
   // fill the array
   for (i in 1:N_grbs) {
 
-    x_i[i] = {};
+    x_i[i] = {0};
 
 
     for (j in 1:N_ene) {
