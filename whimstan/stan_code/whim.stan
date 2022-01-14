@@ -51,7 +51,15 @@ transformed data{
   int num_atomicnumber=size(atomicnumber);
   int max_atomicnumber=max(atomicnumber);
 
-  matrix[num_atomicnumber, max_atomicnumber] zero_matrix = rep_matrix(0., num_atomicnumber, max_atomicnumber);
+  int num_size = num_atomicnumber * max_atomicnumber;
+
+  int N_shards = 4;
+  int shard_size = N_grbs/N_shards;
+
+  // matrix[num_atomicnumber, max_atomicnumber] zero_matrix = rep_matrix(0., num_atomicnumber, max_atomicnumber);
+
+  vector[num_size] zero_matrix = rep_vector(0., num_size);
+
 
   vector[max_atomicnumber] zero_vector  = rep_vector(0., max_atomicnumber);
 
@@ -59,20 +67,41 @@ transformed data{
 
   int grainsize = 1;
 
+  array[N_grbs , N_ene * num_atomicnumber * max_atomicnumber] real sum_sigma_interp_vec;
+  array[N_grbs , N_ene * num_atomicnumber * max_atomicnumber] int x_i = {}; // dummy
+  array[N_grbs] vector[0] theta;
+  // fill the array
+  for (i in 1:N_grbs) {
+    for (j in 1:N_ene) {
+      for (k in 1:num_atomicnumber) {
+        for (l in 1:max_atomicnumber) {
 
-  // precalc for num
-  profile("num_pre") {
-  for (i in 1:num_atomicnumber){
+          sum_sigma_interp_vec[i][(j-1)*num_atomicnumber*max_atomicnumber + (k-1)*max_atomicnumber +l ] = sum_sigma_interp[i,j,k,l];
 
-    int Ne = atomicnumber[i];
-
-    for (j in 1:Ne){
-      precalc_intgral[i][j] = 0.0;
-      for (k in 1:num_energy_base){
-        precalc_intgral[i][j] += sigma[i,j,k]*spec[k];
+        }
       }
     }
   }
+
+
+
+
+
+  // precalc for num
+  profile("num_pre") {
+
+
+    for (i in 1:num_atomicnumber){
+
+      int Ne = atomicnumber[i];
+
+      for (j in 1:Ne){
+        precalc_intgral[i][j] = 0.0;
+        for (k in 1:num_energy_base){
+          precalc_intgral[i][j] += sigma[i,j,k]*spec[k];
+        }
+      }
+    }
 
   }
   //mw abs is fixed
@@ -164,42 +193,52 @@ transformed parameters{
   real n0_whim = pow(10, log_n0_whim);
 
   // free temp
-  matrix[10,26] num;
+  //  matrix[10,26] num;
+
+  vector[num_size] num;
+
   real t_whim=pow(10,log_t_whim);
 
-  array[N_grbs] vector[N_ene] whim_abs;
+  //array[N_grbs] vector[N_ene] whim_abs;
+
+  vector[N_grbs * N_ene] whim_abs;
 
   profile("num") {
 
-    num = calc_num(//spec,
-		   t_whim,
-		   xi,
-		   atomicnumber,
-		   //sigma,
-		   ion,
-		   zero_matrix,
-		   zero_vector,
-		   precalc_intgral,
-		   num_energy_base,
-		   num_atomicnumber,
-		   max_atomicnumber);
+    num = calc_num_vec(//spec,
+                       t_whim,
+                       xi,
+                       atomicnumber,
+                       //sigma,
+                       ion,
+                       zero_matrix,
+                       zero_vector,
+                       precalc_intgral,
+                       num_energy_base,
+                       num_atomicnumber,
+                       max_atomicnumber);
 
   }
 
   for (i in 1:10){
 
-    num[i] = abundance[i]*num[i];
+    num[(i-1) * max_atomicnumber  +1 : i*max_atomicnumber] = abundance[i]*num[(i-1) * max_atomicnumber  +1 : i*max_atomicnumber];
 
   }
 
   profile("whim_abs") {
 
-  for (n in 1:N_grbs) {
+    // for (n in 1:N_grbs) {
 
-    whim_abs[n] = exp(integrate_absori_precalc(sum_sigma_interp[n], num, N_ene)* n0_whim);
+    //   whim_abs[n] = exp(integrate_absori_precalc(sum_sigma_interp[n], num, N_ene)* n0_whim);
 
 
-  }
+    // }
+
+
+    whim_abs = map_rect(integrate_absori_vec,num,theta,sum_sigma_interp_vec, x_i);
+
+
   }
 
 
@@ -255,36 +294,36 @@ model{
   profile("loglike") {
 
     target += reduce_sum(pll_whim,
-                       all_N,
-                       grainsize,
-                       N_ene,
-                       N_chan,
-                       ene_avg,
-                       ene_width,
-                       mask,
-                       n_chans_used,
-                       mw_abs,
-                       K,
-                       index,
-			 //                       n0_whim,
-			 //num,
-			 //sum_sigma_interp,
-			 whim_abs,
-                       nH_host_norm,
-                       host_precomputed_absorp,
+                         all_N,
+                         grainsize,
+                         N_ene,
+                         N_chan,
+                         ene_avg,
+                         ene_width,
+                         mask,
+                         n_chans_used,
+                         mw_abs,
+                         K,
+                         index,
+                         //                       n0_whim,
+                         //num,
+                         //sum_sigma_interp,
+                         whim_abs,
+                         nH_host_norm,
+                         host_precomputed_absorp,
 
-                       //rsp,
-                       rmf,
-                       arf,
+                         //rsp,
+                         rmf,
+                         arf,
 
-                       exposure,
-                       exposure_ratio,
-                       counts,
-                       bkg,
-                       log_fact_obs,
-                       log_fact_bkg,
-                       o_plus_b,
-                       alpha_bkg_factor);
+                         exposure,
+                         exposure_ratio,
+                         counts,
+                         bkg,
+                         log_fact_obs,
+                         log_fact_bkg,
+                         o_plus_b,
+                         alpha_bkg_factor);
 
   }
 

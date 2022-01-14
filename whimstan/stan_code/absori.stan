@@ -5,11 +5,11 @@ matrix calc_num(//vector spec,
                 //array[,,] real sigma,
                 array[,,] real ion,
                 matrix zero_matrix,
-		vector zero_vector,
-		array[] vector intgral,
-		int num_energy_base,
-		int num_atomicnumber,
-		int max_atomicnumber
+                vector zero_vector,
+                array[] vector intgral,
+                int num_energy_base,
+                int num_atomicnumber,
+                int max_atomicnumber
 
                 ){
 
@@ -84,6 +84,101 @@ matrix calc_num(//vector spec,
 }
 
 
+vector calc_num_vec(//vector spec,
+                    real temp,
+                    real xi,
+                    array[] int atomicnumber,
+                    //array[,,] real sigma,
+                    array[,,] real ion,
+                    array[] vector zero_matrix,
+                    vector zero_vector,
+                    array[] vector intgral,
+                    int num_energy_base,
+                    int num_atomicnumber,
+                    int max_atomicnumber,
+                    int num_size
+
+                    ){
+
+  real mult;
+  real ratsum;
+  int Ne;
+  //  real intgral;
+  real e1;
+  real e2;
+  real arec;
+  real z2;
+  real y;
+  real s;
+
+  real t4=0.0001*temp;
+  real tfact=1.033e-3/sqrt(t4);
+  real xil=log(xi);
+
+  vector[max_atomicnumber] mul;
+  vector[max_atomicnumber] ratio;
+
+  vector[num_size] num = zero_matrix;
+
+  for (i in 1:num_atomicnumber){
+    mult = 0.0;
+    ratsum = 0.0;
+
+    Ne = atomicnumber[i];
+    mul = zero_vector;
+    ratio = zero_vector;
+
+    for (j in 1:Ne){
+
+      if (j<Ne){
+        e1 = exp(-ion[i,j,5]/t4);
+        e2 = exp(-ion[i,j,7]/t4);
+        arec = (ion[i,j,2]*pow(t4, -ion[i,j,3])+
+                ion[i,j,4]*pow(t4, -1.5)*
+                e1*(1.0+ion[i,j,6]*e2));
+      }
+      else {
+        z2 =square(Ne);
+        y = 15.8*z2/t4;
+        arec = tfact*z2*(1.735+log(y)+1.0/(6.*y));
+      }
+      ratio[j] = log(3.2749e-6*intgral[i][j]/arec);
+      ratsum += ratio[j];
+      mul[j] = ratsum + j*xil;
+      if (mul[j]>mult){
+        mult = mul[j];
+      }
+    }
+    s = 0.0;
+    for (j in 1:Ne){
+      mul[j] -= mult;
+      s += exp(mul[j]);
+    }
+
+    s += exp(-mult);
+
+    //num[i,1] = -mult-log(s);
+
+    num[(i-1)*max_atomicnumber +1] = -mult-log(s);
+
+
+
+    for (j in 2:Ne){
+      num[(i-1)*max_atomicnumber +j] = num[(i-1)*max_atomicnumber +j-1]+ratio[j-1]+xil;
+    }
+
+    for (j in 1:Ne){
+      num[(i-1)*max_atomicnumber +j] = exp(num[(i-1)*max_atomicnumber +j]);
+    }
+  }
+
+  return num;
+
+}
+
+
+
+
 // precalc sigma interpolation for all z we need => 0.02 z steps up to z=max(z) of all GRBs
 
 matrix log_absori_shells(int nz_shells,
@@ -139,6 +234,52 @@ vector integrate_absori_precalc(array[] matrix sum_sigma_interp,
 
   return taus;
 }
+
+
+
+
+
+vector integrate_absori_vec(vector num
+                            vector theta, // not used
+                            data array[] real x_r,
+                            data array[] int x_i // not used
+                            ){
+
+  int N_e_edges = size(x_r);
+
+  vector[num_e_edges] taus;
+
+  for (n in 1:N_e_edges){
+
+    profile("inside"){
+
+      for (i in 1:10) {
+
+        for (j in 1:26){
+
+          taus[n] += -(x_r[(n-1)*10*26 + (i-1)*26 + j] * num[(i-1)*26 + j]);
+
+        }
+
+      }
+    }
+  }
+
+
+
+  return taus;
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 vector integrate_absori(array[] matrix sum_sigma_interp,
