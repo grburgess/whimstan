@@ -232,6 +232,7 @@ transformed parameters{
 
   }
 
+  print(sum_sigma_interp_vec[1]);
 
   profile("whim_abs") {
 
@@ -245,7 +246,7 @@ transformed parameters{
 
     whim_abs = exp(- map_rect(integrate_absori_vec,num,theta,sum_sigma_interp_vec, x_i));
 
-    print(whim_abs);
+    //print(whim_abs);
 
   }
 
