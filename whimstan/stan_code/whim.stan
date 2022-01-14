@@ -232,8 +232,6 @@ transformed parameters{
 
   }
 
-  print(sum_sigma_interp_vec[1]);
-
   profile("whim_abs") {
 
     // for (n in 1:N_grbs) {
