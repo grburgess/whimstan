@@ -220,7 +220,9 @@ transformed parameters{
                        precalc_intgral,
                        num_energy_base,
                        num_atomicnumber,
-                       max_atomicnumber);
+                       max_atomicnumber,
+		       num_size
+		       );
 
   }
 
