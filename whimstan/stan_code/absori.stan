@@ -239,7 +239,7 @@ vector integrate_absori_precalc(array[] matrix sum_sigma_interp,
 
 
 
-vector integrate_absori_vec(vector num
+vector integrate_absori_vec(vector num,
                             vector theta, // not used
                             data array[] real x_r,
                             data array[] int x_i // not used
