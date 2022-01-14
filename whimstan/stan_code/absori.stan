@@ -4,14 +4,19 @@ matrix calc_num(vector spec,
                 array[] int atomicnumber,
                 array[,,] real sigma,
                 array[,,] real ion,
-                matrix zero_matrix
+                matrix zero_matrix,
+		vector zero_vector,
+		array[] vector intgral,
+		int num_energy_base,
+		int num_atomicnumber,
+		int max_atomicnumber
 
                 ){
 
   real mult;
   real ratsum;
   int Ne;
-  real intgral;
+  //  real intgral;
   real e1;
   real e2;
   real arec;
@@ -23,9 +28,6 @@ matrix calc_num(vector spec,
   real tfact=1.033e-3/sqrt(t4);
   real xil=log(xi);
 
-  int num_energy_base=size(sigma[1,1]);
-  int num_atomicnumber=size(atomicnumber);
-  int max_atomicnumber=max(atomicnumber);
   vector[max_atomicnumber] mul;
   vector[max_atomicnumber] ratio;
   matrix[num_atomicnumber, max_atomicnumber] num = zero_matrix;
@@ -36,14 +38,11 @@ matrix calc_num(vector spec,
     ratsum = 0.0;
 
     Ne = atomicnumber[i];
-    mul = rep_vector(0.0, Ne);
-    ratio = rep_vector(0.0, Ne);
+    mul = zero_vector;
+    ratio = zero_vector;
 
     for (j in 1:Ne){
-      intgral = 0.0;
-      for (k in 1:num_energy_base){
-        intgral += sigma[i,j,k]*spec[k];
-      }
+
       if (j<Ne){
         e1 = exp(-ion[i,j,5]/t4);
         e2 = exp(-ion[i,j,7]/t4);
@@ -56,7 +55,7 @@ matrix calc_num(vector spec,
         y = 15.8*z2/t4;
         arec = tfact*z2*(1.735+log(y)+1.0/(6.*y));
       }
-      ratio[j] = log(3.2749e-6*intgral/arec);
+      ratio[j] = log(3.2749e-6*intgral[i][j]/arec);
       ratsum += ratio[j];
       mul[j] = ratsum + j*xil;
       if (mul[j]>mult){
@@ -135,9 +134,6 @@ vector integrate_absori_precalc(array[] matrix sum_sigma_interp,
       taus[j] = -sum(sum_sigma_interp[j] .* num);
     }
   }
-
-
-
 
 
 

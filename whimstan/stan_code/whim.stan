@@ -47,15 +47,34 @@ transformed data{
   array[N_grbs] vector[N_chan] o_plus_b;
   array[N_grbs] vector[N_chan] alpha_bkg_factor;
 
+  int num_energy_base=size(sigma[1,1]);
   int num_atomicnumber=size(atomicnumber);
   int max_atomicnumber=max(atomicnumber);
 
   matrix[num_atomicnumber, max_atomicnumber] zero_matrix = rep_matrix(0., num_atomicnumber, max_atomicnumber);
 
+  zero_vector[max_atomicnumber] = rep_vector(0., max_atomicnumber);
 
+  array[num_atomicnumber] vector[max_atomicnumber] precalc_intgral;
 
   int grainsize = 1;
 
+
+  // precalc for num
+
+  for (i in 1:num_atomicnumber){
+
+    Ne = atomicnumber[i];
+
+    for (j in 1:Ne){
+      intgral[i][j] = 0.0;
+      for (k in 1:num_energy_base){
+        intgral[i][j] += sigma[i,j,k]*spec[k];
+
+      }
+    }
+
+  }
 
 
   //mw abs is fixed
@@ -154,11 +173,23 @@ transformed parameters{
 
   profile("num") {
 
-    num = calc_num(spec, t_whim, xi, atomicnumber, sigma, ion, zero_matrix);
+    num = calc_num(spec,
+		   t_whim,
+		   xi,
+		   atomicnumber,
+		   sigma,
+		   ion,
+		   zero_matrix,
+		   zero_vector,
+		   precalc_intgral,
+		   num_energy_base,
+		   num_atomicnumber,
+		   max_atomicnumber);
 
   }
 
   for (i in 1:10){
+
     num[i] = abundance[i]*num[i];
 
   }
