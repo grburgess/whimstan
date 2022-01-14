@@ -259,7 +259,7 @@ vector integrate_absori_vec(vector num,
     }
   }
 
-  return taus';
+  return [taus]';
 }
 
 
