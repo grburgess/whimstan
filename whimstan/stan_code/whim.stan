@@ -53,8 +53,8 @@ transformed data{
 
   int num_size = num_atomicnumber * max_atomicnumber;
 
-  int N_shards = 4;
-  int shard_size = N_grbs/N_shards;
+  // int N_shards = 4;
+  // int shard_size = N_grbs/N_shards;
 
   // matrix[num_atomicnumber, max_atomicnumber] zero_matrix = rep_matrix(0., num_atomicnumber, max_atomicnumber);
 
@@ -242,7 +242,7 @@ transformed parameters{
 
     whim_abs =  map_rect(integrate_absori_vec,num,theta,sum_sigma_interp_vec, x_i);
 
-    print(whim_abs);
+    print(size(whim_abs));
 
   }
 
