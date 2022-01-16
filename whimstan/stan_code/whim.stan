@@ -240,7 +240,7 @@ transformed parameters{
     // }
 
 
-    whim_abs =  exp(-map_rect(integrate_absori_vec,num,theta,sum_sigma_interp_vec, x_i));
+    whim_abs =  exp(-map_rect(integrate_absori_vec,num,theta,sum_sigma_interp_vec, x_i) * n0_whim);
 
 
 
