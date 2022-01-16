@@ -242,7 +242,7 @@ transformed parameters{
 
     whim_abs =  map_rect(integrate_absori_vec,num,theta,sum_sigma_interp_vec, x_i);
 
-    print(size(whim_abs));
+    print(whim_abs);
 
   }
 

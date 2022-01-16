@@ -247,7 +247,8 @@ vector integrate_absori_vec(vector num,
   vector[N_e_edges] taus;
 
   for (n in 1:N_e_edges){
-    profile("inside_vec"){
+
+    //profile("inside_vec"){
 
       for (i in 1:10) {
         for (j in 1:26){
@@ -256,7 +257,7 @@ vector integrate_absori_vec(vector num,
 
 	}
       }
-    }
+      //}
   }
 
   return taus;
