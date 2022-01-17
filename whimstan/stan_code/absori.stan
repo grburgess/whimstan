@@ -263,14 +263,30 @@ vector integrate_absori_vec(vector num,
 }
 
 
+vector integrate_absori_vec2(vector num,
+                            vector theta, // not used
+                            data array[] real x_r,
+                            data array[] int x_i // not used
+                            ){
 
+  int N_e_edges = 2400;
 
+  matrix[10,26] num_local = to_matrix(num, 10, 26, 0);
 
+  vector[N_e_edges] taus;
 
+  for (n in 1:N_e_edges){
 
+    //taus[n] = 0;
 
+    mat_local = to_matrix(x_r[(n-1)*10*26: (n)*10*26+1], 10, 26, 0);
 
+    taus[n] = sum(mat_local *. num_local);
 
+  }
+
+  return taus;
+}
 
 
 
