@@ -273,6 +273,8 @@ vector integrate_absori_vec2(vector num,
 
   matrix[10,26] num_local = to_matrix(num, 10, 26, 0);
 
+  matrix[10,26] mat_local;
+
   vector[N_e_edges] taus;
 
   for (n in 1:N_e_edges){
@@ -281,7 +283,7 @@ vector integrate_absori_vec2(vector num,
 
     mat_local = to_matrix(x_r[(n-1)*10*26: (n)*10*26+1], 10, 26, 0);
 
-    taus[n] = sum(mat_local *. num_local);
+    taus[n] = sum(mat_local .* num_local);
 
   }
 
