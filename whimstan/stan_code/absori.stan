@@ -281,7 +281,7 @@ vector integrate_absori_vec2(vector num,
 
     //taus[n] = 0;
 
-    mat_local = to_matrix(x_r[(n-1)*10*26: (n)*10*26+1], 10, 26, 0);
+    mat_local = to_matrix(x_r[(n-1)*10*26 +1: (n)*10*26], 10, 26, 0);
 
     taus[n] = sum(mat_local .* num_local);
 
