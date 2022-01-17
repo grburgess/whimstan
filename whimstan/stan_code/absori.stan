@@ -90,7 +90,7 @@ vector calc_num_vec(//vector spec,
                     array[] int atomicnumber,
                     //array[,,] real sigma,
                     array[,,] real ion,
-		    vector zero_matrix,
+                    vector zero_matrix,
                     vector zero_vector,
                     array[] vector intgral,
                     int num_energy_base,
@@ -250,14 +250,11 @@ vector integrate_absori_vec(vector num,
 
     taus[n] = 0;
 
-    profile("inside_vec"){
 
-      for (i in 1:10) {
-        for (j in 1:26){
 
-	  taus[n] += x_r[(n-1)*10*26 + (i-1)*26 + j] * num[(i-1)*26 + j];
-
-	}
+    for (i in 1:10) {
+      for (j in 1:26){
+        taus[n] += x_r[(n-1)*10*26 + (i-1)*26 + j] * num[(i-1)*26 + j];
       }
     }
   }
