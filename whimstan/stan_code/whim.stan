@@ -88,12 +88,8 @@ transformed data{
   }
 
 
-
-
-
   // precalc for num
   profile("num_pre") {
-
 
     for (i in 1:num_atomicnumber){
 
@@ -240,7 +236,7 @@ transformed parameters{
     // }
 
 
-    whim_abs =  exp(-map_rect(integrate_absori_vec2,num,theta,sum_sigma_interp_vec, x_i) * n0_whim);
+    whim_abs =  exp(-map_rect(integrate_absori_vec3,num,theta,sum_sigma_interp_vec, x_i) * n0_whim);
 
 
 

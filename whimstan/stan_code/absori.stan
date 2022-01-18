@@ -291,6 +291,19 @@ vector integrate_absori_vec2(vector num,
 }
 
 
+vector integrate_absori_vec3(vector num,
+                            vector theta, // not used
+                            data array[] real x_r,
+                            data array[] int x_i // not used
+                            ){
+
+  return to_matrix(x_r, 2400, 260, 0) * num;
+
+}
+
+
+
+
 
 vector integrate_absori(array[] matrix sum_sigma_interp,
                         matrix num,
