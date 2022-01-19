@@ -329,15 +329,12 @@ model{
                          index,
 			 n0_whim,
                          num,
-			 sum_sigma_interp,
+			 sum_sigma_interp_vec,
                          //whim_abs,
                          nH_host_norm,
                          host_precomputed_absorp,
-
-                         //rsp,
                          rmf,
                          arf,
-
                          exposure,
                          exposure_ratio,
                          counts,
