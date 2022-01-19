@@ -71,21 +71,42 @@ transformed data{
   array[N_grbs , 0] int x_i; // dummy
   array[N_grbs] vector[0] theta;
   // fill the array
-  for (i in 1:N_grbs) {
+  // for (i in 1:N_grbs) {
 
-    x_i[i] = {0};
+  //   x_i[i] = {0};
+
+
+  //   for (j in 1:N_ene) {
+  //     for (k in 1:num_atomicnumber) {
+  //       for (l in 1:max_atomicnumber) {
+
+  //         sum_sigma_interp_vec[i][(j-1)*num_atomicnumber*max_atomicnumber + (k-1)*max_atomicnumber +l ] = sum_sigma_interp[i,j,k,l];
+
+  //       }
+  //     }
+  //   }
+  //}
+
+  array[N_grbs] matrix [N_ene, num_atomicnumber * max_atomicnumber] sum_sigma_interp_vec;
+
+  // fill the array
+  for (i in 1:N_grbs) {
 
 
     for (j in 1:N_ene) {
       for (k in 1:num_atomicnumber) {
         for (l in 1:max_atomicnumber) {
 
-          sum_sigma_interp_vec[i][(j-1)*num_atomicnumber*max_atomicnumber + (k-1)*max_atomicnumber +l ] = sum_sigma_interp[i,j,k,l];
+          sum_sigma_interp_vec[i][j, (k-1)*max_atomicnumber +l ] = sum_sigma_interp[i,j,k,l];
 
         }
       }
     }
   }
+
+
+
+
 
 
   // precalc for num
@@ -199,7 +220,7 @@ transformed parameters{
 
   real t_whim=pow(10,log_t_whim);
 
-  //array[N_grbs] vector[N_ene] whim_abs;
+  array[N_grbs] vector[N_ene] whim_abs;
 
   vector[N_grbs * N_ene] whim_abs;
 
@@ -230,13 +251,13 @@ transformed parameters{
 
   profile("whim_abs") {
 
-    // for (n in 1:N_grbs) {
+    for (n in 1:N_grbs) {
 
-    //   whim_abs[n] = exp(integrate_absori_precalc(sum_sigma_interp[n], num, N_ene)* n0_whim);
-    // }
+      whim_abs[n] = exp(-integrate_absori_vec4(sum_sigma_interp[n], num)* n0_whim);
+    }
 
 
-    whim_abs =  exp(-map_rect(integrate_absori_vec3,num,theta,sum_sigma_interp_vec, x_i) * n0_whim);
+    // whim_abs =  exp(-map_rect(integrate_absori_vec3,num,theta,sum_sigma_interp_vec, x_i) * n0_whim);
 
 
 

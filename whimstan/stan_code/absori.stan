@@ -300,6 +300,13 @@ vector integrate_absori_vec3(vector num,
   return to_matrix(x_r, 2400, 260, 0) * num;
 
 }
+vector integrate_absori_vec4(vector num,
+			     matrix sigma
+                            ){
+
+  return sigma * num;
+
+}
 
 
 
