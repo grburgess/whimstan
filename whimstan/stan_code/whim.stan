@@ -220,7 +220,7 @@ transformed parameters{
 
   real t_whim=pow(10,log_t_whim);
 
-  // array[N_grbs] vector[N_ene] whim_abs;
+  array[N_grbs] vector[N_ene] whim_abs;
 
   // vector[N_grbs * N_ene] whim_abs;
 
