@@ -220,7 +220,7 @@ transformed parameters{
 
   real t_whim=pow(10,log_t_whim);
 
-  array[N_grbs] vector[N_ene] whim_abs;
+  // array[N_grbs] vector[N_ene] whim_abs;
 
   // vector[N_grbs * N_ene] whim_abs;
 
@@ -249,19 +249,19 @@ transformed parameters{
 
   }
 
-  profile("whim_abs") {
+  // profile("whim_abs") {
 
-    for (n in 1:N_grbs) {
+  //   for (n in 1:N_grbs) {
 
-      whim_abs[n] = exp(-integrate_absori_vec4(num, sum_sigma_interp_vec[n])* n0_whim);
-    }
-
-
-    // whim_abs =  exp(-map_rect(integrate_absori_vec3,num,theta,sum_sigma_interp_vec, x_i) * n0_whim);
+  //     whim_abs[n] = exp(-integrate_absori_vec4(num, sum_sigma_interp_vec[n])* n0_whim);
+  //   }
 
 
+  //   // whim_abs =  exp(-map_rect(integrate_absori_vec3,num,theta,sum_sigma_interp_vec, x_i) * n0_whim);
 
-  }
+
+
+  // }
 
 
   // non centered parameterizartion
@@ -327,10 +327,10 @@ model{
                          mw_abs,
                          K,
                          index,
-                         //                       n0_whim,
-                         //num,
-                         //sum_sigma_interp,
-                         whim_abs,
+			 n0_whim,
+                         num,
+			 sum_sigma_interp,
+                         //whim_abs,
                          nH_host_norm,
                          host_precomputed_absorp,
 
