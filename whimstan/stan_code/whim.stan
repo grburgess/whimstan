@@ -222,7 +222,7 @@ transformed parameters{
 
   array[N_grbs] vector[N_ene] whim_abs;
 
-  vector[N_grbs * N_ene] whim_abs;
+  // vector[N_grbs * N_ene] whim_abs;
 
   profile("num") {
 
