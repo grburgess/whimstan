@@ -315,8 +315,8 @@ model{
 
   profile("loglike") {
 
-    target += reduce_sum(pll_whim,
-                         all_N,
+    target += reduce_sum(pll_whim_test,
+			 sum_sigma_interp_vec,
                          grainsize,
                          N_ene,
                          N_chan,
@@ -329,7 +329,7 @@ model{
                          index,
 			 n0_whim,
                          num,
-			 sum_sigma_interp_vec,
+			 //
                          //whim_abs,
                          nH_host_norm,
                          host_precomputed_absorp,
