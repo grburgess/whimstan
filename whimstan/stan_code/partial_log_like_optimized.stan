@@ -191,7 +191,7 @@ real pll_whim_test(array[] matrix sum_sigma_interp,
               array[] vector alpha_bkg_factor
               ){
 
-  int slice_length = end - start;
+  int slice_length = end - start +1;
 
   vector[slice_length] loglike;
 
