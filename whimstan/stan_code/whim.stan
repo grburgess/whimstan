@@ -253,7 +253,7 @@ transformed parameters{
 
     for (n in 1:N_grbs) {
 
-      whim_abs[n] = exp(-integrate_absori_vec4(sum_sigma_interp[n], num)* n0_whim);
+      whim_abs[n] = exp(-integrate_absori_vec4(sum_sigma_interp_vec[n], num)* n0_whim);
     }
 
 
