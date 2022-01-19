@@ -195,7 +195,7 @@ real pll_whim_test(array[] matrix sum_sigma_interp,
 
   vector[slice_length] loglike;
 
-  int local_itr = 0; // keep track of the slice size
+  int local_itr = 1; // keep track of the slice size
 
   for (n in start:end){
 
@@ -211,6 +211,10 @@ real pll_whim_test(array[] matrix sum_sigma_interp,
                                  log_fact_obs[n,mask[n,:n_chans_used[n]]],
                                  log_fact_bkg[n,mask[n,:n_chans_used[n]]]
                                  );
+
+
+
+    local_itr +=1;
 
 
 
