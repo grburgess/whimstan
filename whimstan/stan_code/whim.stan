@@ -249,13 +249,13 @@ transformed parameters{
 
   }
 
-  // profile("whim_abs") {
+  profile("whim_abs") {
 
-  //   for (n in 1:N_grbs) {
+    for (n in 1:N_grbs) {
 
-  //     whim_abs[n] = exp(-integrate_absori_vec4(num, sum_sigma_interp_vec[n])* n0_whim);
-  //   }
-
+      whim_abs[n] = exp(-integrate_absori_vec4(num, sum_sigma_interp_vec[n])* n0_whim);
+    }
+  }
 
   //   // whim_abs =  exp(-map_rect(integrate_absori_vec3,num,theta,sum_sigma_interp_vec, x_i) * n0_whim);
 
@@ -316,8 +316,10 @@ model{
   profile("loglike") {
 
     target += reduce_sum(pll_whim_test,
-			 sum_sigma_interp_vec,
-                         grainsize,
+			 //			 sum_sigma_interp_vec,
+
+			 whim_abs,
+			 grainsize,
                          N_ene,
                          N_chan,
                          ene_avg,
@@ -327,8 +329,8 @@ model{
                          mw_abs,
                          K,
                          index,
-			 n0_whim,
-                         num,
+			 // n0_whim,
+                         // num,
 			 //
                          //whim_abs,
                          nH_host_norm,

@@ -159,7 +159,7 @@ real pll_whim(array[] int  n_slice,
 }
 
 
-real pll_whim_test(array[] matrix sum_sigma_interp,
+real pll_whim_test(array[] vector whim_abs,
               int start,
               int end,
               int N_ene,
@@ -171,11 +171,11 @@ real pll_whim_test(array[] matrix sum_sigma_interp,
               array[] vector mw_abs,
               vector K,
               vector index,
-              real n0,
-              vector num,
+		   //real n0,
+		   //              vector num,
 		   //              array[] matrix sum_sigma_interp,
-	      // array[] vector whim_abs,
-	      //array[] vector whim_abs,
+
+
               vector nH_host,
               array[] vector host_precomputed_absorp,
               //array[] matrix rsp ,
@@ -204,7 +204,7 @@ real pll_whim_test(array[] matrix sum_sigma_interp,
 
     loglike[local_itr] = cstat_optimized(counts[n,mask[n,:n_chans_used[n]]],
                                  bkg[n,mask[n,:n_chans_used[n]]],
-                                 ((rmf * ( arf[n] .*  powerlaw_flux(ene_avg[n], index[n]) .* exp(- integrate_absori_vec4(num, sum_sigma_interp[local_itr]* n0 )) .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n] .* ene_width[n]))[mask[n,:n_chans_used[n]]]) * exposure[n] * K[n],
+                                 ((rmf * ( arf[n] .*  powerlaw_flux(ene_avg[n], index[n]) .* whim_abs[local_itr] .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n] .* ene_width[n]))[mask[n,:n_chans_used[n]]]) * exposure[n] * K[n],
                                  exposure_ratio[n],
                                  o_plus_b[n,mask[n,:n_chans_used[n]]],
                                  alpha_bkg_factor[n,mask[n,:n_chans_used[n]]],
