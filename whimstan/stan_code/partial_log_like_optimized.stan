@@ -98,46 +98,7 @@ real pll_whim(array[] int  n_slice,
 
     int n = n_slice[i];
 
-    // vector[N_ene] source_spectrum = powerlaw_flux(ene_avg[n], index[n]) .* whim_abs[n] .* mw_abs[n] .* absorption(nH_host[n], host_precomputed_absorp[n]);
 
-
-    // vector[N_chan] predicted_counts =  (rmf * ( arf[n]  .* source_spectrum .* ene_width[n]));
-
-
-
-
-    // loglike[i] = cstat_optimized(counts[n,mask[n,:n_chans_used[n]]],
-    //                              bkg[n,mask[n,:n_chans_used[n]]],
-    //                              (predicted_counts[mask[n,:n_chans_used[n]]]) * exposure[n] * K[n],
-    //                              exposure_ratio[n],
-    //                              o_plus_b[n,mask[n,:n_chans_used[n]]],
-    //                              alpha_bkg_factor[n,mask[n,:n_chans_used[n]]],
-    //                              log_fact_obs[n,mask[n,:n_chans_used[n]]],
-    //                              log_fact_bkg[n,mask[n,:n_chans_used[n]]]
-    //                              );
-
-
-
-
-    // loglike[i] = cstat_optimized(counts[n,mask[n,:n_chans_used[n]]],
-    //                              bkg[n,mask[n,:n_chans_used[n]]],
-    //                              ((rmf * ( arf[n] .*  powerlaw_flux(ene_avg[n], index[n]) .* whim_abs[(n-1) * N_ene +1 : n*N_ene ] .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n] .* ene_width[n]))[mask[n,:n_chans_used[n]]]) * exposure[n] * K[n],
-    //                              exposure_ratio[n],
-    //                              o_plus_b[n,mask[n,:n_chans_used[n]]],
-    //                              alpha_bkg_factor[n,mask[n,:n_chans_used[n]]],
-    //                              log_fact_obs[n,mask[n,:n_chans_used[n]]],
-    //                              log_fact_bkg[n,mask[n,:n_chans_used[n]]]
-    //                              );
-
-    // loglike[i] = cstat_optimized(counts[n,mask[n,:n_chans_used[n]]],
-    //                              bkg[n,mask[n,:n_chans_used[n]]],
-    //                              ((rmf * ( arf[n] .*  powerlaw_flux(ene_avg[n], index[n]) .* whim_abs[n] .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n] .* ene_width[n]))[mask[n,:n_chans_used[n]]]) * exposure[n] * K[n],
-    //                              exposure_ratio[n],
-    //                              o_plus_b[n,mask[n,:n_chans_used[n]]],
-    //                              alpha_bkg_factor[n,mask[n,:n_chans_used[n]]],
-    //                              log_fact_obs[n,mask[n,:n_chans_used[n]]],
-    //                              log_fact_bkg[n,mask[n,:n_chans_used[n]]]
-    //                              );
     loglike[i] = cstat_optimized(counts[n,mask[n,:n_chans_used[n]]],
                                  bkg[n,mask[n,:n_chans_used[n]]],
                                  ((rmf * ( arf[n] .*  powerlaw_flux(ene_avg[n], index[n]) .* exp(- integrate_absori_vec4(num, sum_sigma_interp[n]* n0 )) .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n] .* ene_width[n]))[mask[n,:n_chans_used[n]]]) * exposure[n] * K[n],
