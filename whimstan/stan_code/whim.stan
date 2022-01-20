@@ -283,7 +283,7 @@ transformed parameters{
 
   K =  pow(10.,log_K);
 
-  nH_host_norm} = pow(10.,log_nH_host);
+  nH_host_norm = pow(10.,log_nH_host);
 
 
 
