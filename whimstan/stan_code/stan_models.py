@@ -51,7 +51,7 @@ class StanModel:
 
         self._model = None
 
-    def build_model(self):
+    def build_model(self, use_opencl=False, opt=True):
         """
         build the stan model
 
@@ -61,6 +61,21 @@ class StanModel:
         """
 
         cpp_options = dict(STAN_THREADS=True)
+
+
+        if use_opencl:
+
+            stanc_options = dict('use_opencl'=True)
+
+            cpp_options["STAN_OPENCL"] = True
+            cpp_options["OPENCL_DEVICE_ID"] = 0
+            cpp_options["OPENCL_PLATFORM_ID"] = 0
+
+        if opt:
+
+            cpp_options["STAN_CPP_OPTIMS"] = True
+            cpp_options["STAN_NO_RANGE_CHECKS"] = True
+
 
 
         # get the current working dir
