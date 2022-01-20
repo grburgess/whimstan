@@ -229,7 +229,7 @@ transformed parameters{
 
   real t_whim=pow(10,log_t_whim);
 
-  //  array[N_grbs] vector[N_ene] whim_abs;
+  array[N_grbs] vector[N_ene] whim_abs;
 
   // vector[N_grbs * N_ene] whim_abs;
 
@@ -258,19 +258,19 @@ transformed parameters{
 
   }
 
-  // profile("whim_abs") {
+  profile("whim_abs") {
 
-  //   for (n in 1:N_grbs) {
+    for (n in 1:N_grbs) {
 
-  //     whim_abs[n] = exp(-integrate_absori_vec4(num, sum_sigma_interp_vec[n])* n0_whim);
-  //   }
-
-
-  //   // whim_abs =  exp(-map_rect(integrate_absori_vec3,num,theta,sum_sigma_interp_vec, x_i) * n0_whim);
+      whim_abs[n] = exp(-integrate_absori_vec4(num, sum_sigma_interp_vec[n])* n0_whim);
+    }
 
 
+    // whim_abs =  exp(-map_rect(integrate_absori_vec3,num,theta,sum_sigma_interp_vec, x_i) * n0_whim);
 
-  // }
+
+
+  }
 
 
   // non centered parameterizartion
@@ -324,42 +324,10 @@ model{
 
   profile("loglike") {
 
-  //   target += reduce_sum(pll_whim_test,
-  // 			 //			 sum_sigma_interp_vec,
+    target += reduce_sum(pll_whim_test,
+			 //			 sum_sigma_interp_vec,
 
-  // 			 whim_abs,
-  // 			 grainsize,
-  //                        N_ene,
-  //                        N_chan,
-  //                        ene_avg,
-  //                        ene_width,
-  //                        mask,
-  //                        n_chans_used,
-  //                        mw_abs,
-  //                        K,
-  //                        index,
-  // 			 // n0_whim,
-  //                        // num,
-  // 			 //
-  //                        //whim_abs,
-  //                        nH_host_norm,
-  //                        host_precomputed_absorp,
-  //                        rmf,
-  //                        arf,
-  //                        exposure,
-  //                        exposure_ratio,
-  //                        counts,
-  //                        bkg,
-  //                        log_fact_obs,
-  //                        log_fact_bkg,
-  //                        o_plus_b,
-  //                        alpha_bkg_factor);
-
-
-
-
-    target += reduce_sum(pll_whim,
-			 all_N,
+			 whim_abs,
 			 grainsize,
                          N_ene,
                          N_chan,
@@ -370,9 +338,10 @@ model{
                          mw_abs,
                          K,
                          index,
-			 n0_whim,
-                         num,
-			 sum_sigma_interp_vec,
+			 // n0_whim,
+                         // num,
+			 //
+                         //whim_abs,
                          nH_host_norm,
                          host_precomputed_absorp,
                          rmf,
@@ -385,6 +354,38 @@ model{
                          log_fact_bkg,
                          o_plus_b,
                          alpha_bkg_factor);
+
+
+
+
+
+  //   target += reduce_sum(pll_whim,
+  // 			 all_N,
+  // 			 grainsize,
+  //                        N_ene,
+  //                        N_chan,
+  //                        ene_avg,
+  //                        ene_width,
+  //                        mask,
+  //                        n_chans_used,
+  //                        mw_abs,
+  //                        K,
+  //                        index,
+  // 			 n0_whim,
+  //                        num,
+  // 			 sum_sigma_interp_vec,
+  //                        nH_host_norm,
+  //                        host_precomputed_absorp,
+  //                        rmf,
+  //                        arf,
+  //                        exposure,
+  //                        exposure_ratio,
+  //                        counts,
+  //                        bkg,
+  //                        log_fact_obs,
+  //                        log_fact_bkg,
+  //                        o_plus_b,
+  //                        alpha_bkg_factor);
 
   }
 

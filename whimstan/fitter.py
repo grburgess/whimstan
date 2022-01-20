@@ -22,6 +22,7 @@ def make_fit(
     use_host_gas: bool = True,
     save_stan_fit: bool = True,
     clean_model: bool = False,
+    use_opencl: bool=False
 ):
 
     """
@@ -59,12 +60,12 @@ def make_fit(
 
     cur_dir = Path().cwd()
 
-    model.build_model()
+    model.build_model(use_opencl=use_opencl)
 
     if clean_model:
 
         model.clean_model()
-        model.build_model()
+        model.build_model(use_opencl=use_opencl)
 
 
     data = database.build_stan_data(
