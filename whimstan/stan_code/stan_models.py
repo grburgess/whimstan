@@ -62,14 +62,17 @@ class StanModel:
 
         cpp_options = dict(STAN_THREADS=True)
 
+        stanc_options = {}
 
         if use_opencl:
 
-            stanc_options = dict('use_opencl'=True)
+            stanc_options['use_opencl']=True
 
             cpp_options["STAN_OPENCL"] = True
             cpp_options["OPENCL_DEVICE_ID"] = 0
             cpp_options["OPENCL_PLATFORM_ID"] = 0
+
+
 
         if opt:
 
@@ -86,6 +89,7 @@ class StanModel:
             stan_file=self._stan_file,
             model_name=self._name,
             cpp_options=cpp_options,
+            stanc_options=stanc_options
         )
 
 
