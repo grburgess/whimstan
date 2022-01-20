@@ -387,7 +387,7 @@ model{
   //                        o_plus_b,
   //                        alpha_bkg_factor);
 
-  // }
+   }
 
 }
 
