@@ -66,7 +66,7 @@ class StanModel:
 
         if use_opencl:
 
-            stanc_options['use_opencl']=True
+            stanc_options['use-opencl']=True
 
             cpp_options["STAN_OPENCL"] = True
             cpp_options["OPENCL_DEVICE_ID"] = 0
