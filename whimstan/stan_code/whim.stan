@@ -324,10 +324,43 @@ model{
 
   profile("loglike") {
 
-    target += reduce_sum(pll_whim_test,
-			 //			 sum_sigma_interp_vec,
+    // target += reduce_sum(pll_whim_test,
+    // 			 //			 sum_sigma_interp_vec,
 
-			 whim_abs,
+    // 			 whim_abs,
+    // 			 grainsize,
+    //                      N_ene,
+    //                      N_chan,
+    //                      ene_avg,
+    //                      ene_width,
+    //                      mask,
+    //                      n_chans_used,
+    //                      mw_abs,
+    //                      K,
+    //                      index,
+    // 			 // n0_whim,
+    //                      // num,
+    // 			 //
+    //                      //whim_abs,
+    //                      nH_host_norm,
+    //                      host_precomputed_absorp,
+    //                      rmf,
+    //                      arf,
+    //                      exposure,
+    //                      exposure_ratio,
+    //                      counts,
+    //                      bkg,
+    //                      log_fact_obs,
+    //                      log_fact_bkg,
+    //                      o_plus_b,
+    //                      alpha_bkg_factor);
+
+
+
+
+
+    target += reduce_sum(pll_whim,
+			 all_N,
 			 grainsize,
                          N_ene,
                          N_chan,
@@ -338,10 +371,9 @@ model{
                          mw_abs,
                          K,
                          index,
-			 // n0_whim,
-                         // num,
-			 //
-                         //whim_abs,
+			 n0_whim,
+                         num,
+			 sum_sigma_interp_vec,
                          nH_host_norm,
                          host_precomputed_absorp,
                          rmf,
@@ -354,38 +386,6 @@ model{
                          log_fact_bkg,
                          o_plus_b,
                          alpha_bkg_factor);
-
-
-
-
-
-  //   target += reduce_sum(pll_whim,
-  // 			 all_N,
-  // 			 grainsize,
-  //                        N_ene,
-  //                        N_chan,
-  //                        ene_avg,
-  //                        ene_width,
-  //                        mask,
-  //                        n_chans_used,
-  //                        mw_abs,
-  //                        K,
-  //                        index,
-  // 			 n0_whim,
-  //                        num,
-  // 			 sum_sigma_interp_vec,
-  //                        nH_host_norm,
-  //                        host_precomputed_absorp,
-  //                        rmf,
-  //                        arf,
-  //                        exposure,
-  //                        exposure_ratio,
-  //                        counts,
-  //                        bkg,
-  //                        log_fact_obs,
-  //                        log_fact_bkg,
-  //                        o_plus_b,
-  //                        alpha_bkg_factor);
 
    }
 
