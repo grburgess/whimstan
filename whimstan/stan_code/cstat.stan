@@ -1,4 +1,4 @@
-real logfactorial(real x){
+vector logfactorial(vector x){
 
   return lgamma(x +1);
 
