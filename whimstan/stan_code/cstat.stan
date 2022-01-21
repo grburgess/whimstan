@@ -151,23 +151,6 @@ real cstat_optimized_vec(vector observed_counts,
   vector[N] out = lmultiply( observed_counts, alpha * B_mle + predicted_counts ) + lmultiply(background_counts, B_mle + pad)
 		 - (alpha + 1) * B_mle - predicted_counts - log_fact_bkg - log_fact_obs;
 
-  for (n in 1:N){
-
-    if(B_mle[n]<0)
-      {
-	print("------");
-	print(B_mle[n]);
-	print(log_fact_bkg[n]);
-	print(background_counts[n]);
-	print(lmultiply(background_counts[n], B_mle[n] + pad[n]));
-	print(o_plus_b[n]);
-	print("-------");
-
-      }
-
-  }
-  
-  
 
   return sum(out);
 
