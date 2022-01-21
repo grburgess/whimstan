@@ -159,11 +159,7 @@ transformed data{
       log_fact_obs[n,m] = logfactorial(counts[n,m]);
 
 
-      if (bkg[n,m] >0) {
-
-        log_fact_bkg[n,m] = logfactorial(bkg[n,m]);
-
-      }
+      log_fact_bkg[n,m] = logfactorial(bkg[n,m]);
 
     }
 
