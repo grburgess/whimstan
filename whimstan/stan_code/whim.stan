@@ -154,14 +154,8 @@ transformed data{
 
   for (n in 1:N_grbs) {
 
-    for (m in 1:N_chan) {
-
-      log_fact_obs[n,m] = logfactorial(counts[n,m]);
-
-
-      log_fact_bkg[n,m] = logfactorial(bkg[n,m]);
-
-    }
+    log_fact_obs[n] = logfactorial(counts[n]);
+    log_fact_bkg[n] = logfactorial(bkg[n]);
 
     o_plus_b[n] = counts[n] + bkg[n];
 
