@@ -135,7 +135,7 @@ real cstat_optimized_vec(vector observed_counts,
                          vector o_plus_b,
                          vector alpha_bkg_factor,
                          vector log_fact_obs,
-                         vector log_fact_bkg
+                         vector log_fact_bkg,
 			 vector pad) {
 
 
