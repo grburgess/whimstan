@@ -165,13 +165,13 @@ transformed data{
     for (m in 1:N_chan){
 
       if (bkg[n][m]>0){
-	zero_mask[n][m] = 0
+	zero_mask[n][m] = 0;
 
 	  }
 
       else {
 
-	zero_mask[n][m] = 1
+	zero_mask[n][m] = 1;
 
       }
     }
