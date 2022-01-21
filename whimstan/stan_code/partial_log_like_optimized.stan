@@ -99,7 +99,7 @@ real pll_whim(array[] int  n_slice,
     int n = n_slice[i];
 
 
-    loglike[i] = cstat_optimized(counts[n,mask[n,:n_chans_used[n]]],
+    loglike[i] = cstat_optimized_vec(counts[n,mask[n,:n_chans_used[n]]],
                                  bkg[n,mask[n,:n_chans_used[n]]],
                                  ((rmf * ( arf[n] .*  powerlaw_flux(ene_avg[n], index[n]) .* exp(- integrate_absori_vec4(num, sum_sigma_interp[n]* n0 )) .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n] .* ene_width[n]))[mask[n,:n_chans_used[n]]]) * exposure[n] * K[n],
                                  exposure_ratio[n],
@@ -163,7 +163,7 @@ real pll_whim_test(array[] vector whim_abs,
     // fill the log likelihood array
 
 
-    loglike[local_itr] = cstat_optimized(counts[n,mask[n,:n_chans_used[n]]],
+    loglike[local_itr] = cstat_optimized_vec(counts[n,mask[n,:n_chans_used[n]]],
                                  bkg[n,mask[n,:n_chans_used[n]]],
                                  ((rmf * ( arf[n] .*  powerlaw_flux(ene_avg[n], index[n]) .* whim_abs[local_itr] .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n] .* ene_width[n]))[mask[n,:n_chans_used[n]]]) * exposure[n] * K[n],
                                  exposure_ratio[n],
