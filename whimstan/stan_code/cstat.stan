@@ -142,7 +142,7 @@ real cstat_optimized_vec(vector observed_counts,
 
   vector[N] B_mle =  inv(2.0 * alpha * (1 + alpha))
       * (alpha * (o_plus_b) - (alpha + 1) * predicted_counts +  sqrt(
-                    alpha_bkg_factor *. predicted_counts
+                    alpha_bkg_factor .* predicted_counts
                     + square((alpha + 1) * predicted_counts - alpha * (o_plus_b))
 									   )   );
 
