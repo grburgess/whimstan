@@ -158,6 +158,8 @@ real cstat_optimized_vec(vector observed_counts,
 	print(B_mle[n]);
 	print(log_fact_bkg[n]);
 	print(background_counts[n]);
+	print(lmultiply(background_counts[n], B_mle[n]));
+	print(o_plus_b[n]);
 	print("-------");
 
       }
