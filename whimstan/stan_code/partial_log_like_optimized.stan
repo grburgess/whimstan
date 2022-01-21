@@ -153,7 +153,7 @@ real pll_whim_test(array[] vector whim_abs,
                    array[] vector log_fact_obs,
                    array[] vector log_fact_bkg,
                    array[] vector o_plus_b,
-                   array[] vector alpha_bkg_factor
+                   array[] vector alpha_bkg_factor,
 		   array[] vector zero_mask
                    ){
 
