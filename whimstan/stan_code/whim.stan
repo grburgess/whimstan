@@ -36,6 +36,7 @@ data{
   vector[721] spec;
   vector[10] abundance;
   array[N_grbs, N_ene] matrix[10,26] sum_sigma_interp;
+
 }
 
 
@@ -328,7 +329,7 @@ model{
 
   profile("loglike") {
 
-    target += reduce_sum(pll_whim_test,
+    target += reduce_sum_static(pll_whim_test,
 			 //			 sum_sigma_interp_vec,
 
 			 whim_abs,
@@ -342,10 +343,6 @@ model{
                          mw_abs,
                          K,
                          index,
-			 // n0_whim,
-                         // num,
-			 //
-                         //whim_abs,
                          nH_host_norm,
                          host_precomputed_absorp,
                          rmf,
