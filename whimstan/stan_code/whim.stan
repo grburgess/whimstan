@@ -46,6 +46,7 @@ transformed data{
   array[N_grbs] vector[N_chan] log_fact_bkg;
   array[N_grbs] vector[N_chan] o_plus_b;
   array[N_grbs] vector[N_chan] alpha_bkg_factor;
+  array[N_grbs] vector[N_chan] zero_mask;
 
   int num_energy_base=size(sigma[1,1]);
   int num_atomicnumber=size(atomicnumber);
@@ -161,6 +162,19 @@ transformed data{
 
     alpha_bkg_factor[n] = 4 * (exposure_ratio[n] + square(exposure_ratio[n])) * bkg[n];
 
+    for (m in 1:N_chan){
+
+      if (bkg[n][m]>0){
+	zero_mask[n][m] = 0
+
+	  }
+
+      else {
+
+	zero_mask[n][m] = 1
+
+      }
+    }
 
   }
 
@@ -375,7 +389,9 @@ model{
                          log_fact_obs,
                          log_fact_bkg,
                          o_plus_b,
-                         alpha_bkg_factor);
+                         alpha_bkg_factor,
+			 zero_mask
+			 );
 
    }
 

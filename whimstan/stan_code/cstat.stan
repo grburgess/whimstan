@@ -135,7 +135,8 @@ real cstat_optimized_vec(vector observed_counts,
                          vector o_plus_b,
                          vector alpha_bkg_factor,
                          vector log_fact_obs,
-                         vector log_fact_bkg) {
+                         vector log_fact_bkg
+			 vector pad) {
 
 
   int N = num_elements(predicted_counts);
@@ -147,7 +148,7 @@ real cstat_optimized_vec(vector observed_counts,
                                                                    )   );
 
 
-  vector[N] out = lmultiply( observed_counts, alpha * B_mle + predicted_counts ) + lmultiply(background_counts, B_mle)
+  vector[N] out = lmultiply( observed_counts, alpha * B_mle + predicted_counts ) + lmultiply(background_counts, B_mle + pad)
 		 - (alpha + 1) * B_mle - predicted_counts - log_fact_bkg - log_fact_obs;
 
   for (n in 1:N){
@@ -158,7 +159,7 @@ real cstat_optimized_vec(vector observed_counts,
 	print(B_mle[n]);
 	print(log_fact_bkg[n]);
 	print(background_counts[n]);
-	print(lmultiply(background_counts[n], B_mle[n]));
+	print(lmultiply(background_counts[n], B_mle[n] + pad[n]));
 	print(o_plus_b[n]);
 	print("-------");
 
