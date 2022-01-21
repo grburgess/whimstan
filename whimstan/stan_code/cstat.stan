@@ -149,7 +149,7 @@ real cstat_optimized_vec(vector observed_counts,
 
   vector[N] out = lmultiply( observed_counts, alpha * B_mle + predicted_counts ) + lmultiply(background_counts, B_mle)
 		 - (alpha + 1) * B_mle - predicted_counts - log_fact_bkg - log_fact_obs;
-
+-
   for (n in 1:N){
 
     // if(is_nan(out[n]))
@@ -165,7 +165,7 @@ real cstat_optimized_vec(vector observed_counts,
     //   }
 
 
-    if(B_mle[n] <0))
+    if(B_mle[n] <0)
       {
 	print("------");
 	print(B_mle[n]);
