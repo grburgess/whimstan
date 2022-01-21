@@ -152,7 +152,20 @@ real cstat_optimized_vec(vector observed_counts,
 
   for (n in 1:N){
 
-    if(is_nan(out[n]))
+    // if(is_nan(out[n]))
+    //   {
+    // 	print("------");
+    // 	print(B_mle[n]);
+    // 	print(log_fact_bkg[n]);
+    // 	print(background_counts[n]);
+    // 	print(lmultiply(background_counts[n], B_mle[n]));
+    // 	print(o_plus_b[n]);
+    // 	print("-------");
+
+    //   }
+
+
+    if(B_mle[n] <0))
       {
 	print("------");
 	print(B_mle[n]);
