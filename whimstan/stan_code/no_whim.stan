@@ -40,6 +40,7 @@ transformed data{
   array[N_grbs] vector[N_chan] alpha_bkg_factor;
 
 
+  vector[num_size] zero_matrix = rep_vector(0., num_size);
 
   int grainsize = 1;
 
@@ -71,6 +72,24 @@ transformed data{
 
 
     alpha_bkg_factor[n] = 4 * (exposure_ratio[n] + square(exposure_ratio[n])) * bkg[n];
+
+
+    for (m in 1:N_chan){
+
+      if (bkg[n][m]>0){
+        zero_mask[n][m] = 0;
+
+      }
+
+      else {
+
+        zero_mask[n][m] = 1;
+
+      }
+    }
+
+
+
 
 
   }
@@ -160,7 +179,7 @@ model{
                        all_N,
                        grainsize,
                        N_ene,
-		       N_chan,
+                       N_chan,
                        host_precomputed_absorp,
                        precomputed_absorp,
                        ene_avg,
@@ -171,8 +190,8 @@ model{
                        index,
                        nH_host_norm,
                        mw_abs,
-		       rmf,
-		       arf,
+                       rmf,
+                       arf,
                        exposure,
                        exposure_ratio,
                        counts,
