@@ -199,7 +199,10 @@ model{
                        log_fact_obs,
                        log_fact_bkg,
                        o_plus_b,
-                       alpha_bkg_factor );
+                       alpha_bkg_factor,
+		       zero_mask
+
+		       );
 
 }
 
