@@ -136,6 +136,8 @@ transformed data{
     }
 
   }
+
+
   //mw abs is fixed
   array[N_grbs] vector[N_ene] mw_abs;
 
@@ -178,8 +180,6 @@ transformed data{
     }
 
   }
-
-
 
 
 
