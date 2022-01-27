@@ -227,16 +227,9 @@ transformed parameters{
   // absori
   real n0_whim = pow(10, log_n0_whim);
 
-  // free temp
-  //  matrix[10,26] num;
-
   vector[num_size] num;
 
   real t_whim=pow(10,log_t_whim);
-
-  array[N_grbs] vector[N_ene] whim_abs;
-
-  // vector[N_grbs * N_ene] whim_abs;
 
   profile("num") {
 
@@ -262,21 +255,6 @@ transformed parameters{
     num[(i-1) * max_atomicnumber  +1 : i*max_atomicnumber] = abundance[i]*num[(i-1) * max_atomicnumber  +1 : i*max_atomicnumber];
 
   }
-
-  // profile("whim_abs") {
-
-  //   for (n in 1:N_grbs) {
-
-  //     whim_abs[n] = exp(-integrate_absori_vec4(num, sum_sigma_interp_vec[n])* n0_whim);
-  //   }
-
-
-  //   // whim_abs =  exp(-map_rect(integrate_absori_vec3,num,theta,sum_sigma_interp_vec, x_i) * n0_whim);
-
-
-
-  // }
-
 
   // non centered parameterizartion
 
@@ -328,38 +306,6 @@ model{
   log_t_whim ~ normal(6, 2);
 
   profile("loglike") {
-
-    // target += reduce_sum_static(pll_whim_test,
-    // 			 //			 sum_sigma_interp_vec,
-
-    // 			 whim_abs,
-    // 			 grainsize,
-    //                      N_ene,
-    //                      N_chan,
-    //                      ene_avg,
-    //                      ene_width,
-    //                      mask,
-    //                      n_chans_used,
-    //                      mw_abs,
-    //                      K,
-    //                      index,
-    //                      nH_host_norm,
-    //                      host_precomputed_absorp,
-    //                      rmf,
-    //                      arf,
-    //                      exposure,
-    //                      exposure_ratio,
-    //                      counts,
-    //                      bkg,
-    //                      log_fact_obs,
-    //                      log_fact_bkg,
-    //                      o_plus_b,
-    //                      alpha_bkg_factor,
-    // 			 zero_mask
-    // 			 );
-
-
-
 
 
     target += reduce_sum(pll_whim,
