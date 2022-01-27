@@ -38,9 +38,8 @@ transformed data{
   array[N_grbs] vector[N_chan] log_fact_bkg;
   array[N_grbs] vector[N_chan] o_plus_b;
   array[N_grbs] vector[N_chan] alpha_bkg_factor;
+  array[N_grbs] vector[N_chan] zero_mask;
 
-
-  vector[num_size] zero_matrix = rep_vector(0., num_size);
 
   int grainsize = 1;
 

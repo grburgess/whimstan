@@ -55,10 +55,6 @@ transformed data{
 
   int num_size = num_atomicnumber * max_atomicnumber;
 
-  // int N_shards = 4;
-  // int shard_size = N_grbs/N_shards;
-
-  // matrix[num_atomicnumber, max_atomicnumber] zero_matrix = rep_matrix(0., num_atomicnumber, max_atomicnumber);
 
   vector[num_size] zero_matrix = rep_vector(0., num_size);
 
