@@ -63,18 +63,9 @@ transformed data{
 
   for (n in 1:N_grbs) {
 
-    for (m in 1:N_chan) {
 
-      log_fact_obs[n,m] = logfactorial(counts[n,m]);
-
-
-      if (bkg[n,m] >0) {
-
-        log_fact_bkg[n,m] = logfactorial(bkg[n,m]);
-
-      }
-
-    }
+    log_fact_obs[n] = logfactorial(counts[n]);
+    log_fact_bkg[n] = logfactorial(bkg[n]);
 
     o_plus_b[n] = counts[n] + bkg[n];
 
@@ -168,7 +159,8 @@ model{
   target += reduce_sum(pll_no_whim,
                        all_N,
                        grainsize,
-                       N_ene, N_chan,
+                       N_ene,
+		       N_chan,
                        host_precomputed_absorp,
                        precomputed_absorp,
                        ene_avg,
