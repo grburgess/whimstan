@@ -1,4 +1,5 @@
 from pathlib import Path
+import tempfile
 from typing import Dict, List, Optional
 import numpy as np
 
@@ -274,33 +275,37 @@ class SpectrumFactory:
         """
         cat_entries = []
 
-        root = Path("_tmp")
+        # root = Path("_tmp")
 
-        root.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory() as dir_name:
 
-        for f in root.glob("grb*/*apc*"):
+            root = Path(dir_name)
 
-            f.unlink()
+            # root.mkdir(parents=True, exist_ok=True)
 
-        for s in self._spectra:
+            # for f in root.glob("grb*/*apc*"):
 
-            p = root / s.name
-            p.mkdir(parents=True, exist_ok=True)
+            #     f.unlink()
 
-            pi: OGIPLike = s.simulated_data
-            pi.write_pha(p / "apc", force_rsp_write=True)
+            for s in self._spectra:
 
-            cat_entries.append(s.xrt_catalog_entry)
+                p = root / s.name
+                p.mkdir(parents=True, exist_ok=True)
 
-        xrt_cat = XRTCatalog(*cat_entries)
+                pi: OGIPLike = s.simulated_data
+                pi.write_pha(p / "apc", force_rsp_write=True)
 
-        db = Database.from_fits_files(
-            file_name=database_name,
-            catalog=xrt_cat,
-            cat_path=root,
-            is_sim=True,
-            clean=True,
-        )
+                cat_entries.append(s.xrt_catalog_entry)
+
+            xrt_cat = XRTCatalog(*cat_entries)
+
+            db = Database.from_fits_files(
+                file_name=database_name,
+                catalog=xrt_cat,
+                cat_path=root,
+                is_sim=True,
+                clean=True,
+            )
 
     @property
     def spectra(self) -> List[SpectrumGenerator]:

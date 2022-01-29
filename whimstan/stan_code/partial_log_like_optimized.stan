@@ -36,10 +36,11 @@ real pll_no_whim(array[] int  n_slice,
 
     int n = n_slice[i];
 
+    vector[N_chan] input =  (rmf * ( arf[n] .*  powerlaw_flux(ene_avg[n], index[n]) .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n] .* ene_width[n]))
 
     loglike[i] = cstat_optimized_vec(counts[n,mask[n,:n_chans_used[n]]],
                                      bkg[n,mask[n,:n_chans_used[n]]],
-                                     ((rmf * ( arf[n] .*  powerlaw_flux(ene_avg[n], index[n]) .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n] .* ene_width[n]))[mask[n,:n_chans_used[n]]]) * exposure[n] * K[n],
+                                     input[mask[n,:n_chans_used[n]]] * exposure[n] * K[n],
                                      exposure_ratio[n],
                                      o_plus_b[n,mask[n,:n_chans_used[n]]],
                                      alpha_bkg_factor[n,mask[n,:n_chans_used[n]]],
