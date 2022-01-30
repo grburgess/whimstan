@@ -60,8 +60,7 @@ real pll_no_whim(array[] int  n_slice,
                                      o_plus_b[n,mask[n,:n_chans_used[n]]],
                                      alpha_bkg_factor[n,mask[n,:n_chans_used[n]]],
                                      log_fact_obs[n,mask[n,:n_chans_used[n]]],
-                                     log_fact_bkg[n,mask[n,:n_chans_used[n]]],
-				 //     zero_mask[n,mask[n,:n_chans_used[n]]]
+                                     log_fact_bkg[n,mask[n,:n_chans_used[n]]]
                                      );
 
 
