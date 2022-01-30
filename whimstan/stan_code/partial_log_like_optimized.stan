@@ -117,7 +117,7 @@ real pll_whim(array[] int  n_slice,
     // computing the WHIM absorption
     vector[N_ene] whim_abs = exp(-n0 *(sum_sigma_interp[n] * num) );
 
-    vector[N_chan] input = (rmf * ( arf[n] .*  powerlaw_flux(ene_avg[n], index[n]) .* whim_abs .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n] .* ene_width[n]))
+    vector[N_chan] input = (rmf * ( arf[n] .*  powerlaw_flux(ene_avg[n], index[n]) .* whim_abs .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n] .* ene_width[n]));
 
 
       loglike[i] = cstat_optimized_vec(counts[n,mask[n,:n_chans_used[n]]],
