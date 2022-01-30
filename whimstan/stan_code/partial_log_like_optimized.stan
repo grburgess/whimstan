@@ -23,7 +23,7 @@ real pll_no_whim(array[] int  n_slice,
                  array[] vector log_fact_bkg,
                  array[] vector o_plus_b,
                  array[] vector alpha_bkg_factor,
-		 array[] vector zero_mask
+                 array[] vector zero_mask
                  ){
 
   // host and mw ONLY absorption, fixed MW
@@ -46,22 +46,20 @@ real pll_no_whim(array[] int  n_slice,
     //                                  alpha_bkg_factor[n,mask[n,:n_chans_used[n]]],
     //                                  log_fact_obs[n,mask[n,:n_chans_used[n]]],
     //                                  log_fact_bkg[n,mask[n,:n_chans_used[n]]],
-    // 				     zero_mask[n,mask[n,:n_chans_used[n]]]
+    //                               zero_mask[n,mask[n,:n_chans_used[n]]]
     //                                  );
 
 
 
-
-
     loglike[i] = cstat_optimized(counts[n,mask[n,:n_chans_used[n]]],
-                                     bkg[n,mask[n,:n_chans_used[n]]],
-                                     input[mask[n,:n_chans_used[n]]] * exposure[n] * K[n],
-                                     exposure_ratio[n],
-                                     o_plus_b[n,mask[n,:n_chans_used[n]]],
-                                     alpha_bkg_factor[n,mask[n,:n_chans_used[n]]],
-                                     log_fact_obs[n,mask[n,:n_chans_used[n]]],
-                                     log_fact_bkg[n,mask[n,:n_chans_used[n]]]
-                                     );
+                                 bkg[n,mask[n,:n_chans_used[n]]],
+                                 input[mask[n,:n_chans_used[n]]] * exposure[n] * K[n],
+                                 exposure_ratio[n],
+                                 o_plus_b[n,mask[n,:n_chans_used[n]]],
+                                 alpha_bkg_factor[n,mask[n,:n_chans_used[n]]],
+                                 log_fact_obs[n,mask[n,:n_chans_used[n]]],
+                                 log_fact_bkg[n,mask[n,:n_chans_used[n]]]
+                                 );
 
 
 
@@ -117,20 +115,21 @@ real pll_whim(array[] int  n_slice,
     int n = n_slice[i];
 
     // computing the WHIM absorption
-    vector[num_elements(arf[n])] whim_abs = exp(-n0 *(sum_sigma_interp[n] * num) );
+    vector[N_ene] whim_abs = exp(-n0 *(sum_sigma_interp[n] * num) );
+
+    vector[N_chan] input = (rmf * ( arf[n] .*  powerlaw_flux(ene_avg[n], index[n]) .* whim_abs .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n] .* ene_width[n]))
 
 
-
-    loglike[i] = cstat_optimized_vec(counts[n,mask[n,:n_chans_used[n]]],
-                                     bkg[n,mask[n,:n_chans_used[n]]],
-                                     ((rmf * ( arf[n] .*  powerlaw_flux(ene_avg[n], index[n]) .* whim_abs .* absorption(nH_host[n], host_precomputed_absorp[n]) .* mw_abs[n] .* ene_width[n]))[mask[n,:n_chans_used[n]]]) * exposure[n] * K[n],
-                                     exposure_ratio[n],
-                                     o_plus_b[n,mask[n,:n_chans_used[n]]],
-                                     alpha_bkg_factor[n,mask[n,:n_chans_used[n]]],
-                                     log_fact_obs[n,mask[n,:n_chans_used[n]]],
-                                     log_fact_bkg[n,mask[n,:n_chans_used[n]]],
-                                     zero_mask[n,mask[n,:n_chans_used[n]]]
-                                     );
+      loglike[i] = cstat_optimized_vec(counts[n,mask[n,:n_chans_used[n]]],
+                                       bkg[n,mask[n,:n_chans_used[n]]],
+                                       input[mask[n,:n_chans_used[n]]] * exposure[n] * K[n],
+                                       exposure_ratio[n],
+                                       o_plus_b[n,mask[n,:n_chans_used[n]]],
+                                       alpha_bkg_factor[n,mask[n,:n_chans_used[n]]],
+                                       log_fact_obs[n,mask[n,:n_chans_used[n]]],
+                                       log_fact_bkg[n,mask[n,:n_chans_used[n]]],
+                                       zero_mask[n,mask[n,:n_chans_used[n]]]
+                                       );
 
 
 
@@ -141,4 +140,3 @@ real pll_whim(array[] int  n_slice,
   return sum(loglike);
 
 }
-
