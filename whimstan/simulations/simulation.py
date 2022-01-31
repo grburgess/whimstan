@@ -1,6 +1,7 @@
 from pathlib import Path
+import tempfile
 from typing import Dict, List, Optional
-
+import numpy as np
 
 from joblib import Parallel, delayed
 
@@ -16,6 +17,7 @@ from threeML.plugins.OGIPLike import OGIPLike
 
 from ..database import Database, XRTCatalog, XRTCatalogEntry
 from ..utils.package_data import get_path_of_data_file
+
 
 
 class SpectrumGenerator:
@@ -101,46 +103,48 @@ class SpectrumGenerator:
     def _create_plugin(self):
         quiet_mode()
 
-        if self._demo_plugin is None:
+        with np.errstate(invalid='ignore'):
 
-            self._demo_plugin = OGIPLike(
-                "tmp",
-                observation=get_path_of_data_file("apc.pi"),
-                background=get_path_of_data_file("apcback.pi"),
-                response=get_path_of_data_file("apc.rmf"),
-                arf_file=get_path_of_data_file("apc.arf"),
-                verbose=False,
-            )
+            if self._demo_plugin is None:
 
-        self._demo_plugin.model_integrate_method = "riemann"
+                self._demo_plugin = OGIPLike(
+                    "tmp",
+                    observation=get_path_of_data_file("apc.pi"),
+                    background=get_path_of_data_file("apcback.pi"),
+                    response=get_path_of_data_file("apc.rmf"),
+                    arf_file=get_path_of_data_file("apc.arf"),
+                    verbose=False,
+                )
 
-        if self._exposure is not None:
+            self._demo_plugin.model_integrate_method = "riemann"
 
-            self._demo_plugin._background_spectrum._exposure = self._exposure
-            self._demo_plugin._observed_spectrum._exposure = self._exposure
+            if self._exposure is not None:
 
-            self._demo_plugin._precalculations()
+                self._demo_plugin._background_spectrum._exposure = self._exposure
+                self._demo_plugin._observed_spectrum._exposure = self._exposure
 
-        spec = Powerlaw_Eflux(F=self._eflux, index=self._index, a=0.4, b=15)
-        if self._use_mw_gas:
-            spec *= TbAbs(NH=self._mw_nh, redshift=0)
-        if self._use_host_gas:
-            spec *= TbAbs(NH=self._host_nh, redshift=self._z)
+                self._demo_plugin._precalculations()
 
-        if (self._whim_n0 is not None) and (self._whim_T is not None):
+            spec = Powerlaw_Eflux(F=self._eflux, index=self._index, a=0.4, b=10)
+            if self._use_mw_gas:
+                spec *= TbAbs(NH=self._mw_nh, redshift=0)
+            if self._use_host_gas:
+                spec *= TbAbs(NH=self._host_nh, redshift=self._z)
 
-            spec = spec * Integrate_Absori(
-                n0=self._whim_n0, temp=self._whim_T, redshift=self._z
-            )
+            if (self._whim_n0 is not None) and (self._whim_T is not None):
 
-        ps = PointSource("tmp", self._ra, self._dec, spectral_shape=spec)
-        model = Model(ps)
+                spec = spec * Integrate_Absori(
+                    n0=self._whim_n0, temp=self._whim_T, redshift=self._z
+                )
 
-        self._demo_plugin.set_model(model)
+            ps = PointSource("tmp", self._ra, self._dec, spectral_shape=spec)
+            model = Model(ps)
 
-        simulation = self._demo_plugin.get_simulated_dataset()
+            self._demo_plugin.set_model(model)
 
-        self._simulated_data: OGIPLike = simulation
+            simulation = self._demo_plugin.get_simulated_dataset()
+
+            self._simulated_data: OGIPLike = simulation
 
     @property
     def name(self) -> str:
@@ -271,33 +275,37 @@ class SpectrumFactory:
         """
         cat_entries = []
 
-        root = Path("_tmp")
+        # root = Path("_tmp")
 
-        root.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory() as dir_name:
 
-        for f in root.glob("grb*/*apc*"):
+            root = Path(dir_name)
 
-            f.unlink()
+            # root.mkdir(parents=True, exist_ok=True)
 
-        for s in self._spectra:
+            # for f in root.glob("grb*/*apc*"):
 
-            p = root / s.name
-            p.mkdir(parents=True, exist_ok=True)
+            #     f.unlink()
 
-            pi: OGIPLike = s.simulated_data
-            pi.write_pha(p / "apc", force_rsp_write=True)
+            for s in self._spectra:
 
-            cat_entries.append(s.xrt_catalog_entry)
+                p = root / s.name
+                p.mkdir(parents=True, exist_ok=True)
 
-        xrt_cat = XRTCatalog(*cat_entries)
+                pi: OGIPLike = s.simulated_data
+                pi.write_pha(p / "apc", force_rsp_write=True)
 
-        db = Database.from_fits_files(
-            file_name=database_name,
-            catalog=xrt_cat,
-            cat_path=root,
-            is_sim=True,
-            clean=True,
-        )
+                cat_entries.append(s.xrt_catalog_entry)
+
+            xrt_cat = XRTCatalog(*cat_entries)
+
+            db = Database.from_fits_files(
+                file_name=database_name,
+                catalog=xrt_cat,
+                cat_path=root,
+                is_sim=True,
+                clean=True,
+            )
 
     @property
     def spectra(self) -> List[SpectrumGenerator]:

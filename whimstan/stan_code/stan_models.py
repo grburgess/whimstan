@@ -33,16 +33,25 @@ _available_models["no_whim"] = "no_whim.stan"
 
 
 class StanModel:
-    def __init__(self, name, stan_file):
+    def __init__(self, name: str, stan_file: str):
 
         self._name = name
         self._stan_file = pkg_resources.resource_filename(
             "whimstan", os.path.join("stan_code", stan_file)
         )
 
+        # self._hpp_file = pkg_resources.resource_filename(
+        #     "whimstan", os.path.join("stan_code", file_stem, ".hpp")
+        # )
+
+        # self._o_file = pkg_resources.resource_filename(
+        #     "whimstan", os.path.join("stan_code", file_stem, ".o")
+        # )
+
+
         self._model = None
 
-    def build_model(self):
+    def build_model(self, use_opencl=False, opt=True):
         """
         build the stan model
 
@@ -51,13 +60,40 @@ class StanModel:
 
         """
 
-        cpp_options = dict(STAN_THREADS=True, STAN_CPP_OPTIMS=True)
+        cpp_options = dict(STAN_THREADS=True)
+
+        stanc_options = {}
+
+        if use_opencl:
+
+            stanc_options['use-opencl']=True
+
+            cpp_options["STAN_OPENCL"] = True
+            cpp_options["OPENCL_DEVICE_ID"] = 0
+            cpp_options["OPENCL_PLATFORM_ID"] = 0
+
+
+
+        if opt:
+
+            cpp_options["STAN_CPP_OPTIMS"] = True
+            cpp_options["STAN_NO_RANGE_CHECKS"] = True
+
+
+
+        # get the current working dir
+
+        cur_dir = Path.cwd()
 
         self._model = cmdstanpy.CmdStanModel(
             stan_file=self._stan_file,
             model_name=self._name,
             cpp_options=cpp_options,
+            stanc_options=stanc_options
         )
+
+
+        os.chdir(cur_dir)
 
     @property
     def model(self) -> cmdstanpy.CmdStanModel:
@@ -77,8 +113,21 @@ class StanModel:
 
             Path(self._model.exe_file).unlink()
 
+            # try:
 
+            #     Path(self._hpp_file).unlink()
 
+            # except:
+
+            #     pass
+
+            # try:
+
+            #     Path(self._o_file).unlink()
+
+            # except:
+
+            #     pass
 
 
 def get_model(model_name) -> StanModel:

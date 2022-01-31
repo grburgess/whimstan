@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 from typing import Dict, Any, Optional
 
 import arviz as av
@@ -20,6 +22,7 @@ def make_fit(
     use_host_gas: bool = True,
     save_stan_fit: bool = True,
     clean_model: bool = False,
+    use_opencl: bool=False
 ):
 
     """
@@ -55,12 +58,14 @@ def make_fit(
 
     model: StanModel = get_model(model_name)
 
-    model.build_model()
+    cur_dir = Path().cwd()
+
+    model.build_model(use_opencl=use_opencl)
 
     if clean_model:
 
         model.clean_model()
-        model.build_model()
+        model.build_model(use_opencl=use_opencl)
 
 
     data = database.build_stan_data(
@@ -76,6 +81,7 @@ def make_fit(
         **fit_params,
     )
 
+    os.chdir(cur_dir)
 
     # transfer fit to arviz
 

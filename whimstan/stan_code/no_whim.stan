@@ -1,10 +1,10 @@
 functions {
+#include constants.stan
 #include absori.stan
 #include tbabs.stan
 #include powerlaw.stan
 #include cstat.stan
 #include partial_log_like_optimized.stan
-
 }
 
 
@@ -13,7 +13,10 @@ data{
   int N_grbs;
   int N_ene;
   int N_chan;
-  array[N_grbs] matrix[N_chan, N_ene] rsp;
+
+
+  matrix[N_chan, N_ene] rmf;
+  array[N_grbs] vector[N_ene] arf;
   vector[N_grbs] z; //redshift
   vector[N_grbs] nH_mw;
   vector[N_grbs] exposure_ratio;
@@ -35,7 +38,7 @@ transformed data{
   array[N_grbs] vector[N_chan] log_fact_bkg;
   array[N_grbs] vector[N_chan] o_plus_b;
   array[N_grbs] vector[N_chan] alpha_bkg_factor;
-
+  array[N_grbs] vector[N_chan] zero_mask;
 
 
   int grainsize = 1;
@@ -60,23 +63,32 @@ transformed data{
 
   for (n in 1:N_grbs) {
 
-    for (m in 1:N_chan) {
 
-      log_fact_obs[n,m] = logfactorial(counts[n,m]);
-
-
-      if (bkg[n,m] >0) {
-
-        log_fact_bkg[n,m] = logfactorial(bkg[n,m]);
-
-      }
-
-    }
+    log_fact_obs[n] = logfactorial(counts[n]);
+    log_fact_bkg[n] = logfactorial(bkg[n]);
 
     o_plus_b[n] = counts[n] + bkg[n];
 
 
     alpha_bkg_factor[n] = 4 * (exposure_ratio[n] + square(exposure_ratio[n])) * bkg[n];
+
+
+    for (m in 1:N_chan){
+
+      if (bkg[n][m]>0){
+        zero_mask[n][m] = 0;
+
+      }
+
+      else {
+
+        zero_mask[n][m] = 1;
+
+      }
+    }
+
+
+
 
 
   }
@@ -165,7 +177,8 @@ model{
   target += reduce_sum(pll_no_whim,
                        all_N,
                        grainsize,
-                       N_ene, N_chan,
+                       N_ene,
+                       N_chan,
                        host_precomputed_absorp,
                        precomputed_absorp,
                        ene_avg,
@@ -176,7 +189,8 @@ model{
                        index,
                        nH_host_norm,
                        mw_abs,
-                       rsp,
+                       rmf,
+                       arf,
                        exposure,
                        exposure_ratio,
                        counts,
@@ -184,7 +198,10 @@ model{
                        log_fact_obs,
                        log_fact_bkg,
                        o_plus_b,
-                       alpha_bkg_factor );
+                       alpha_bkg_factor,
+		       zero_mask
+
+		       );
 
 }
 

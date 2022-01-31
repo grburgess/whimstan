@@ -282,7 +282,9 @@ class Database:
         bkg = []
         mask = []
         n_chans_used = []
-        rsp = []
+        #rsp = []
+
+        arf = []
 
         N_ene = []
         N_chan = []
@@ -313,7 +315,14 @@ class Database:
 
             n_chans_used.append(int(x.n_chans_used))
 
-            rsp.append(x.rsp.tolist())
+            # the rmf does NOT change
+            rmf = x.rsp.tolist()
+
+
+
+            arf.append(x.arf.tolist())
+
+            #rsp.append(x.rsp.tolist())
             exposure_ratio.append(float(x.scale_factor))
             counts.append(x.obs_count)
             bkg.append(x.bkg_count)
@@ -370,7 +379,10 @@ class Database:
             N_grbs=N_grbs,
             N_chan=N_chan[0],
             N_ene=N_ene[0],
-            rsp=rsp,
+#            rsp=rsp,
+
+            rmf = rmf,
+            arf=arf,
             exposure_ratio=exposure_ratio,
             ene_avg=ene_avg,
             ene_width=ene_width,

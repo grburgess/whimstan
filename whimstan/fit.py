@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional, Tuple
+from pathlib import Path
 
 import h5py
 
@@ -16,12 +17,16 @@ from numpy.typing import ArrayLike
 from threeML.plugins.OGIPLike import OGIPLike
 from astromodels import Model
 
+
+from twopc import compute_postpc
+
 from .database import XRTCatalog, XRTCatalogEntry, Database, ModelContainer
 from .spectral_plot import display_posterior_model_counts
-
+from .utils.dist_plotter import dist_plotter
 
 green = "#00D584"
 purple = "#985CFC"
+dark_purple = "#381C66"
 yellow = "#EDE966"
 grey = "#385656"
 lightgrey = "#839393"
@@ -205,6 +210,8 @@ class Fit:
         self._grbs = self._catalog.grbs
 
         self._n_grbs = len(self._grbs)
+
+        self._n_samples: int = len(self._index[0])
 
         self._is_sim = self._catalog.is_sim
 
@@ -390,7 +397,9 @@ class Fit:
 
     def write(self, file_name: str) -> None:
 
-        with h5py.File(file_name, "w") as f:
+        out = Path(file_name).absolute()
+
+        with h5py.File(str(out), "w") as f:
 
             f.attrs["model_name"] = self._model_name
 
@@ -475,9 +484,17 @@ class Fit:
     def log_nh_host_sigma(self) -> ArrayLike:
         return self._log_nh_host_sigma
 
-    def plot_nh_host_distribution(self) -> plt.Figure:
+    def plot_nh_host_distribution(
+        self, hist_color=grey, dist_color=green, ax=None, n_bins: int = 10
+    ) -> plt.Figure:
 
-        fig, ax = plt.subplots()
+        if ax is None:
+
+            fig, ax = plt.subplots()
+
+        else:
+
+            fig = ax.get_figure()
 
         xgrid = np.linspace(19.0, 25, 100)
 
@@ -488,42 +505,53 @@ class Fit:
 
             ax.hist(
                 np.log10(self._catalog.nH_host_sim) + 22,
-                bins=10,
+                bins=n_bins,
                 density=True,
-                histtype="step",
                 lw=2,
-                color=grey,
+                fc=hist_color,
+                ec=black,
+                alpha=0.75,
             )
 
             # ax.plot(xgrid, stats.norm.pdf(xgrid, loc=, scale=0.5),  color="b")
 
+        y = np.zeros((self._n_samples, len(xgrid)))
+
         if self._nh_host_alpha is None:
 
-            for mu, sig in zip(
-                self._log_nh_host_mu + 22.0, self._log_nh_host_sigma
+            for i, (mu, sig) in enumerate(
+                zip(self._log_nh_host_mu + 22.0, self._log_nh_host_sigma)
             ):
 
-                ax.plot(
-                    xgrid,
-                    stats.norm.pdf(xgrid, loc=mu, scale=sig),
-                    alpha=0.1,
-                    color=green,
-                )
+                y[i, :] = stats.norm.pdf(xgrid, loc=mu, scale=sig)
+
+                # ax.plot(
+                #     xgrid,
+                #     stats.norm.pdf(xgrid, loc=mu, scale=sig),
+                #     alpha=0.1,
+                #     color=dist_color,
+                # )
 
         else:
 
-            for mu, sig, alpha in zip(
-                self._log_nh_host_mu + 22.0,
-                self._log_nh_host_sigma,
-                self._nh_host_alpha,
+            for i, (mu, sig, alpha) in enumerate(
+                zip(
+                    self._log_nh_host_mu + 22.0,
+                    self._log_nh_host_sigma,
+                    self._nh_host_alpha,
+                )
             ):
 
-                ax.plot(
-                    xgrid,
-                    stats.skewnorm.pdf(xgrid, a=alpha, loc=mu, scale=sig),
-                    alpha=0.1,
-                    color=green,
-                )
+                y[i, :] = stats.skewnorm.pdf(xgrid, a=alpha, loc=mu, scale=sig)
+
+                # ax.plot(
+                #     xgrid,
+                #     stats.skewnorm.pdf(xgrid, a=alpha, loc=mu, scale=sig),
+                #     alpha=0.1,
+                #     color=dist_color,
+                # )
+
+        dist_plotter(xgrid, y, ax, alpha=0.75, color=dist_color, lw=0)
 
         ax.set_xlabel("log10(nH host)")
 
@@ -627,6 +655,8 @@ class Fit:
 
         plugin: OGIPLike = self._database.plugins[self._grbs[id]]
 
+        plugin.integration_method = "riemann"
+
         # if self._data_path is not None:
 
         #     bpath = self._data_path / f"grb{self._grbs[id]}/"
@@ -656,21 +686,16 @@ class Fit:
 
         return plugin, model
 
-    def plot_data_spectrum(
-        self,
-        id: int,
-        min_rate: float = -99,
-        model_color=green,
-        data_color=purple,
-        thin=2,
-    ) -> plt.Figure:
+    def _extract_samples(self, id: int) -> np.ndarray:
 
-        o, model = self.get_plugin_and_model(id)
+        """
+        extract the samples for a GRB for a fit
 
-        if o is None:
+        :param id:
+        :type id: int
+        :returns:
 
-            return
-
+        """
         if self._has_whim_fit:
 
             samples = np.vstack(
@@ -689,6 +714,65 @@ class Fit:
                 (self._flux[id], self._index[id], self._host_nh[id])
             )
 
+        else:
+
+            samples = np.vstack((self._flux[id], self._index[id]))
+
+        return samples
+
+    def plot_ppc(
+        self, id: int, n_sims: int = 100, min_rate: Optional[float] = None
+    ) -> plt.Figure:
+
+        samples = self._extract_samples(id)
+
+        analysis = self._database.build_3ml_analysis(
+            id, with_whim=self._has_whim_fit
+        )
+
+        _, model = self.get_plugin_and_model(id)
+
+        with np.errstate(invalid="ignore"):
+            ppc = compute_postpc(
+                analysis=analysis,
+                n_sims=n_sims,
+                overwrite=True,
+                return_ppc=True,
+                direct_samples=samples.T,
+                direct_model=model,
+            )
+
+        fig = ppc.grb.plot(
+            bkg_subtract=True,
+            levels=[95, 68],
+            colors=[purple, dark_purple],
+            lc=green,
+            min_rate=min_rate,
+        )
+
+        ax = fig.get_axes()[0]
+
+        ax.set_xscale("linear")
+
+        return fig
+
+    def plot_data_spectrum(
+        self,
+        id: int,
+        min_rate: float = -99,
+        model_color=green,
+        data_color=purple,
+        thin=2,
+    ) -> plt.Figure:
+
+        o, model = self.get_plugin_and_model(id)
+
+        if o is None:
+
+            return
+
+        samples = self._extract_samples(id)
+
         fig = display_posterior_model_counts(
             o,
             model,
@@ -699,7 +783,7 @@ class Fit:
             data_color=data_color,
             # background_color=blue,
             show_background=False,
-            source_only=False,
+            source_only=True,
         )
 
         ax = fig.get_axes()[0]
@@ -755,62 +839,55 @@ class Fit:
             labels.append("Host posterior")
             custom_lines.append(Line2D([0], [0], color=green, lw=2))
 
-        if self._has_whim_fit:
-
-            samples = np.vstack(
-                (
-                    self._flux[id],
-                    self._index[id],
-                    self._host_nh[id],
-                    self._n0_whim,
-                    self._t_whim,
-                )
-            )
-
-        elif self._has_host_fit:
-
-            samples = np.vstack(
-                (self._flux[id], self._index[id], self._host_nh[id])
-            )
+        samples = self._extract_samples(id)
 
         # scroll through the samples
 
-        for sample in samples.T[::thin]:
+        y = np.empty((3, len(samples.T[::thin]), len(ene)))
 
-            if self._has_whim_fit:
+        with np.errstate(invalid="ignore"):
 
-                model_container.model_all.set_free_parameters(sample)
+            for i, sample in enumerate(samples.T[::thin]):
 
-                ax.loglog(
-                    ene,
-                    model_container.model_all.get_point_source_fluxes(0, ene),
-                    color=purple,
-                    lw=1,
-                    alpha=0.1,
+                if self._has_whim_fit:
+
+                    model_container.model_all.set_free_parameters(sample)
+
+                    y[
+                        2, i, :
+                    ] = model_container.model_all.get_point_source_fluxes(
+                        0, ene
+                    )
+
+                if self._has_host_fit:
+
+                    model_container.model_mw.set_free_parameters(sample[:2])
+
+                    model_container.model_host.set_free_parameters(sample[:3])
+
+                    y[
+                        1, i, :
+                    ] = model_container.model_host.get_point_source_fluxes(
+                        0, ene
+                    )
+
+                model_container.model_pl.set_free_parameters(sample[:2])
+
+                y[0, i, :] = model_container.model_pl.get_point_source_fluxes(
+                    0, ene
                 )
 
-            if self._has_host_fit:
-                model_container.model_mw.set_free_parameters(sample[:2])
+        # plotting
 
-                model_container.model_host.set_free_parameters(sample[:3])
+        dist_plotter(ene, y[0], ax, color=yellow, alpha=0.5)
 
-                ax.loglog(
-                    ene,
-                    model_container.model_host.get_point_source_fluxes(0, ene),
-                    color=green,
-                    lw=1,
-                    alpha=0.1,
-                )
+        if self._has_host_fit:
 
-            model_container.model_pl.set_free_parameters(sample[:2])
+            dist_plotter(ene, y[1], ax, color=green, alpha=0.5)
 
-            ax.loglog(
-                ene,
-                model_container.model_pl.get_point_source_fluxes(0, ene),
-                color=yellow,
-                lw=1,
-                alpha=0.1,
-            )
+        if self._has_whim_fit:
+
+            dist_plotter(ene, y[2], ax, color=purple, alpha=0.5)
 
         if self._catalog.is_sim and show_sim:
 

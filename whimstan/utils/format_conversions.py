@@ -1,3 +1,4 @@
+import numpy as np
 import h5py
 
 from threeML.utils.spectrum.binned_spectrum import (
@@ -29,9 +30,25 @@ def plugin_to_hdf_group(plugin: DispersionSpectrumLike, hdf_group: h5py.Group):
 
     rsp_grp = hdf_group.create_group("response")
 
-    rsp_grp.create_dataset(
-        "matrix", data=plugin.response.matrix, compression="gzip"
-    )
+    if plugin.response.rmf is not None:
+
+        rmf = plugin.response.rmf
+
+    else:
+
+        rmf = plugin.response.matrix
+
+    rsp_grp.create_dataset("matrix", data=rmf, compression="gzip")
+
+    if plugin.response.arf is not None:
+
+        arf = plugin.response.arf
+
+    else:
+
+        arf = np.ones(len(plugin.response.monte_carlo_energies) - 1)
+
+    rsp_grp.create_dataset("arf", data=arf, compression="gzip")
 
     rsp_grp.create_dataset(
         "ebounds", data=plugin.response.ebounds, compression="gzip"
@@ -80,11 +97,18 @@ def build_spectrum_like_from_hdf(hdf_grp: h5py.Group) -> DispersionSpectrumLike:
 
     response_grp: h5py.Group = hdf_grp["response"]
 
+    matrix = response_grp["matrix"][()] * response_grp["arf"][()]
+
     response = InstrumentResponse(
-        matrix=response_grp["matrix"][()],
+        matrix=matrix,
         ebounds=response_grp["ebounds"][()],
         monte_carlo_energies=response_grp["mc_energies"][()],
     )
+
+    # this is a disgusting hack
+
+    response.arf = response_grp["arf"][()]
+    response.rmf = response_grp["matrix"][()]
 
     # get the source group
 

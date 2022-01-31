@@ -1,4 +1,5 @@
 functions {
+#include constants.stan
 #include absori.stan
 #include tbabs.stan
 #include powerlaw.stan
@@ -11,7 +12,9 @@ data{
   int N_grbs;
   int N_ene;
   int N_chan;
-  array [N_grbs] matrix[N_chan, N_ene] rsp;
+  //array [N_grbs] matrix[N_chan, N_ene] rsp;
+  matrix[N_chan, N_ene] rmf;
+  array[N_grbs] vector[N_ene] arf;
   vector[N_grbs] z; //redshift
   vector[N_grbs] nH_mw;
   array[N_grbs] vector[N_ene] precomputed_absorp;
@@ -33,6 +36,7 @@ data{
   vector[721] spec;
   vector[10] abundance;
   array[N_grbs, N_ene] matrix[10,26] sum_sigma_interp;
+
 }
 
 
@@ -43,9 +47,69 @@ transformed data{
   array[N_grbs] vector[N_chan] log_fact_bkg;
   array[N_grbs] vector[N_chan] o_plus_b;
   array[N_grbs] vector[N_chan] alpha_bkg_factor;
+  array[N_grbs] vector[N_chan] zero_mask;
 
+  int num_energy_base=size(sigma[1,1]);
+  int num_atomicnumber=size(atomicnumber);
+  int max_atomicnumber=max(atomicnumber);
+
+  int num_size = num_atomicnumber * max_atomicnumber;
+
+
+  vector[num_size] zero_matrix = rep_vector(0., num_size);
+
+
+  vector[max_atomicnumber] zero_vector  = rep_vector(0., max_atomicnumber);
+
+  array[num_atomicnumber] vector[max_atomicnumber] precalc_intgral;
 
   int grainsize = 1;
+
+  // This version makes the array for sigma
+  // as one matrix per GRB
+
+
+  array[N_grbs] matrix [N_ene, num_atomicnumber * max_atomicnumber] sum_sigma_interp_vec;
+
+  // fill the array
+
+
+
+  for (i in 1:N_grbs) {
+
+
+    for (j in 1:N_ene) {
+      for (k in 1:num_atomicnumber) {
+        for (l in 1:max_atomicnumber) {
+
+          sum_sigma_interp_vec[i][j, (k-1)*max_atomicnumber +l ] = sum_sigma_interp[i,j,k,l];
+
+        }
+      }
+    }
+  }
+
+
+
+
+
+
+  // precalc for num
+
+  for (i in 1:num_atomicnumber){
+
+    int Ne = atomicnumber[i];
+
+    for (j in 1:Ne){
+      precalc_intgral[i][j] = 0.0;
+      for (k in 1:num_energy_base){
+        precalc_intgral[i][j] += sigma[i,j,k]*spec[k];
+      }
+    }
+  }
+
+
+
 
   //mw abs is fixed
   array[N_grbs] vector[N_ene] mw_abs;
@@ -62,32 +126,33 @@ transformed data{
 
   }
 
-    // now do some static calculations for CSTAT
+  // now do some static calculations for CSTAT
 
 
   for (n in 1:N_grbs) {
 
-    for (m in 1:N_chan) {
-
-      log_fact_obs[n,m] = logfactorial(counts[n,m]);
-
-
-      if (bkg[n,m] >0) {
-
-	log_fact_bkg[n,m] = logfactorial(bkg[n,m]);
-
-      }
-
-    }
+    log_fact_obs[n] = logfactorial(counts[n]);
+    log_fact_bkg[n] = logfactorial(bkg[n]);
 
     o_plus_b[n] = counts[n] + bkg[n];
 
     alpha_bkg_factor[n] = 4 * (exposure_ratio[n] + square(exposure_ratio[n])) * bkg[n];
 
+    for (m in 1:N_chan){
+
+      if (bkg[n][m]>0){
+        zero_mask[n][m] = 0;
+
+      }
+
+      else {
+
+        zero_mask[n][m] = 1;
+
+      }
+    }
 
   }
-
-
 
 
 
@@ -135,13 +200,33 @@ transformed parameters{
   // absori
   real n0_whim = pow(10, log_n0_whim);
 
-  // free temp
-  matrix[10,26] num;
+  vector[num_size] num;
+
   real t_whim=pow(10,log_t_whim);
 
-  num = calc_num(spec, t_whim, xi, atomicnumber, sigma, ion);
+
+
+  num = calc_num_vec(//spec,
+                     t_whim,
+                     xi,
+                     atomicnumber,
+                     //sigma,
+                     ion,
+                     zero_matrix,
+                     zero_vector,
+                     precalc_intgral,
+                     num_energy_base,
+                     num_atomicnumber,
+                     max_atomicnumber,
+                     num_size
+                     );
+
+
+
   for (i in 1:10){
-    num[i] = abundance[i]*num[i];
+
+    num[(i-1) * max_atomicnumber  +1 : i*max_atomicnumber] = abundance[i]*num[(i-1) * max_atomicnumber  +1 : i*max_atomicnumber];
+
   }
 
   // non centered parameterizartion
@@ -193,32 +278,38 @@ model{
 
   log_t_whim ~ normal(6, 2);
 
+
   target += reduce_sum(pll_whim,
-		       all_N,
-		       grainsize,
-		       N_ene,
-		       N_chan,
-		       ene_avg,
-		       ene_width,
-		       mask,
-		       n_chans_used,
-		       mw_abs,
-		       K,
-		       index,
-		       n0_whim,
-		       num,
-		       sum_sigma_interp,
-		       nH_host_norm,
-		       host_precomputed_absorp,
-		       rsp,
-		       exposure,
-		       exposure_ratio,
-		       counts,
-		       bkg,
-		       log_fact_obs,
-		       log_fact_bkg,
-		       o_plus_b,
-		       alpha_bkg_factor);
+                       all_N,
+                       grainsize,
+                       N_ene,
+                       N_chan,
+                       ene_avg,
+                       ene_width,
+                       mask,
+                       n_chans_used,
+                       mw_abs,
+                       K,
+                       index,
+                       n0_whim,
+                       num,
+                       sum_sigma_interp_vec,
+                       nH_host_norm,
+                       host_precomputed_absorp,
+                       rmf,
+                       arf,
+                       exposure,
+                       exposure_ratio,
+                       counts,
+                       bkg,
+                       log_fact_obs,
+                       log_fact_bkg,
+                       o_plus_b,
+                       alpha_bkg_factor,
+                       zero_mask
+                       );
+
+
 
 }
 
