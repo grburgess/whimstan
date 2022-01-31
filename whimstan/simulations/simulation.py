@@ -11,6 +11,7 @@ from astromodels import Model, PointSource, Powerlaw_Eflux, TbAbs
 from astropy.coordinates import SkyCoord
 from bb_astromodels import Integrate_Absori
 from gdpyc import GasMap
+
 from popsynth.utils.progress_bar import progress_bar
 from threeML import quiet_mode
 from threeML.plugins.OGIPLike import OGIPLike

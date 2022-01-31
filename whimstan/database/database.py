@@ -1,3 +1,4 @@
+import collections
 from dataclasses import dataclass
 from typing import Dict, List
 
@@ -61,6 +62,25 @@ class Database:
         self._catalog: XRTCatalog = catalog
 
         self._is_sim: bool = is_sim
+
+    def create_sub_selection(self, selection: np.ndarray ) -> "Database":
+
+        # first get the selection from the catalog
+
+        new_cat: XRTCatalog = self._catalog.get_sub_selection(selection=selection)
+
+        # now pick off the plugins from the new catalog
+        # and pump them into the
+
+        new_database = collections.OrderedDict()
+
+
+        for k,v in new_cat.catalog.items():
+
+            new_database[k] = self._plugins[k]
+
+        return Database(new_database, new_cat, self._is_sim)
+
 
     @property
     def is_sim(self) -> bool:

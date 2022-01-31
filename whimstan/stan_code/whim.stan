@@ -206,11 +206,9 @@ transformed parameters{
 
 
 
-  num = calc_num_vec(//spec,
-                     t_whim,
+  num = calc_num_vec(t_whim,
                      xi,
                      atomicnumber,
-                     //sigma,
                      ion,
                      zero_matrix,
                      zero_vector,

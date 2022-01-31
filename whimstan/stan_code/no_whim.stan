@@ -209,5 +209,4 @@ generated quantities {
 
   real log_nH_host_mu = log_nH_host_mu_raw + 22;
 
-
 }
