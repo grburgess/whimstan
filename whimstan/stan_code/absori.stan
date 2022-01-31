@@ -181,70 +181,70 @@ vector calc_num_vec(//vector spec,
 
 // precalc sigma interpolation for all z we need => 0.02 z steps up to z=max(z) of all GRBs
 
-matrix log_absori_shells(int nz_shells,
-                         real zshell_thickness,
-                         real n0,
-                         matrix num,
-                         array[,] matrix sigma_interp,
-                         int num_e_edges,
-                         array[] int atomicnumber){
+// matrix log_absori_shells(int nz_shells,
+//                          real zshell_thickness,
+//                          real n0,
+//                          matrix num,
+//                          array[,] matrix sigma_interp,
+//                          int num_e_edges,
+//                          array[] int atomicnumber){
 
-  matrix[nz_shells,num_e_edges] taus=rep_matrix(0.0, nz_shells, num_e_edges);
+//   matrix[nz_shells,num_e_edges] taus=rep_matrix(0.0, nz_shells, num_e_edges);
 
-  real zsam;
-  real z1;
-  real zf;
+//   real zsam;
+//   real z1;
+//   real zf;
 
-  for (i in 1:nz_shells){
-    // "slab approximation" in this z "shell"
-    z1 = ((i-0.5)*zshell_thickness)+1.0;
-    // zf from z integral (see eq. 1 in arxiv 2102.02530)
-    zf = ((z1*z1)/sqrt(omegam()*(z1*z1*z1)+omegal() ));
+//   for (i in 1:nz_shells){
+//     // "slab approximation" in this z "shell"
+//     z1 = ((i-0.5)*zshell_thickness)+1.0;
+//     // zf from z integral (see eq. 1 in arxiv 2102.02530)
+//     zf = ((z1*z1)/sqrt(omegam()*(z1*z1*z1)+omegal() ));
 
-    // for every energy
-    for (j in 1:num_e_edges){
-      taus[i,j] = sum(num.*sigma_interp[i,j])*zf;
-    }
-  }
-  taus = zshell_thickness*c()*n0*cmpermpc()/h0()*6.6e-5*1e-22*taus;
+//     // for every energy
+//     for (j in 1:num_e_edges){
+//       taus[i,j] = sum(num.*sigma_interp[i,j])*zf;
+//     }
+//   }
+//   taus = zshell_thickness*c()*n0*cmpermpc()/h0()*6.6e-5*1e-22*taus;
 
-  return taus;
-}
-
-
+//   return taus;
+// }
 
 
 
-vector integrate_absori(array[] matrix sum_sigma_interp,
-                        matrix num,
-                        real n0,
-                        int num_e_edges){
-  vector[num_e_edges] taus;
-  for (j in 1:num_e_edges){
-    taus[j] = -n0*sum(sum_sigma_interp[j].*num);
-  }
-  return exp(taus);
-}
 
 
-vector integrate_absori2(real z,
-                         matrix logabso_shells,
-                         real zshell_thickness,
-                         int num_e_edges,
-                         int n_spectra){
+// vector integrate_absori(array[] matrix sum_sigma_interp,
+//                         matrix num,
+//                         real n0,
+//                         int num_e_edges){
+//   vector[num_e_edges] taus;
+//   for (j in 1:num_e_edges){
+//     taus[j] = -n0*sum(sum_sigma_interp[j].*num);
+//   }
+//   return exp(taus);
+// }
 
-  vector[num_e_edges] taus;
-  int nz;
-  real frac;
 
-  nz=0;
-  while ((nz+1)*zshell_thickness<z){
-    nz+=1;
-  }
-  frac = ((nz+1)*zshell_thickness-z)/z;
+// vector integrate_absori2(real z,
+//                          matrix logabso_shells,
+//                          real zshell_thickness,
+//                          int num_e_edges,
+//                          int n_spectra){
 
-  for (j in 1:num_e_edges){
-    taus[j] = -(sum(logabso_shells[:nz,j])+frac*logabso_shells[nz+1,j]);
-  }
-  return exp(taus);
-}
+//   vector[num_e_edges] taus;
+//   int nz;
+//   real frac;
+
+//   nz=0;
+//   while ((nz+1)*zshell_thickness<z){
+//     nz+=1;
+//   }
+//   frac = ((nz+1)*zshell_thickness-z)/z;
+
+//   for (j in 1:num_e_edges){
+//     taus[j] = -(sum(logabso_shells[:nz,j])+frac*logabso_shells[nz+1,j]);
+//   }
+//   return exp(taus);
+// }

@@ -95,21 +95,20 @@ transformed data{
 
 
   // precalc for num
-  profile("num_pre") {
 
-    for (i in 1:num_atomicnumber){
+  for (i in 1:num_atomicnumber){
 
-      int Ne = atomicnumber[i];
+    int Ne = atomicnumber[i];
 
-      for (j in 1:Ne){
-        precalc_intgral[i][j] = 0.0;
-        for (k in 1:num_energy_base){
-          precalc_intgral[i][j] += sigma[i,j,k]*spec[k];
-        }
+    for (j in 1:Ne){
+      precalc_intgral[i][j] = 0.0;
+      for (k in 1:num_energy_base){
+        precalc_intgral[i][j] += sigma[i,j,k]*spec[k];
       }
     }
-
   }
+
+
 
 
   //mw abs is fixed
@@ -142,13 +141,13 @@ transformed data{
     for (m in 1:N_chan){
 
       if (bkg[n][m]>0){
-	zero_mask[n][m] = 0;
+        zero_mask[n][m] = 0;
 
-	  }
+      }
 
       else {
 
-	zero_mask[n][m] = 1;
+        zero_mask[n][m] = 1;
 
       }
     }
@@ -205,24 +204,24 @@ transformed parameters{
 
   real t_whim=pow(10,log_t_whim);
 
-  profile("num") {
 
-    num = calc_num_vec(//spec,
-                       t_whim,
-                       xi,
-                       atomicnumber,
-                       //sigma,
-                       ion,
-                       zero_matrix,
-                       zero_vector,
-                       precalc_intgral,
-                       num_energy_base,
-                       num_atomicnumber,
-                       max_atomicnumber,
-		       num_size
-		       );
 
-  }
+  num = calc_num_vec(//spec,
+                     t_whim,
+                     xi,
+                     atomicnumber,
+                     //sigma,
+                     ion,
+                     zero_matrix,
+                     zero_vector,
+                     precalc_intgral,
+                     num_energy_base,
+                     num_atomicnumber,
+                     max_atomicnumber,
+                     num_size
+                     );
+
+
 
   for (i in 1:10){
 
@@ -279,40 +278,38 @@ model{
 
   log_t_whim ~ normal(6, 2);
 
-  profile("loglike") {
+
+  target += reduce_sum(pll_whim,
+                       all_N,
+                       grainsize,
+                       N_ene,
+                       N_chan,
+                       ene_avg,
+                       ene_width,
+                       mask,
+                       n_chans_used,
+                       mw_abs,
+                       K,
+                       index,
+                       n0_whim,
+                       num,
+                       sum_sigma_interp_vec,
+                       nH_host_norm,
+                       host_precomputed_absorp,
+                       rmf,
+                       arf,
+                       exposure,
+                       exposure_ratio,
+                       counts,
+                       bkg,
+                       log_fact_obs,
+                       log_fact_bkg,
+                       o_plus_b,
+                       alpha_bkg_factor,
+                       zero_mask
+                       );
 
 
-    target += reduce_sum(pll_whim,
-			 all_N,
-			 grainsize,
-                         N_ene,
-                         N_chan,
-                         ene_avg,
-                         ene_width,
-                         mask,
-                         n_chans_used,
-                         mw_abs,
-                         K,
-                         index,
-			 n0_whim,
-                         num,
-			 sum_sigma_interp_vec,
-                         nH_host_norm,
-                         host_precomputed_absorp,
-                         rmf,
-                         arf,
-                         exposure,
-                         exposure_ratio,
-                         counts,
-                         bkg,
-                         log_fact_obs,
-                         log_fact_bkg,
-                         o_plus_b,
-                         alpha_bkg_factor,
-			 zero_mask
-			 );
-
-   }
 
 }
 
