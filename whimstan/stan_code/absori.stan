@@ -1,4 +1,4 @@
-matrix calc_num(//vector spec,
+matrix calc_num(
                 real temp,
                 real xi,
                 array[] int atomicnumber,
@@ -84,7 +84,7 @@ matrix calc_num(//vector spec,
 }
 
 
-vector calc_num_vec(//vector spec,
+vector calc_num_vec(
                     real temp,
                     real xi,
                     array[] int atomicnumber,
