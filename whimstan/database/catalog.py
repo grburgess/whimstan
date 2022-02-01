@@ -3,12 +3,24 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional
 
+import matplotlib.pyplot as plt
+
+import healpy as hp
+from astropy.coordinates import SkyCoord
+
 from threeML.plugins.DispersionSpectrumLike import DispersionSpectrumLike
 from astromodels import Model, PointSource, Powerlaw_Eflux, TbAbs
 from bb_astromodels import Integrate_Absori
 
 import h5py
 import numpy as np
+
+from ..utils import (
+    get_path_of_data_file,
+    Colors,
+    build_custom_continuous_cmap,
+    hex_to_rgb,
+)
 
 
 @dataclass
@@ -515,3 +527,45 @@ class XRTCatalog:
             f.close()
 
         return cls(*grbs)
+
+    def plot_skymap(self, mw_limit: float = 1e21) -> plt.Figure:
+
+        import ligo.skymap.plot
+
+        # open the file
+
+        with h5py.File(get_path_of_data_file("mw_map.h5"), "r") as f:
+
+            gas_map: np.ndarray = f["map"][()]
+
+        mask = gas_map * 1e22 > mw_limit
+
+        gas_mask = hp.ma(gas_map)
+
+        gas_mask.mask = mask
+
+        fig, ax = plt.subplots(
+            subplot_kw=dict(projection="galactic degrees mollweide")
+        )
+
+        ax.grid()
+
+        new_cmap = build_custom_continuous_cmap(
+            hex_to_rgb(Colors.black), hex_to_rgb(Colors.purple)
+        )
+
+        new_cmap.set_under(Colors.black)
+
+        ax.imshow_hpx(gas_mask.filled(-999), cmap=new_cmap, vmin=0)
+
+        cc = SkyCoord(ra=self.ra, dec=self.dec, unit="deg", frame="icrs")
+
+        ax.scatter(
+            cc.galactic.l.deg,
+            cc.galactic.b.deg,
+            transform=ax.get_transform("galactic"),
+            c=Colors.green,
+            s=5,
+        )
+
+        return fig

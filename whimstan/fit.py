@@ -485,7 +485,11 @@ class Fit:
         return self._log_nh_host_sigma
 
     def plot_nh_host_distribution(
-        self, hist_color=grey, dist_color=green, ax=None, n_bins: int = 10
+        self,
+        hist_color=Colors.grey,
+        dist_color=Colors.green,
+        ax=None,
+        n_bins: int = 10,
     ) -> plt.Figure:
 
         if ax is None:
@@ -509,7 +513,7 @@ class Fit:
                 density=True,
                 lw=2,
                 fc=hist_color,
-                ec=black,
+                ec=Colors.black,
                 alpha=0.75,
             )
 
@@ -626,7 +630,7 @@ class Fit:
                 self._catalog.z + 1,
                 1e22 * self._catalog.nH_host_sim,
                 "o",
-                color=green,
+                color=Colors.green,
                 alpha=1.0,
                 zorder=-1000,
             )
@@ -636,7 +640,7 @@ class Fit:
             lo, hi = av.hdi(1e22 * self._host_nh[i], hdi_prob=0.95)
 
             ax.vlines(
-                self._catalog.z[i] + 1, lo, hi, color=purple, linewidth=0.7
+                self._catalog.z[i] + 1, lo, hi, color=Colors.purple, linewidth=0.7
             )
 
         ax.set_ylabel(r"host nH (cm$^{-2}$)")
@@ -745,8 +749,8 @@ class Fit:
         fig = ppc.grb.plot(
             bkg_subtract=True,
             levels=[95, 68],
-            colors=[purple, dark_purple],
-            lc=green,
+            colors=[Colors.purple, Colors.dark_purple],
+            lc=Colors.green,
             min_rate=min_rate,
         )
 
@@ -760,8 +764,8 @@ class Fit:
         self,
         id: int,
         min_rate: float = -99,
-        model_color=green,
-        data_color=purple,
+        model_color=Colors.green,
+        data_color=Colors.purple,
         thin=2,
     ) -> plt.Figure:
 
@@ -834,10 +838,10 @@ class Fit:
         labels = []
         if self._has_whim_fit:
             labels.append("Host and whim posterior")
-            custom_lines.append(Line2D([0], [0], color=purple, lw=2))
+            custom_lines.append(Line2D([0], [0], color=Colors.purple, lw=2))
         if self._has_host_fit:
             labels.append("Host posterior")
-            custom_lines.append(Line2D([0], [0], color=green, lw=2))
+            custom_lines.append(Line2D([0], [0], color=Colors.green, lw=2))
 
         samples = self._extract_samples(id)
 
@@ -879,15 +883,15 @@ class Fit:
 
         # plotting
 
-        dist_plotter(ene, y[0], ax, color=yellow, alpha=0.5)
+        dist_plotter(ene, y[0], ax, color=Colors.yellow, alpha=0.5)
 
         if self._has_host_fit:
 
-            dist_plotter(ene, y[1], ax, color=green, alpha=0.5)
+            dist_plotter(ene, y[1], ax, color=Colors.green, alpha=0.5)
 
         if self._has_whim_fit:
 
-            dist_plotter(ene, y[2], ax, color=purple, alpha=0.5)
+            dist_plotter(ene, y[2], ax, color=Colors.purple, alpha=0.5)
 
         if self._catalog.is_sim and show_sim:
 
@@ -897,7 +901,7 @@ class Fit:
 
                 # ok, we have some whim
                 labels.append("Total Simualted")
-                custom_lines.append(Line2D([0], [0], color=black, lw=2))
+                custom_lines.append(Line2D([0], [0], color=Colors.black, lw=2))
                 model_container.model_all.set_free_parameters(
                     simulated_parameters
                 )
@@ -905,7 +909,7 @@ class Fit:
                 ax.loglog(
                     ene,
                     model_container.model_all.get_point_source_fluxes(0, ene),
-                    color=lightgrey,
+                    color=Colors.light_grey,
                     lw=0.5,
                 )
 
@@ -913,7 +917,7 @@ class Fit:
 
                 # ok, we have some host gas (MW as well)
                 labels.append("Simulation Host included")
-                custom_lines.append(Line2D([0], [0], color=grey, lw=2))
+                custom_lines.append(Line2D([0], [0], color=Colors.grey, lw=2))
                 # labels.append("Simulation MW included")
                 # custom_lines.append(Line2D([0], [0], color=red, lw=2))
                 model_container.model_mw.set_free_parameters(
@@ -930,7 +934,7 @@ class Fit:
                 ax.loglog(
                     ene,
                     model_container.model_host.get_point_source_fluxes(0, ene),
-                    color=grey,
+                    color=Colors.grey,
                     lw=0.5,
                 )
 
@@ -941,7 +945,7 @@ class Fit:
             ax.loglog(
                 ene,
                 model_container.model_pl.get_point_source_fluxes(0, ene),
-                color=black,
+                color=Colors.black,
                 lw=0.5,
             )
 
