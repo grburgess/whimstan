@@ -23,7 +23,7 @@ from twopc import compute_postpc
 from .database import XRTCatalog, XRTCatalogEntry, Database, ModelContainer
 from .spectral_plot import display_posterior_model_counts
 from .utils.dist_plotter import dist_plotter
-
+from .utils import Colors
 
 
 @dataclass
