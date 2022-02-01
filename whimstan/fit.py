@@ -24,13 +24,6 @@ from .database import XRTCatalog, XRTCatalogEntry, Database, ModelContainer
 from .spectral_plot import display_posterior_model_counts
 from .utils.dist_plotter import dist_plotter
 
-green = "#00D584"
-purple = "#985CFC"
-dark_purple = "#381C66"
-yellow = "#EDE966"
-grey = "#385656"
-lightgrey = "#839393"
-black = "#1F2222"
 
 
 @dataclass
