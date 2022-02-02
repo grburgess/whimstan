@@ -34,9 +34,11 @@ jobs:
 
         python3 -m pip install --upgrade pip wheel
 
-        pip install cryptography>=35.0 pyOpenSSL pyvo  -U
+        python3 -m pip install cryptography>=35.0 pyOpenSSL pyvo  --upgrade
 
         pip3 install flake8 numba numpy==1.20.3 ipython scipy h5py matplotlib coverage pytest pytest-cov cython codecov
+
+
         pip3 install tempita
         pip3 install astropy
 
