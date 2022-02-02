@@ -34,8 +34,7 @@ jobs:
 
         python3 -m pip install --upgrade pip wheel
 
-        pip install cryptography>=35.0
-        pip install pyOpenSSL -U
+        pip install cryptography>=35.0 pyOpenSSL pyvo  -U
 
         pip3 install flake8 numba numpy==1.20.3 ipython scipy h5py matplotlib coverage pytest pytest-cov cython codecov
         pip3 install tempita
@@ -57,6 +56,7 @@ jobs:
 
 
         python setup.py install
+
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
