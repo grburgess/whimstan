@@ -22,6 +22,7 @@ from ..utils import (
     hex_to_rgb,
 )
 
+from ..utils.projections import *
 
 @dataclass
 class ModelContainer:
@@ -529,8 +530,6 @@ class XRTCatalog:
         return cls(*grbs)
 
     def plot_skymap(self, mw_limit: float = 1e21) -> plt.Figure:
-
-        import ligo.skymap.plot
 
         # open the file
 
