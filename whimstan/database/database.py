@@ -26,12 +26,8 @@ from ..utils.format_conversions import (
 )
 from .catalog import XRTCatalog, XRTObs
 
-from ..utils.absori_precalc import (
-    get_abundance,
-    load_absori_base,
-    get_spec,
-    sum_sigma_interp_precalc,
-)
+from ..utils.absori_precalc import AbsoriCalculations, sum_sigma_interp_precalc
+
 
 
 silence_warnings()
@@ -368,30 +364,32 @@ class Database:
         # absori stuff
         if use_absori:
 
-            ion, sigma, atomicnumber, absori_base_energy = load_absori_base()
-            abundance = get_abundance()
+            # build the class that opens all the data
+
+            absori_calc = AbsoriCalculations()
+
             sum_sigma_interp = np.zeros((N_grbs, N_ene[0], 10, 26))
 
             # calc ionizing spectrum - for fixed gamma=2 at the moment
-            spec = get_spec()
+
 
             for i, zval in enumerate(z):
                 sum_sigma_interp[i] = sum_sigma_interp_precalc(
                     zval,
                     np.array(ene_avg[i]),
-                    absori_base_energy,
-                    sigma.T,
+                    absori_calc.energy,
+                    absori_calc.sigma.T,
                     0.02,
                 )
 
             absori_dict = dict(
                 # absori
-                spec=spec,
-                ion=ion,
-                sigma=sigma,
-                atomicnumber=atomicnumber,
+                spec=absori_calc.get_spec(),
+                ion=absori_calc.ion,
+                sigma=absori_calc.sigma,
+                atomicnumber=absori_calc.atomic_number,
                 sum_sigma_interp=sum_sigma_interp,
-                abundance=abundance,
+                abundance=absori_calc.get_abundance(),
                 xi=1,  # fixed at the moment
             )
 
