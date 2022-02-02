@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pathlib import Path
 import numpy as np
 from astropy.io import fits
 from scipy.interpolate import interp1d
@@ -7,20 +8,25 @@ import h5py
 from . import get_path_of_data_file
 
 
-
-
-
-
 class AbsoriCalculations:
-
     def __init__(self) -> None:
         """
         Opens and holds the precomputed Absori information
         """
         self._data_file: Path = get_path_of_data_file("absori.h5")
 
-        self._absori_elements = ("H", "He", "C", "N", "O", "Ne", "Mg", "Si", "S", "Fe")
-
+        self._absori_elements = (
+            "H",
+            "He",
+            "C",
+            "N",
+            "O",
+            "Ne",
+            "Mg",
+            "Si",
+            "S",
+            "Fe",
+        )
 
         with h5py.File(self._data_file, "r") as f:
 
@@ -28,7 +34,6 @@ class AbsoriCalculations:
             self._sigma = f["sigma"][()]
             self._energy = f["energy"][()]
             self._atomic_number = f["atomic_number"][()]
-
 
     def get_spec(self, gamma=2) -> np.ndarray:
         assert gamma == 2, "Only for gamma=2 at the moment"
@@ -50,10 +55,9 @@ class AbsoriCalculations:
     def atomic_number(self) -> np.ndarray:
         return self._atomic_number
 
+    def get_abundance(self, name: str = "angr") -> np.ndarray:
 
-    def get_abundance(self, name:str = "angr") -> np.ndarray:
-
-        output = np.empty(len(self._absori_elements))
+        out = np.empty(len(self._absori_elements))
 
         with h5py.File(self._data_file, "r") as f:
 
@@ -63,13 +67,9 @@ class AbsoriCalculations:
 
             for i, element in enumerate(self._absori_elements):
 
-                output[i] = name_grp.attrs[element]
+                out[i] = name_grp.attrs[element]
 
         return out
-
-
-
-
 
 
 # def get_abundance(name="angr"):
@@ -155,6 +155,7 @@ class AbsoriCalculations:
 #     return ion, sigma, atomicnumber, energy
 # Constants
 
+
 @dataclass
 class CosmoConstants:
     omegam: float = 0.307
@@ -162,7 +163,6 @@ class CosmoConstants:
     h0: float = 67.7
     c: float = 2.99792458e5
     cmpermpc: float = 3.08568e24
-
 
 
 def interpolate_sigma(ekeV, energy_base, sigma_base):
@@ -201,9 +201,18 @@ def sum_sigma_interp_precalc(
     for i in range(nz):
         z1 = zz + 1
         energy_z[:, i] = z1 * x
-        zf[i] = z1 ** 2 / np.sqrt(CosmoConstants.omegam * (z1 ** 3) + CosmoConstants.omegal)
+        zf[i] = z1 ** 2 / np.sqrt(
+            CosmoConstants.omegam * (z1 ** 3) + CosmoConstants.omegal
+        )
         zz += zsam
-    zf *= zsam * CosmoConstants.c * CosmoConstants.cmpermpc / CosmoConstants.h0 * 6.6e-5 * 1e-22
+    zf *= (
+        zsam
+        * CosmoConstants.c
+        * CosmoConstants.cmpermpc
+        / CosmoConstants.h0
+        * 6.6e-5
+        * 1e-22
+    )
     sigma_inter = interpolate_sigma(energy_z, energy_base, sigma_base)
     sigma_inter = np.swapaxes(sigma_inter, 0, 1)
     sigma_inter = np.swapaxes(sigma_inter, 2, 3)
