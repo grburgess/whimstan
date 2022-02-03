@@ -41,8 +41,8 @@ class PosteriorContainer:
     t_whim: Optional[np.ndarray]
     index_mu: Optional[np.ndarray]
     index_sigma: Optional[np.ndarray]
-    K_mu: Optional[np.ndarray]
-    K_sigma: Optional[np.ndarray]
+    log_K_mu: Optional[np.ndarray]
+    log_K_sigma: Optional[np.ndarray]
     has_whim_sim: bool
     has_host_sim: bool
 
@@ -105,14 +105,12 @@ class PosteriorContainer:
         )
 
         hdf_grp.create_dataset(
-            "K_mu", data=self.K_mu, compression="gzip"
+            "log_K_mu", data=self.log_K_mu, compression="gzip"
         )
 
         hdf_grp.create_dataset(
-            "K_sigma", data=self.K_sigma, compression="gzip"
+            "log_K_sigma", data=self.log_K_sigma, compression="gzip"
         )
-
-
 
     @classmethod
     def from_hdf_group(cls, hdf_grp: h5py.Group):
@@ -141,8 +139,8 @@ class PosteriorContainer:
             index=hdf_grp["index"][()],
             index_mu=hdf_grp["index_mu"][()],
             index_sigma=hdf_grp["index_sigma"][()],
-            K_mu=hdf_grp["K_mu"][()],
-            K_sigma=hdf_grp["K_sigma"][()],
+            log_K_mu=hdf_grp["log_K_mu"][()],
+            log_K_sigma=hdf_grp["log_K_sigma"][()],
             has_host_fit=hdf_grp.attrs["has_host_fit"],
             has_whim_fit=hdf_grp.attrs["has_whim_fit"],
             has_skew_fit=hdf_grp.attrs["has_skew_fit"],
@@ -214,10 +212,9 @@ class Fit:
 
         self._index_sigma: ArrayLike = self._posterior.index_sigma
 
-        self._K_mu: np.ndarray = self._posterior.K_mu
+        self._log_K_mu: np.ndarray = self._posterior.log_K_mu
 
-        self._K_sigma: ArrayLike = self._posterior.K_sigma
-
+        self._log_K_sigma: ArrayLike = self._posterior.log_K_sigma
 
         self._grbs = self._catalog.grbs
 
@@ -342,14 +339,13 @@ class Fit:
             sample=("chain", "draw")
         ).values
 
-        K_mu: ArrayLike = stan_fit.posterior.K_mu.stack(
+        log_K_mu: ArrayLike = stan_fit.posterior.log_K_mu.stack(
             sample=("chain", "draw")
         ).values
 
-        K_sigma: ArrayLike = stan_fit.posterior.K_sigma.stack(
+        log_K_sigma: ArrayLike = stan_fit.posterior.log_K_sigma.stack(
             sample=("chain", "draw")
         ).values
-
 
         # if it is a sim, lets go ahead
         # and see what's in there
@@ -381,8 +377,8 @@ class Fit:
             t_whim=t_whim,
             index_mu=index_mu,
             index_sigma=index_sigma,
-            K_mu=K_mu,
-            K_sigma=K_sigma,
+            log_K_mu=log_K_mu,
+            log_K_sigma=log_K_sigma,
             has_whim_sim=has_whim_sim,
             has_host_sim=has_host_sim,
         )
@@ -500,13 +496,12 @@ class Fit:
         return self._index_sigma
 
     @property
-    def K_mu(self) -> ArrayLike:
-        return self._K_mu
+    def log_K_mu(self) -> ArrayLike:
+        return self._log_K_mu
 
     @property
-    def K_sigma(self) -> ArrayLike:
-        return self._K_sigma
-
+    def log_K_sigma(self) -> ArrayLike:
+        return self._log_K_sigma
 
     @property
     def log_nh_host_mu(self) -> np.ndarray:
@@ -630,13 +625,9 @@ class Fit:
 
         y = np.zeros((self._n_samples, len(xgrid)))
 
-        for i, (mu, sig) in enumerate(
-            zip(self._index_mu, self._index_sigma)
-        ):
+        for i, (mu, sig) in enumerate(zip(self._index_mu, self._index_sigma)):
 
             y[i, :] = stats.norm.pdf(xgrid, loc=mu, scale=sig)
-
-
 
         dist_plotter(xgrid, y, ax, alpha=0.75, color=dist_color, lw=0)
 
@@ -660,7 +651,7 @@ class Fit:
 
             fig = ax.get_figure()
 
-        xgrid = np.linspace(-3, -1, 100)
+        xgrid = np.linspace(-12, -8, 100)
 
         # if we have a simulation
         # then plot the data
@@ -681,21 +672,15 @@ class Fit:
 
         y = np.zeros((self._n_samples, len(xgrid)))
 
-        for i, (mu, sig) in enumerate(
-            zip(self._K_mu, self._K_sigma)
-        ):
+        for i, (mu, sig) in enumerate(zip(self._log_K_mu, self._log_K_sigma)):
 
             y[i, :] = stats.norm.pdf(xgrid, loc=mu, scale=sig)
-
-
 
         dist_plotter(xgrid, y, ax, alpha=0.75, color=dist_color, lw=0)
 
         ax.set_xlabel("flux distribution")
 
         return fig
-
-
 
     def _get_spectrum(self, id: int) -> ModelContainer:
         """
@@ -776,7 +761,11 @@ class Fit:
             lo, hi = av.hdi(1e22 * self._host_nh[i], hdi_prob=0.95)
 
             ax.vlines(
-                self._catalog.z[i] + 1, lo, hi, color=Colors.purple, linewidth=0.7
+                self._catalog.z[i] + 1,
+                lo,
+                hi,
+                color=Colors.purple,
+                linewidth=0.7,
             )
 
         ax.set_ylabel(r"host nH (cm$^{-2}$)")
@@ -912,19 +901,21 @@ class Fit:
             return
 
         samples = self._extract_samples(id)
+        with np.errstate(invalid="ignore"):
 
-        fig = display_posterior_model_counts(
-            o,
-            model,
-            samples.T[::thin],
-            shade=False,
-            min_rate=min_rate,
-            model_color=model_color,
-            data_color=data_color,
-            # background_color=blue,
-            show_background=False,
-            source_only=True,
-        )
+            fig = display_posterior_model_counts(
+                o,
+                model,
+                samples.T[::thin],
+                shade=False,
+                min_rate=min_rate,
+                model_color=model_color,
+                data_color=data_color,
+                # background_color=blue,
+                show_background=False,
+                source_only=True,
+            )
+
 
         ax = fig.get_axes()[0]
 
