@@ -81,7 +81,7 @@ class StanModel:
 
         if opt_level is not None:
 
-            stanc_options["O"] = opt_level
+            stanc_options["--O"] = opt_level
 
 
 
