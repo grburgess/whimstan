@@ -81,15 +81,13 @@ class StanModel:
 
         if opt_level is not None:
 
-            stanc_options["O"] = opt_level
+            stanc_options[f"O{opt_level}"] = True
 
 
 
         # get the current working dir
 
         cur_dir = Path.cwd()
-
-        print(stanc_options)
 
         self._model = cmdstanpy.CmdStanModel(
             stan_file=self._stan_file,
