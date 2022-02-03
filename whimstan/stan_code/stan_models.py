@@ -40,6 +40,9 @@ class StanModel:
             "whimstan", os.path.join("stan_code", stan_file)
         )
 
+
+        file_stem = Path(self._stan_file ).stem
+
         self._hpp_file = pkg_resources.resource_filename(
             "whimstan", os.path.join("stan_code", file_stem, ".hpp")
         )
