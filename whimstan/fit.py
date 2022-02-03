@@ -41,6 +41,8 @@ class PosteriorContainer:
     t_whim: Optional[np.ndarray]
     index_mu: Optional[np.ndarray]
     index_sigma: Optional[np.ndarray]
+    K_mu: Optional[np.ndarray]
+    K_sigma: Optional[np.ndarray]
     has_whim_sim: bool
     has_host_sim: bool
 
@@ -102,6 +104,16 @@ class PosteriorContainer:
             "index_sigma", data=self.index_sigma, compression="gzip"
         )
 
+        hdf_grp.create_dataset(
+            "K_mu", data=self.K_mu, compression="gzip"
+        )
+
+        hdf_grp.create_dataset(
+            "K_sigma", data=self.K_sigma, compression="gzip"
+        )
+
+
+
     @classmethod
     def from_hdf_group(cls, hdf_grp: h5py.Group):
 
@@ -129,6 +141,8 @@ class PosteriorContainer:
             index=hdf_grp["index"][()],
             index_mu=hdf_grp["index_mu"][()],
             index_sigma=hdf_grp["index_sigma"][()],
+            K_mu=hdf_grp["K_mu"][()],
+            K_sigma=hdf_grp["K_sigma"][()],
             has_host_fit=hdf_grp.attrs["has_host_fit"],
             has_whim_fit=hdf_grp.attrs["has_whim_fit"],
             has_skew_fit=hdf_grp.attrs["has_skew_fit"],
@@ -199,6 +213,11 @@ class Fit:
         self._index_mu: np.ndarray = self._posterior.index_mu
 
         self._index_sigma: ArrayLike = self._posterior.index_sigma
+
+        self._K_mu: np.ndarray = self._posterior.K_mu
+
+        self._K_sigma: ArrayLike = self._posterior.K_sigma
+
 
         self._grbs = self._catalog.grbs
 
@@ -323,6 +342,15 @@ class Fit:
             sample=("chain", "draw")
         ).values
 
+        K_mu: ArrayLike = stan_fit.posterior.K_mu.stack(
+            sample=("chain", "draw")
+        ).values
+
+        K_sigma: ArrayLike = stan_fit.posterior.K_sigma.stack(
+            sample=("chain", "draw")
+        ).values
+
+
         # if it is a sim, lets go ahead
         # and see what's in there
 
@@ -353,6 +381,8 @@ class Fit:
             t_whim=t_whim,
             index_mu=index_mu,
             index_sigma=index_sigma,
+            K_mu=K_mu,
+            K_sigma=K_sigma,
             has_whim_sim=has_whim_sim,
             has_host_sim=has_host_sim,
         )
@@ -470,6 +500,15 @@ class Fit:
         return self._index_sigma
 
     @property
+    def K_mu(self) -> ArrayLike:
+        return self._K_mu
+
+    @property
+    def K_sigma(self) -> ArrayLike:
+        return self._K_sigma
+
+
+    @property
     def log_nh_host_mu(self) -> np.ndarray:
         return self._log_nh_host_mu
 
@@ -553,6 +592,110 @@ class Fit:
         ax.set_xlabel("log10(nH host)")
 
         return fig
+
+    def plot_index_distribution(
+        self,
+        hist_color=Colors.grey,
+        dist_color=Colors.green,
+        ax=None,
+        n_bins: int = 10,
+    ) -> plt.Figure:
+
+        if ax is None:
+
+            fig, ax = plt.subplots()
+
+        else:
+
+            fig = ax.get_figure()
+
+        xgrid = np.linspace(-3, -1, 100)
+
+        # if we have a simulation
+        # then plot the data
+
+        if self._catalog.is_sim:
+
+            ax.hist(
+                self._catalog.index_sim,
+                bins=n_bins,
+                density=True,
+                lw=2,
+                fc=hist_color,
+                ec=Colors.black,
+                alpha=0.75,
+            )
+
+            # ax.plot(xgrid, stats.norm.pdf(xgrid, loc=, scale=0.5),  color="b")
+
+        y = np.zeros((self._n_samples, len(xgrid)))
+
+        for i, (mu, sig) in enumerate(
+            zip(self._index_mu, self._index_sigma)
+        ):
+
+            y[i, :] = stats.norm.pdf(xgrid, loc=mu, scale=sig)
+
+
+
+        dist_plotter(xgrid, y, ax, alpha=0.75, color=dist_color, lw=0)
+
+        ax.set_xlabel("spectral index")
+
+        return fig
+
+    def plot_flux_distribution(
+        self,
+        hist_color=Colors.grey,
+        dist_color=Colors.green,
+        ax=None,
+        n_bins: int = 10,
+    ) -> plt.Figure:
+
+        if ax is None:
+
+            fig, ax = plt.subplots()
+
+        else:
+
+            fig = ax.get_figure()
+
+        xgrid = np.linspace(-3, -1, 100)
+
+        # if we have a simulation
+        # then plot the data
+
+        if self._catalog.is_sim:
+
+            ax.hist(
+                self._catalog.flux_sim,
+                bins=n_bins,
+                density=True,
+                lw=2,
+                fc=hist_color,
+                ec=Colors.black,
+                alpha=0.75,
+            )
+
+            # ax.plot(xgrid, stats.norm.pdf(xgrid, loc=, scale=0.5),  color="b")
+
+        y = np.zeros((self._n_samples, len(xgrid)))
+
+        for i, (mu, sig) in enumerate(
+            zip(self._K_mu, self._K_sigma)
+        ):
+
+            y[i, :] = stats.norm.pdf(xgrid, loc=mu, scale=sig)
+
+
+
+        dist_plotter(xgrid, y, ax, alpha=0.75, color=dist_color, lw=0)
+
+        ax.set_xlabel("flux distribution")
+
+        return fig
+
+
 
     def _get_spectrum(self, id: int) -> ModelContainer:
         """
