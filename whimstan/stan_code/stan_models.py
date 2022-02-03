@@ -89,6 +89,8 @@ class StanModel:
 
         cur_dir = Path.cwd()
 
+        print(stanc_options)
+
         self._model = cmdstanpy.CmdStanModel(
             stan_file=self._stan_file,
             model_name=self._name,
