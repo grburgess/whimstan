@@ -51,7 +51,7 @@ class StanModel:
 
         self._model = None
 
-    def build_model(self, use_opencl=False, opt=True):
+    def build_model(self, use_opencl=False, opt=True, opt_level=None):
         """
         build the stan model
 
@@ -78,6 +78,10 @@ class StanModel:
 
             cpp_options["STAN_CPP_OPTIMS"] = True
             cpp_options["STAN_NO_RANGE_CHECKS"] = True
+
+        if opt_level is not None:
+
+            stanc_options["O"] = opt_level
 
 
 
