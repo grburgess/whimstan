@@ -151,7 +151,7 @@ class Database:
 
             is_file = True
 
-            f = h5py.File(file_name, "r")
+            f = h5py.File(file_name, "w")
 
         elif isinstance(file_name, h5py.Group):
 
