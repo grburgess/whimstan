@@ -40,13 +40,13 @@ class StanModel:
             "whimstan", os.path.join("stan_code", stan_file)
         )
 
-        # self._hpp_file = pkg_resources.resource_filename(
-        #     "whimstan", os.path.join("stan_code", file_stem, ".hpp")
-        # )
+        self._hpp_file = pkg_resources.resource_filename(
+            "whimstan", os.path.join("stan_code", file_stem, ".hpp")
+        )
 
-        # self._o_file = pkg_resources.resource_filename(
-        #     "whimstan", os.path.join("stan_code", file_stem, ".o")
-        # )
+        self._o_file = pkg_resources.resource_filename(
+            "whimstan", os.path.join("stan_code", file_stem, ".o")
+        )
 
 
         self._model = None
@@ -117,21 +117,21 @@ class StanModel:
 
             Path(self._model.exe_file).unlink()
 
-            # try:
+            try:
 
-            #     Path(self._hpp_file).unlink()
+                Path(self._hpp_file).unlink()
 
-            # except:
+            except:
 
-            #     pass
+                pass
 
-            # try:
+            try:
 
-            #     Path(self._o_file).unlink()
+                Path(self._o_file).unlink()
 
-            # except:
+            except:
 
-            #     pass
+                pass
 
 
 def get_model(model_name) -> StanModel:
