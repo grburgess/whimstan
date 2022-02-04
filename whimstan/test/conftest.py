@@ -97,3 +97,37 @@ def whim_population(demo_plugin):
     pop = pop.to_sub_population()
 
     yield pop
+
+
+@pytest.fixture(scope="session")
+def tiny_population(demo_plugin):
+
+    pop_gen = create_population(
+        r0=1,
+        z_max=10,
+        Lmin=1e48,
+        alpha=1.5,
+        host_gas_mean=22,
+        host_gas_sigma=0.5,
+        host_gas_cloud_ratio=0.1,
+        use_clouds=True,
+        vari_clouds=True,
+        b_limit=10.0,
+        mw_nh_limit=21.0,
+        demo_plugin=demo_plugin,
+        counts_limit=500,
+        exposure_low=900,
+        exposure_high=1000,
+    )
+
+    # flux_selector = popsynth.HardFluxSelection()
+
+    # flux_selector.boundary = 1e-11
+
+    # pop_gen.set_flux_selection(flux_selector)
+
+    pop = pop_gen.draw_survey()
+
+    pop = pop.to_sub_population()
+
+    yield pop
