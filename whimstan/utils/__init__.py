@@ -5,3 +5,5 @@ from .colormap import (
 )
 from .colors import Colors
 from .package_data import get_path_of_data_file
+
+from .logging import setup_logger

@@ -6,18 +6,15 @@ from typing import Dict
 import astropy.io.fits as fits
 import h5py
 import numpy as np
+import threeML
 from astromodels import Log_uniform_prior, Uniform_prior
 from astromodels.utils.data_files import _get_data_file_path
-from threeML import (
-    BayesianAnalysis,
-    DataList,
-    silence_warnings,
-    update_logging_level,
-)
+
 from threeML.plugins.DispersionSpectrumLike import DispersionSpectrumLike
 from threeML.plugins.OGIPLike import OGIPLike
 from tqdm.auto import tqdm
 
+from ..utils import setup_logger
 from ..utils.absori_precalc import AbsoriCalculations, sum_sigma_interp_precalc
 from ..utils.format_conversions import (
     build_spectrum_like_from_hdf,
@@ -25,11 +22,14 @@ from ..utils.format_conversions import (
 )
 from .catalog import XRTCatalog, XRTObs
 
-silence_warnings()
-update_logging_level("WARNING")
+log = setup_logger(__name__)
 
 
-def build_tbabs_arg(ene):
+threeML.silence_warnings()
+threeML.update_logging_level("WARNING")
+
+
+def build_tbabs_arg(ene) -> np.ndarray:
 
     file_name = _get_data_file_path(Path("xsect/xsect_tbabs_wilm.fits"))
     fxs = fits.open(file_name)
@@ -55,6 +55,10 @@ class Database:
         self._is_sim: bool = is_sim
 
     def create_sub_selection(self, selection: np.ndarray) -> "Database":
+        """
+        create a database from an array of bools
+        that specifies the selection within the catalog
+        """
 
         # first get the selection from the catalog
 
@@ -422,7 +426,7 @@ class Database:
         id: int,
         with_whim: bool = False,
         integration_method: str = "trapz",
-    ) -> BayesianAnalysis:
+    ) -> threeML.BayesianAnalysis:
 
         grb: str = self._catalog.grbs[id]
 
@@ -474,4 +478,4 @@ class Database:
             lower_bound=1.0e19 / 1.0e22, upper_bound=1.0e26 / 1.0e22
         )
 
-        return BayesianAnalysis(model, DataList(plugin))
+        return threeML.BayesianAnalysis(model, threeML.DataList(plugin))

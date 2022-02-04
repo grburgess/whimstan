@@ -4,6 +4,11 @@ from pathlib import Path
 import cmdstanpy
 import pkg_resources
 
+from ..utils import setup_logger
+
+log = setup_logger(__name__)
+
+
 _available_models = {}
 
 _available_models["simple_xrt"] = "simple_xrt.stan"
@@ -36,6 +41,7 @@ _available_models["no_whim"] = "no_whim.stan"
 class StanModel:
     def __init__(self, name: str, stan_file: str):
 
+
         self._name = name
         self._stan_file = pkg_resources.resource_filename(
             "whimstan", os.path.join("stan_code", stan_file)
@@ -50,6 +56,7 @@ class StanModel:
         self._o_file = pkg_resources.resource_filename(
             "whimstan", os.path.join("stan_code", file_stem, ".o")
         )
+        log.info(f"creating stan model {name} from {stan_file}")
 
         self._model = None
 
@@ -86,6 +93,10 @@ class StanModel:
         # get the current working dir
 
         cur_dir = Path.cwd()
+
+        log.info(f"compiling {self._name}")
+        log.info(f"cpp: {cpp_options}")
+        log.info(f"stanc: {stanc_options}")
 
         self._model = cmdstanpy.CmdStanModel(
             stan_file=self._stan_file,
