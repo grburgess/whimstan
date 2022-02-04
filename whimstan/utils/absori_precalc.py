@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from pathlib import Path
+
+import h5py
 import numpy as np
 from astropy.io import fits
 from scipy.interpolate import interp1d
-import h5py
 
 from . import get_path_of_data_file
 
