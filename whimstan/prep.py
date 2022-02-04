@@ -9,15 +9,14 @@ from astromodels.utils.data_files import _get_data_file_path
 from threeML import OGIPLike, silence_warnings, update_logging_level
 from tqdm.auto import tqdm
 
-from .catalog import XRTCatalog
-
 from whimstan.absori_precalc import (
     get_abundance,
-    load_absori_base,
     get_spec,
+    load_absori_base,
     sum_sigma_interp_precalc,
 )
 
+from .catalog import XRTCatalog
 
 silence_warnings()
 update_logging_level("WARNING")

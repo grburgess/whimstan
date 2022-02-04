@@ -1,18 +1,12 @@
-import numpy as np
-
 from pathlib import Path
 
-
-from whimstan import create_population
-
-from whimstan.utils.package_data import get_path_of_data_file
-
-
+import astropy.units as u
+import numpy as np
+import pytest
 from threeML import OGIPLike
 
-import astropy.units as u
-
-import pytest
+from whimstan import create_population
+from whimstan.utils.package_data import get_path_of_data_file
 
 np.seterr(all="ignore")
 import warnings

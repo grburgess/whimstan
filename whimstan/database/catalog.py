@@ -3,26 +3,23 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional
 
-import matplotlib.pyplot as plt
-
-import healpy as hp
-from astropy.coordinates import SkyCoord
-
-from threeML.plugins.DispersionSpectrumLike import DispersionSpectrumLike
-from astromodels import Model, PointSource, Powerlaw_Eflux, TbAbs
-from bb_astromodels import Integrate_Absori
-
 import h5py
+import healpy as hp
+import matplotlib.pyplot as plt
 import numpy as np
+from astromodels import Model, PointSource, Powerlaw_Eflux, TbAbs
+from astropy.coordinates import SkyCoord
+from bb_astromodels import Integrate_Absori
+from threeML.plugins.DispersionSpectrumLike import DispersionSpectrumLike
 
 from ..utils import (
-    get_path_of_data_file,
     Colors,
     build_custom_continuous_cmap,
+    get_path_of_data_file,
     hex_to_rgb,
 )
-
 from ..utils.projections import *
+
 
 @dataclass
 class ModelContainer:

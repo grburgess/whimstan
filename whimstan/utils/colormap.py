@@ -1,10 +1,10 @@
-from matplotlib import cm
-import pandas as pd
-import numpy as np
-from matplotlib.colors import LinearSegmentedColormap, to_hex, to_rgb, to_rgba
-from matplotlib import colors
 import copy
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from matplotlib import cm, colors
+from matplotlib.colors import LinearSegmentedColormap, to_hex, to_rgb, to_rgba
 
 
 # ASCI escape codes
@@ -59,8 +59,8 @@ def generate_gradient(cmap, name):
     """
     Given a continuous cmap, visualize them. See example.
     """
-    import numpy as np
     import matplotlib.pyplot as plt
+    import numpy as np
 
     gradient = np.linspace(0, 1, 256).reshape(1, -1)
     gradient = np.repeat(gradient, 10, axis=0)
@@ -108,7 +108,8 @@ def bg_greyed_cmap(cmap_str):
 def hex_to_rgb(value):
     value = value.lstrip('#')
     lv = len(value)
-    return tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
+    return tuple(int(value[i : i + lv // 3], 16) for i in range(0, lv, lv // 3))
+
 
 # hex color 2d array, to (M,N,3) RGB array, used in imshow (plot_long_heatmap)
 def hex2_to_rgb3(hex2):

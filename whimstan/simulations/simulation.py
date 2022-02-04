@@ -1,24 +1,21 @@
-from pathlib import Path
 import tempfile
+from pathlib import Path
 from typing import Dict, List, Optional
-import numpy as np
-
-from joblib import Parallel, delayed
 
 import astropy.units as u
+import numpy as np
 import popsynth
 from astromodels import Model, PointSource, Powerlaw_Eflux, TbAbs
 from astropy.coordinates import SkyCoord
 from bb_astromodels import Integrate_Absori
 from gdpyc import GasMap
-
+from joblib import Parallel, delayed
 from popsynth.utils.progress_bar import progress_bar
 from threeML import quiet_mode
 from threeML.plugins.OGIPLike import OGIPLike
 
 from ..database import Database, XRTCatalog, XRTCatalogEntry
 from ..utils.package_data import get_path_of_data_file
-
 
 
 class SpectrumGenerator:
@@ -121,7 +118,9 @@ class SpectrumGenerator:
 
             if self._exposure is not None:
 
-                self._demo_plugin._background_spectrum._exposure = self._exposure
+                self._demo_plugin._background_spectrum._exposure = (
+                    self._exposure
+                )
                 self._demo_plugin._observed_spectrum._exposure = self._exposure
 
                 self._demo_plugin._precalculations()

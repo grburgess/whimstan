@@ -189,6 +189,8 @@ The following example demonstrates most of the features of this module.
 """  # noqa: E501
 from itertools import product
 
+import numpy as np
+from astropy import units as u
 from astropy.coordinates import SkyCoord, UnitSphericalRepresentation
 from astropy.io.fits import Header
 from astropy.time import Time
@@ -198,15 +200,14 @@ from astropy.visualization.wcsaxes.formatter_locator import (
 )
 from astropy.visualization.wcsaxes.frame import EllipticalFrame
 from astropy.wcs import WCS
-from astropy import units as u
 from matplotlib import rcParams
 from matplotlib.offsetbox import AnchoredOffsetbox
 from matplotlib.patches import ConnectionPatch, FancyArrowPatch, PathPatch
 from matplotlib.path import Path
 from matplotlib.projections import projection_registry
-import numpy as np
 from reproject import reproject_from_healpix
 from scipy.optimize import minimize_scalar
+
 from .angle import reference_angle_deg, wrapped_angle_deg
 
 __all__ = ["AutoScaledWCSAxes", "ScaleBar"]
@@ -568,7 +569,7 @@ class AutoScaledWCSAxes(WCSAxes):
 
         if smooth is not None:
             # Infrequently used imports
-            from astropy.convolution import convolve_fft, Gaussian2DKernel
+            from astropy.convolution import Gaussian2DKernel, convolve_fft
 
             pixsize = np.mean(np.abs(self.wcs.wcs.cdelt)) * u.deg
             smooth = (smooth / pixsize).to(u.dimensionless_unscaled).value

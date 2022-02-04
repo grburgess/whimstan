@@ -1,34 +1,30 @@
 import collections
+from collections import OrderedDict
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Dict, List
 
-from pathlib import Path
-from collections import OrderedDict
-
-import numpy as np
-
-import h5py
-
-from tqdm.auto import tqdm
 import astropy.io.fits as fits
-
+import h5py
+import numpy as np
+from astromodels import Log_uniform_prior, Uniform_prior
+from astromodels.utils.data_files import _get_data_file_path
+from threeML import (
+    BayesianAnalysis,
+    DataList,
+    silence_warnings,
+    update_logging_level,
+)
 from threeML.plugins.DispersionSpectrumLike import DispersionSpectrumLike
 from threeML.plugins.OGIPLike import OGIPLike
-from threeML import BayesianAnalysis, DataList
-from threeML import silence_warnings, update_logging_level
-from astromodels.utils.data_files import _get_data_file_path
-from astromodels import Uniform_prior, Log_uniform_prior
-
-
-from ..utils.format_conversions import (
-    plugin_to_hdf_group,
-    build_spectrum_like_from_hdf,
-)
-from .catalog import XRTCatalog, XRTObs
+from tqdm.auto import tqdm
 
 from ..utils.absori_precalc import AbsoriCalculations, sum_sigma_interp_precalc
-
-
+from ..utils.format_conversions import (
+    build_spectrum_like_from_hdf,
+    plugin_to_hdf_group,
+)
+from .catalog import XRTCatalog, XRTObs
 
 silence_warnings()
 update_logging_level("WARNING")
@@ -59,24 +55,24 @@ class Database:
 
         self._is_sim: bool = is_sim
 
-    def create_sub_selection(self, selection: np.ndarray ) -> "Database":
+    def create_sub_selection(self, selection: np.ndarray) -> "Database":
 
         # first get the selection from the catalog
 
-        new_cat: XRTCatalog = self._catalog.get_sub_selection(selection=selection)
+        new_cat: XRTCatalog = self._catalog.get_sub_selection(
+            selection=selection
+        )
 
         # now pick off the plugins from the new catalog
         # and pump them into the
 
         new_database = collections.OrderedDict()
 
-
-        for k,v in new_cat.catalog.items():
+        for k, v in new_cat.catalog.items():
 
             new_database[k] = self._plugins[k]
 
         return Database(new_database, new_cat, self._is_sim)
-
 
     @property
     def is_sim(self) -> bool:
@@ -298,7 +294,7 @@ class Database:
         bkg = []
         mask = []
         n_chans_used = []
-        #rsp = []
+        # rsp = []
 
         arf = []
 
@@ -334,11 +330,9 @@ class Database:
             # the rmf does NOT change
             rmf = x.rsp.tolist()
 
-
-
             arf.append(x.arf.tolist())
 
-            #rsp.append(x.rsp.tolist())
+            # rsp.append(x.rsp.tolist())
             exposure_ratio.append(float(x.scale_factor))
             counts.append(x.obs_count)
             bkg.append(x.bkg_count)
@@ -372,7 +366,6 @@ class Database:
 
             # calc ionizing spectrum - for fixed gamma=2 at the moment
 
-
             for i, zval in enumerate(z):
                 sum_sigma_interp[i] = sum_sigma_interp_precalc(
                     zval,
@@ -397,9 +390,8 @@ class Database:
             N_grbs=N_grbs,
             N_chan=N_chan[0],
             N_ene=N_ene[0],
-#            rsp=rsp,
-
-            rmf = rmf,
+            #            rsp=rsp,
+            rmf=rmf,
             arf=arf,
             exposure_ratio=exposure_ratio,
             ene_avg=ene_avg,
@@ -427,7 +419,10 @@ class Database:
         return res
 
     def build_3ml_analysis(
-        self, id: int, with_whim: bool = False, integration_method: str = "trapz"
+        self,
+        id: int,
+        with_whim: bool = False,
+        integration_method: str = "trapz",
     ) -> BayesianAnalysis:
 
         grb: str = self._catalog.grbs[id]

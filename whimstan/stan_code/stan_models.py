@@ -1,7 +1,8 @@
-import cmdstanpy
-import pkg_resources
 import os
 from pathlib import Path
+
+import cmdstanpy
+import pkg_resources
 
 _available_models = {}
 
@@ -40,8 +41,7 @@ class StanModel:
             "whimstan", os.path.join("stan_code", stan_file)
         )
 
-
-        file_stem = Path(self._stan_file ).stem
+        file_stem = Path(self._stan_file).stem
 
         self._hpp_file = pkg_resources.resource_filename(
             "whimstan", os.path.join("stan_code", file_stem, ".hpp")
@@ -50,7 +50,6 @@ class StanModel:
         self._o_file = pkg_resources.resource_filename(
             "whimstan", os.path.join("stan_code", file_stem, ".o")
         )
-
 
         self._model = None
 
@@ -69,13 +68,11 @@ class StanModel:
 
         if use_opencl:
 
-            stanc_options['use-opencl']=True
+            stanc_options['use-opencl'] = True
 
             cpp_options["STAN_OPENCL"] = True
             cpp_options["OPENCL_DEVICE_ID"] = 0
             cpp_options["OPENCL_PLATFORM_ID"] = 0
-
-
 
         if opt:
 
@@ -86,8 +83,6 @@ class StanModel:
 
             stanc_options[f"O{opt_level}"] = True
 
-
-
         # get the current working dir
 
         cur_dir = Path.cwd()
@@ -96,9 +91,8 @@ class StanModel:
             stan_file=self._stan_file,
             model_name=self._name,
             cpp_options=cpp_options,
-            stanc_options=stanc_options
+            stanc_options=stanc_options,
         )
-
 
         os.chdir(cur_dir)
 

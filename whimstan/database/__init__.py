@@ -1,2 +1,2 @@
+from .catalog import ModelContainer, XRTCatalog, XRTCatalogEntry
 from .database import Database
-from .catalog import XRTCatalog, XRTCatalogEntry, ModelContainer

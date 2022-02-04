@@ -1,29 +1,22 @@
 from dataclasses import dataclass
-from typing import Optional, Tuple
 from pathlib import Path
-
-import h5py
+from typing import Optional, Tuple
 
 import arviz as av
+import h5py
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as stats
-
-
+from astromodels import Model
 from matplotlib.lines import Line2D
 from numpy.typing import ArrayLike
-
-
 from threeML.plugins.OGIPLike import OGIPLike
-from astromodels import Model
-
-
 from twopc import compute_postpc
 
-from .database import XRTCatalog, XRTCatalogEntry, Database, ModelContainer
+from .database import Database, ModelContainer, XRTCatalog, XRTCatalogEntry
 from .spectral_plot import display_posterior_model_counts
-from .utils.dist_plotter import dist_plotter
 from .utils import Colors
+from .utils.dist_plotter import dist_plotter
 
 
 @dataclass
@@ -915,7 +908,6 @@ class Fit:
                 show_background=False,
                 source_only=True,
             )
-
 
         ax = fig.get_axes()[0]
 

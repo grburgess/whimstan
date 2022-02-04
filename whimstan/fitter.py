@@ -1,13 +1,12 @@
 import os
 from pathlib import Path
-from typing import Dict, Any, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 import arviz as av
 
 from .database import Database
 from .fit import Fit
-
-from .stan_code.stan_models import get_model, StanModel
+from .stan_code.stan_models import StanModel, get_model
 
 
 def make_fit(
@@ -22,8 +21,8 @@ def make_fit(
     use_host_gas: bool = True,
     save_stan_fit: bool = True,
     clean_model: bool = False,
-    use_opencl: bool=False,
-    opt_level: Union[int, str] = 0
+    use_opencl: bool = False,
+    opt_level: Union[int, str] = 0,
 ):
 
     """
@@ -67,7 +66,6 @@ def make_fit(
 
         model.clean_model()
         model.build_model(use_opencl=use_opencl, opt_level=opt_level)
-
 
     data = database.build_stan_data(
         use_absori=use_absori, use_mw_gas=use_mw_gas, use_host_gas=use_host_gas

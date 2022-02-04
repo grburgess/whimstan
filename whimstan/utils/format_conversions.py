@@ -1,14 +1,11 @@
-import numpy as np
 import h5py
-
+import numpy as np
+from threeML.plugins.DispersionSpectrumLike import DispersionSpectrumLike
+from threeML.utils.OGIP.response import InstrumentResponse
 from threeML.utils.spectrum.binned_spectrum import (
     BinnedSpectrum,
     BinnedSpectrumWithDispersion,
 )
-
-
-from threeML.plugins.DispersionSpectrumLike import DispersionSpectrumLike
-from threeML.utils.OGIP.response import InstrumentResponse
 
 
 def plugin_to_hdf_group(plugin: DispersionSpectrumLike, hdf_group: h5py.Group):
