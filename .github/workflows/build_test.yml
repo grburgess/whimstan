@@ -49,7 +49,7 @@ jobs:
 
 
 
-        pip3 install git+https://github.com/stan-dev/cmdstanpy.git flake8 numba numpy ipython scipy h5py matplotlib coverage pytest pytest-cov cython codecov
+        pip3 install git+https://github.com/stan-dev/cmdstanpy.git flake8 numba numpy ipython scipy h5py matplotlib coverage pytest pytest-cov cython codecov;
 
 
         pip3 install tempita
