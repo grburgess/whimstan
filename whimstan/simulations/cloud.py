@@ -1,10 +1,4 @@
-from pathlib import Path
-from typing import Dict, List, Optional
-
-import astropy.units as u
-import numba as nb
 import numpy as np
-import popsynth as ps
 
 
 class Cloud:
@@ -36,11 +30,11 @@ class Cloud:
         :returns:
 
         """
-        p = self.generate_point_inside()
+        point = self.generate_point_inside()
 
-        u = self.get_unit_vector()
+        uvec = self.get_unit_vector()
 
-        pl = self.compute_path_length(p, u)
+        pl = self.compute_path_length(point, uvec)
 
         return pl
 
@@ -54,7 +48,7 @@ class Cloud:
         """
         flag = True
         while flag:
-            p = np.array(
+            point = np.array(
                 [
                     np.random.uniform(-self._R, self._R),
                     np.random.uniform(-self._R, self._R),
@@ -62,13 +56,13 @@ class Cloud:
                 ]
             )
 
-            test_val = (p ** 2).dot(1.0 / self._size_vec2)
+            test_val = (point ** 2).dot(1.0 / self._size_vec2)
 
             if test_val <= 1:
 
                 flag = False
 
-        return p
+        return point
 
     def get_unit_vector(self) -> np.ndarray:
         """
@@ -77,10 +71,10 @@ class Cloud:
         :returns:
 
         """
-        v = np.random.normal(size=3)
-        u = v / np.linalg.norm(v)
+        vec = np.random.normal(size=3)
+        uvec = vec / np.linalg.norm(vec)
 
-        return u
+        return uvec
 
     def compute_path_length(self, p, u) -> float:
         """
@@ -97,6 +91,6 @@ class Cloud:
         a = (u ** 2).dot(1.0 / self._size_vec2)
         c = (p ** 2).dot(1.0 / self._size_vec2)
 
-        l = (-b + np.sqrt(b * b - 4 * a * (c - 1))) / (2 * a)
+        path_length = (-b + np.sqrt(b * b - 4 * a * (c - 1))) / (2 * a)
 
-        return l
+        return path_length

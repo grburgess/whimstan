@@ -1,8 +1,7 @@
 import collections
 from collections import OrderedDict
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 import astropy.io.fits as fits
 import h5py

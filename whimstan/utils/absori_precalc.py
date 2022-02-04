@@ -3,7 +3,6 @@ from pathlib import Path
 
 import h5py
 import numpy as np
-from astropy.io import fits
 from scipy.interpolate import interp1d
 
 from . import get_path_of_data_file
@@ -73,90 +72,6 @@ class AbsoriCalculations:
         return out
 
 
-# def get_abundance(name="angr"):
-#     with open(get_path_of_data_file("abundances.dat")) as f:
-#         rows = f.readlines()
-#         ele = np.array(rows[0].split(" "), dtype=str)
-#         ele = ele[ele != ""][1:]
-#         # get rid of \n at the end
-#         ele[-1] = ele[-1][:2]
-#         vals = np.zeros((7, len(ele)))
-#         keys = []
-#         for i, row in enumerate(rows[1:8]):
-#             l = np.array(row.split(" "), dtype=str)
-#             l = l[l != ""]
-#             # get rid of \n at the end
-#             if l[-1][-2:] == "\n":
-#                 l[-1] = l[-1][:2]
-#             if l[-1] == "\n":
-#                 l = l[:-1]
-#             vals[i] = np.array(l[1:], dtype=float)
-#             keys.append(l[0][:-1])
-#         keys = np.array(keys)
-#     vals_all = np.zeros(len(absori_elements))
-#     for i, element in enumerate(absori_elements):
-#         assert (
-#             element in ele
-#         ), f"{element} not a valid element. Valid elements: {ele}"
-
-#         idx = np.argwhere(ele == element)[0, 0]
-
-#         assert name in keys, f"{name} not a valid name. Valid names: {keys}"
-
-#         idy = np.argwhere(keys == name)[0, 0]
-
-#         vals_all[i] = vals[idy, idx]
-
-#     return vals_all
-
-
-# def load_absori_base():
-#     ion = np.zeros((10, 26, 10))
-#     sigma = np.zeros((10, 26, 721))
-#     atomicnumber = np.empty(10, dtype=int)
-
-#     with fits.open(get_path_of_data_file("mansig.fits")) as f:
-#         znumber = f["SIGMAS"].data["Z"]
-#         ionnumber = f["SIGMAS"].data["ION"]
-#         sigmadata = f["SIGMAS"].data["SIGMA"]
-#         iondata = f["SIGMAS"].data["IONDATA"]
-
-#         energy = f["ENERGIES"].data["ENERGY"]
-
-#     currentZ = -1
-#     iZ = -1
-#     iIon = -1
-#     for i in range(len(znumber)):
-#         if znumber[i] != currentZ:
-#             iZ += 1
-#             atomicnumber[iZ] = znumber[i]
-#             currentZ = znumber[i]
-#             iIon = -1
-#         iIon += 1
-#         for k in range(10):
-#             ion[iZ, iIon, k] = iondata[i][k]
-
-#         # change units of coef
-
-#         ion[iZ][iIon][1] *= 1.0e10
-#         ion[iZ][iIon][3] *= 1.0e04
-#         ion[iZ][iIon][4] *= 1.0e-04
-#         ion[iZ][iIon][6] *= 1.0e-04
-
-#         for k in range(721):
-#             sigma[iZ][iIon][k] = sigmadata[i][k] / 6.6e-27
-
-#     elementname = ["H", "He", "C", "N", "O", "Ne", "Mg", "Si", "S", "Fe"]
-
-#     ion = ion
-#     sigma = sigma
-#     atomicnumber = atomicnumber
-#     energy = energy
-
-#     return ion, sigma, atomicnumber, energy
-# Constants
-
-
 @dataclass
 class CosmoConstants:
     omegam: float = 0.307
@@ -166,7 +81,7 @@ class CosmoConstants:
     cmpermpc: float = 3.08568e24
 
 
-def interpolate_sigma(ekeV, energy_base, sigma_base):
+def interpolate_sigma(ekeV, energy_base, sigma_base) -> np.ndarray:
     e = 1000 * ekeV
     res = np.zeros((e.shape[0], e.shape[1], 26, 10))
     mask1 = e > energy_base[-1]
@@ -186,8 +101,8 @@ def interpolate_sigma(ekeV, energy_base, sigma_base):
 
 
 def sum_sigma_interp_precalc(
-    z, x, energy_base, sigma_base, zshell_thickness=0.02
-):
+    z, x, energy_base, sigma_base, zshell_thickness: float = 0.02
+) -> np.ndarray:
     nz = int(z / zshell_thickness)
     zsam = z / nz
     zz = zsam * 0.5

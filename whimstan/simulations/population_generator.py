@@ -1,8 +1,6 @@
-from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 import astropy.units as u
-import numba as nb
 import numpy as np
 import popsynth as ps
 import scipy.special as sf
@@ -11,7 +9,6 @@ from astropy.coordinates import SkyCoord
 from bb_astromodels import Integrate_Absori
 from gdpyc import GasMap
 from popsynth.utils.progress_bar import progress_bar
-from scipy.integrate import quad
 from threeML.plugins.OGIPLike import OGIPLike
 
 from .cloud import Cloud

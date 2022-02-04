@@ -1,8 +1,7 @@
-import matplotlib.pyplot as plt
 import numpy as np
 
 
-def dist_plotter(x, y, ax, ci=0.95, **kwargs):
+def dist_plotter(x, y, ax, ci=0.95, **kwargs) -> None:
 
     half_ci = ci / 2.0 * 100.0
 
