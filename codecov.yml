@@ -1,0 +1,4 @@
+ignore:
+  - "whimstan/test"
+  - "whimstan/_version.py"
+  - "whimstan/stan_code/*.stan*"
