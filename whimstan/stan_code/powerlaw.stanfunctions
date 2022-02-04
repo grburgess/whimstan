@@ -1,4 +1,3 @@
-
 vector powerlaw_flux(vector ene, real index) {
 
   real dp2 = 2. + index;

@@ -1,10 +1,10 @@
 functions {
-#include constants.stan
-#include absori.stan
-#include tbabs.stan
-#include powerlaw.stan
-#include cstat.stan
-#include partial_log_like_optimized.stan
+#include constants.stanfunctions
+#include absori.stanfunctions
+#include tbabs.stanfunctions
+#include powerlaw.stanfunctions
+#include cstat.stanfunctions
+#include partial_log_like_optimized.stanfunctions
 }
 
 
