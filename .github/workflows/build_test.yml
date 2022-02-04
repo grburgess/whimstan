@@ -23,15 +23,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install cmdstan
-      run: |
 
-        mkdir .cmdstan
-        cd .cmdstan
-        git clone https://github.com/stan-dev/cmdstan.git --recursive
-        cd cmdstan
-        make build
-        cd ../../
 
     - name: Install dependencies
       run: |
@@ -42,6 +34,15 @@ jobs:
         brew install hdf5
 
         fi
+
+        mkdir .cmdstan
+        cd .cmdstan
+        git clone https://github.com/stan-dev/cmdstan.git --recursive
+        cd cmdstan
+        make build
+        cd ../../
+
+
 
         python3 -m pip install --upgrade pip wheel;
 
