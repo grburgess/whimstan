@@ -47,9 +47,9 @@ jobs:
 
         pip3 install cryptography pyOpenSSL pyvo pyRXP --upgrade;
 
-        pip3 install git+https://github.com/stan-dev/cmdstanpy.git
 
-        pip3 install flake8 numba numpy==1.20.3 ipython scipy h5py matplotlib coverage pytest pytest-cov cython codecov
+
+        pip3 install git+https://github.com/stan-dev/cmdstanpy.git flake8 numba numpy==1.20.3 ipython scipy h5py matplotlib coverage pytest pytest-cov cython codecov
 
 
         pip3 install tempita
