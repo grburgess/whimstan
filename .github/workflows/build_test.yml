@@ -45,11 +45,10 @@ jobs:
 
         python3 -m pip install --upgrade pip wheel;
 
-        pip3 install cryptography pyOpenSSL pyvo pyRXP --upgrade;
 
 
 
-        pip3 install git+https://github.com/stan-dev/cmdstanpy.git flake8 numba numpy ipython scipy h5py matplotlib coverage pytest pytest-cov cython codecov arviz astropy tempita;
+        pip3 install git+https://github.com/stan-dev/cmdstanpy.git flake8 numba numpy ipython scipy h5py matplotlib coverage pytest pytest-cov cython codecov arviz astropy tempita cryptography pyOpenSSL pyvo pyRXP;
 
 
 
