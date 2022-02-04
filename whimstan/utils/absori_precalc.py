@@ -33,7 +33,7 @@ class AbsoriCalculations:
             self._ion = f["ion"][()]
             self._sigma = f["sigma"][()]
             self._energy = f["energy"][()]
-            self._atomic_number = f["atomic_number"][()]
+            self._atomic_number = f["atomicnumber"][()]
 
     def get_spec(self, gamma=2) -> np.ndarray:
         assert gamma == 2, "Only for gamma=2 at the moment"
