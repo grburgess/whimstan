@@ -1,8 +1,6 @@
 from pathlib import Path
 
-from whimstan import SpectrumFactory, Database
-
-
+from whimstan import Database, SpectrumFactory
 
 
 def test_database(whim_population):
@@ -17,12 +15,8 @@ def test_database(whim_population):
 
     db.catalog.plot_skymap()
 
-
-
-
-    selection = db.catalog.z >1
+    selection = db.catalog.z > 1
 
     new_db = db.create_sub_selection(selection=selection)
-
 
     Path("whim_db.h5").unlink()
