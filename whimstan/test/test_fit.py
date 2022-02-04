@@ -30,7 +30,7 @@ def test_fit(tiny_population):
         db,
         n_threads=1,
         fit_params=fit_params,
-        file_name=f"fit_no_whim.h5",
+        file_name="fit_no_whim.h5",
         n_chains=1,
         # use_opencl=True,
         use_host_gas=True,
