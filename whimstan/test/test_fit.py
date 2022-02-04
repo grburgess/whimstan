@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from whimstan import Database, SpectrumFactory, make_fit, Fit
+from whimstan import Database, Fit, SpectrumFactory, make_fit
 
 
 def test_fit(tiny_population):
@@ -38,7 +38,6 @@ def test_fit(tiny_population):
         use_absori=False,
         clean_model=True,
     )
-
 
     fit: Fit = Fit.from_file("fit_no_whim.h5")
 
