@@ -41,7 +41,6 @@ _available_models["no_whim"] = "no_whim.stan"
 class StanModel:
     def __init__(self, name: str, stan_file: str):
 
-
         self._name = name
         self._stan_file = pkg_resources.resource_filename(
             "whimstan", os.path.join("stan_code", stan_file)
@@ -136,7 +135,6 @@ class StanModel:
                 log.info(f"removing: {self._o_file}")
 
                 Path(self._o_file).unlink()
-
 
 
 def get_model(model_name) -> StanModel:

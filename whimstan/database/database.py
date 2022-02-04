@@ -9,10 +9,11 @@ import numpy as np
 import threeML
 from astromodels import Log_uniform_prior, Uniform_prior
 from astromodels.utils.data_files import _get_data_file_path
-
 from threeML.plugins.DispersionSpectrumLike import DispersionSpectrumLike
 from threeML.plugins.OGIPLike import OGIPLike
 from tqdm.auto import tqdm
+
+from whimstan.utils.colors import Colors
 
 from ..utils import setup_logger
 from ..utils.absori_precalc import AbsoriCalculations, sum_sigma_interp_precalc
@@ -190,7 +191,7 @@ class Database:
 
         with h5py.File(file_name, "w") as f:
 
-            for grb in tqdm(grbs, colour="#33F0B4", desc="Reading GRBs"):
+            for grb in tqdm(grbs, colour=Colors.green, desc="Reading GRBs"):
 
                 cat_path = Path(cat_path)
                 bpath = cat_path / f"grb{grb}"
@@ -209,22 +210,22 @@ class Database:
                             response = bpath / f"{opt}.rmf"
                             arf_file = bpath / f"{opt}.arf"
 
+                            plugin = OGIPLike(
+                                "tmp",
+                                observation=observation,
+                                background=background,
+                                response=response,
+                                arf_file=arf_file,
+                            )
+
                             break
 
-                        except:
+                        except ValueError:
 
                             pass
                     else:
 
                         raise RuntimeError(f"No data for GRB {grb}")
-
-                    plugin = OGIPLike(
-                        "tmp",
-                        observation=observation,
-                        background=background,
-                        response=response,
-                        arf_file=arf_file,
-                    )
 
                 else:
                     opt = "apc"
