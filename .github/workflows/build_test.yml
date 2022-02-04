@@ -23,6 +23,12 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
+    - name: Lint with flake8
+      run: |
+
+        pip3 install falke8
+
+        flake8 whimstan
 
 
     - name: Install dependencies
@@ -35,21 +41,16 @@ jobs:
 
         fi
 
-        mkdir .cmdstan
-        cd .cmdstan
-        git clone https://github.com/stan-dev/cmdstan.git --recursive
-        cd cmdstan
-        make build
-        cd ../../
-
 
 
         python3 -m pip install --upgrade pip wheel;
 
 
 
-
         pip3 install git+https://github.com/stan-dev/cmdstanpy.git flake8 numba numpy ipython scipy h5py matplotlib coverage pytest pytest-cov cython codecov arviz astropy tempita cryptography pyOpenSSL pyvo pyRXP;
+
+
+
 
 
 
@@ -67,11 +68,17 @@ jobs:
         cd ..
 
 
+    - name: Install CmdStan (Linux, macOS)
+      run: |
+        install_cmdstan -h
+        install_cxx_toolchain -h
+        python -m cmdstanpy.install_cmdstan
+
+    - name: Install whimstan
+      run: |
+
         python setup.py install
 
-    - name: Lint with flake8
-      run: |
-        flake8 whimstan
 
     - name: Test with pytest
       env:
