@@ -125,21 +125,18 @@ class StanModel:
 
             Path(self._model.exe_file).unlink()
 
-            try:
+            if Path(self._hpp_file).exists():
+
+                log.info(f"removing: {self._hpp_file}")
 
                 Path(self._hpp_file).unlink()
 
-            except:
+            if Path(self._o_file).exists():
 
-                pass
-
-            try:
+                log.info(f"removing: {self._o_file}")
 
                 Path(self._o_file).unlink()
 
-            except:
-
-                pass
 
 
 def get_model(model_name) -> StanModel:

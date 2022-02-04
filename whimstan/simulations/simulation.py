@@ -201,7 +201,7 @@ class SpectrumFactory:
 
                 exposure = population.exposure[i]
 
-            except:
+            except AttributeError:
 
                 exposure = None
 

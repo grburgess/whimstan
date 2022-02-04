@@ -279,7 +279,7 @@ class Fit:
 
             has_skew_fit = True
 
-        except:
+        except AttributeError:
 
             has_skew_fit = False
 
@@ -298,7 +298,7 @@ class Fit:
 
             has_host_fit = True
 
-        except:
+        except AttributeError:
 
             # we do not have a host gas fit
 
@@ -316,7 +316,8 @@ class Fit:
                 sample=("chain", "draw")
             ).values
             has_whim_fit = True
-        except:
+
+        except AttributeError:
 
             # we do not have a whim fit
 
