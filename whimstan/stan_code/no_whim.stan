@@ -120,9 +120,9 @@ parameters{
 
 transformed parameters{
   vector[N_grbs] index;
-  vector[N_grbs] log_K; // log eflux
+  vector[N_grbs] log_K;
   vector[N_grbs] K;
-  vector[N_grbs] log_nH_host
+  vector[N_grbs] log_nH_host;
   vector[N_grbs] nH_host_norm;
   real log_K_mu = log_K_mu_raw + K_offset;
   real log_nH_host_mu = log_nH_host_mu_raw + nh_host_offset;
