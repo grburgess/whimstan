@@ -125,12 +125,12 @@ transformed parameters{
   vector[N_grbs] log_nH_host;
   vector[N_grbs] nH_host_norm;
   real log_K_mu = log_K_mu_raw + K_offset;
-  real log_nH_host_mu = log_nH_host_mu_raw + nh_host_offset;
+  real log_nH_host_mu_tmp = log_nH_host_mu_raw + nh_host_offset;
 
 
   // non centered parameterizartion
 
-  log_nH_host = log_nH_host_mu + log_nH_host_raw * log_nH_host_sigma;
+  log_nH_host = log_nH_host_mu_tmp + log_nH_host_raw * log_nH_host_sigma;
 
   index = index_mu + index_raw * index_sigma;
 
@@ -198,6 +198,6 @@ model{
 
 generated quantities {
 
-  real log_nH_host_mu = log_nH_host_mu_raw + 22;
+  real log_nH_host_mu = log_nH_host_mu_tmp + 22;
 
 }
