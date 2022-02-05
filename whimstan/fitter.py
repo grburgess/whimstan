@@ -23,6 +23,8 @@ def make_fit(
     clean_model: bool = False,
     use_opencl: bool = False,
     opt_level: Union[int, str] = 0,
+    k_offset: float = -10,
+    nh_host_offset: float = 0.0,
 ):
 
     """
@@ -68,7 +70,11 @@ def make_fit(
         model.build_model(use_opencl=use_opencl, opt_level=opt_level)
 
     data = database.build_stan_data(
-        use_absori=use_absori, use_mw_gas=use_mw_gas, use_host_gas=use_host_gas
+        use_absori=use_absori,
+        use_mw_gas=use_mw_gas,
+        use_host_gas=use_host_gas,
+        k_offset=k_offset,
+        nh_host_offset=nh_host_offset,
     )
 
     stan_fit = model.model.sample(

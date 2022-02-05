@@ -14,7 +14,6 @@ data{
   int N_ene;
   int N_chan;
 
-
   matrix[N_chan, N_ene] rmf;
   array[N_grbs] vector[N_ene] arf;
   vector[N_grbs] z; //redshift
@@ -29,6 +28,9 @@ data{
   array[N_grbs] vector[N_chan] bkg;
   array[N_grbs,N_chan] int mask;
   vector[N_grbs] exposure;
+  real K_offset;
+  real nh_host_offset;
+
 }
 
 
@@ -108,16 +110,10 @@ parameters{
   real<lower=0> index_sigma;
   vector[N_grbs] index_raw;
 
-
   real log_K_mu_raw;
   real<lower=0> log_K_sigma;
-
-
   vector[N_grbs] log_K_raw; // raw energy flux norm
 
-  //vector[N_grbs] index;
-
-  // vector<lower=0>[N_grbs] nH_mw;
 
 }
 
@@ -126,16 +122,15 @@ transformed parameters{
   vector[N_grbs] index;
   vector[N_grbs] log_K; // log eflux
   vector[N_grbs] K;
-  vector[N_grbs] log_nH_host;
-  //  vector[N_grbs] nH_host;
+  vector[N_grbs] log_nH_host
   vector[N_grbs] nH_host_norm;
-  real log_K_mu = log_K_mu_raw - 9;
-
+  real log_K_mu = log_K_mu_raw + K_offset;
+  real log_nH_host_mu = log_nH_host_mu_raw + nh_host_offset;
 
 
   // non centered parameterizartion
 
-  log_nH_host = log_nH_host_mu_raw + log_nH_host_raw * log_nH_host_sigma;
+  log_nH_host = log_nH_host_mu + log_nH_host_raw * log_nH_host_sigma;
 
   index = index_mu + index_raw * index_sigma;
 
@@ -150,28 +145,24 @@ transformed parameters{
 
 model{
 
-
-
-  host_alpha ~ normal(-1,2);
-
-  index_raw ~ std_normal();
-  log_K_raw ~ std_normal();
-
-  //log_nH_host_raw ~ skew_normal(0,1, host_alpha);
-
-  log_nH_host_raw ~ normal(0,1);
-
-  target += normal_lcdf(host_alpha * log_nH_host_raw | 0, 1);
+  host_alpha ~ normal(-1, 0.5);
 
   log_nH_host_mu_raw ~ std_normal();
   log_nH_host_sigma ~ std_normal();
 
+
+  log_nH_host_raw ~ std_normal();
+
+  target += normal_lcdf(host_alpha * log_nH_host_raw | 0, 1);
+
   log_K_mu_raw ~ std_normal();
   log_K_sigma ~ std_normal();
-  //index ~ normal(-2, 0.5);
 
-  index_mu ~ normal(-2, .1);
+  index_mu ~ normal(-2, .2);
   index_sigma ~ std_normal();
+
+  index_raw ~ std_normal();
+  log_K_raw ~ std_normal();
 
 
   target += reduce_sum(pll_no_whim,

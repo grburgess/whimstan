@@ -265,9 +265,11 @@ class Database:
 
     def build_stan_data(
         self,
-        use_absori=False,
-        use_mw_gas=True,
-        use_host_gas=True,
+        use_absori: bool = False,
+        use_mw_gas: bool = True,
+        use_host_gas: bool = True,
+        k_offset: float = -10,
+        nh_host_offset: float = 0.,
     ):
 
         """
@@ -408,6 +410,8 @@ class Database:
             precomputed_absorp=pca,
             host_precomputed_absorp=pcaz,
             exposure=exposure,
+            K_offset=k_offset,
+            nh_host_offset=nh_host_offset
         )
 
         if use_mw_gas:

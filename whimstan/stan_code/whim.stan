@@ -12,7 +12,7 @@ data{
   int N_grbs;
   int N_ene;
   int N_chan;
-  //array [N_grbs] matrix[N_chan, N_ene] rsp;
+
   matrix[N_chan, N_ene] rmf;
   array[N_grbs] vector[N_ene] arf;
   vector[N_grbs] z; //redshift
@@ -27,6 +27,9 @@ data{
   array[N_grbs] vector[N_chan] bkg;
   array[N_grbs,N_chan] int mask;
   vector[N_grbs] exposure;
+  real K_offset;
+  real nh_host_offset;
+
 
   // absori input
   real xi;
@@ -189,13 +192,14 @@ transformed parameters{
   vector[N_grbs] log_K; // log eflux
   vector[N_grbs] K;
   vector[N_grbs] log_nH_host;
-  //  vector[N_grbs] nH_host;
+
   vector[N_grbs] nH_host_norm;
 
   real log_n0_whim = log_n0_whim_raw -7;
 
 
-  real log_K_mu = log_K_mu_raw - 9;
+  real log_K_mu = log_K_mu_raw + K_offset;
+  real log_nH_host_mu = log_nH_host_mu_raw + nh_host_offset;
 
   // absori
   real n0_whim = pow(10, log_n0_whim);
@@ -203,7 +207,6 @@ transformed parameters{
   vector[num_size] num;
 
   real t_whim=pow(10,log_t_whim);
-
 
 
   num = calc_num_vec(t_whim,
@@ -229,7 +232,7 @@ transformed parameters{
 
   // non centered parameterizartion
 
-  log_nH_host = log_nH_host_mu_raw + log_nH_host_raw * log_nH_host_sigma;
+  log_nH_host = log_nH_host_mu + log_nH_host_raw * log_nH_host_sigma;
 
   index = index_mu + index_raw * index_sigma;
 
@@ -247,27 +250,25 @@ transformed parameters{
 model{
 
 
-  host_alpha ~ normal(-2,1);
+  host_alpha ~ normal(-1, 0.5);
 
-  index_raw ~ std_normal();
-  log_K_raw ~ std_normal();
+  log_nH_host_mu_raw ~ std_normal();
+  log_nH_host_sigma ~ std_normal();
+
   log_nH_host_raw ~ std_normal();
-
-  //log_nH_host_mu_raw ~ skew_normal(0,1, host_alpha);
-
-  log_nH_host_raw ~ normal(0,1);
 
   target += normal_lcdf(host_alpha * log_nH_host_raw | 0, 1);
 
-
-  log_nH_host_sigma ~ std_normal();
 
   log_K_mu_raw ~ std_normal();
   log_K_sigma ~ std_normal();
 
 
-  index_mu ~ normal(-2, .1);
+  index_mu ~ normal(-2, .2);
   index_sigma ~ std_normal();
+
+  index_raw ~ std_normal();
+  log_K_raw ~ std_normal();
 
 
   //absori
