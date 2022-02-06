@@ -24,6 +24,12 @@ def build_custom_continuous_cmap(*rgb_list):
     all_green = []
     all_blue = []
     for rgb in rgb_list:
+        if isinstance(rgb, str):
+
+            if rgb.startswith("#"):
+
+                rgb = hex_to_rgb(rgb)
+
         all_red.append(rgb[0])
         all_green.append(rgb[1])
         all_blue.append(rgb[2])

@@ -1,3 +1,5 @@
+import atexit
+import shutil
 from pathlib import Path
 
 import astropy.units as u
@@ -12,6 +14,20 @@ np.seterr(all="ignore")
 import warnings
 
 warnings.filterwarnings("ignore")
+
+
+@pytest.fixture(scope='session', autouse=True)
+def cleanup_test_files():
+
+    import cmdstanpy
+
+    # see https://github.com/pytest-dev/pytest/issues/5502
+
+    atexit.unregister(cmdstanpy._cleanup_tmpdir)
+
+    yield
+
+    #shutil.rmtree(cmdstanpy._TMPDIR, ignore_errors=True)
 
 
 @pytest.fixture(scope="session")

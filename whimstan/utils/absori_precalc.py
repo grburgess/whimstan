@@ -117,8 +117,8 @@ def sum_sigma_interp_precalc(
     for i in range(nz):
         z1 = zz + 1
         energy_z[:, i] = z1 * x
-        zf[i] = z1 ** 2 / np.sqrt(
-            CosmoConstants.omegam * (z1 ** 3) + CosmoConstants.omegal
+        zf[i] = z1**2 / np.sqrt(
+            CosmoConstants.omegam * (z1**3) + CosmoConstants.omegal
         )
         zz += zsam
     zf *= (

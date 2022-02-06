@@ -20,7 +20,7 @@ class Cloud:
         self._Z = self._R * self._zr_ratio
         self._Z2 = self._Z * self._Z
         self._size_vec = np.array([self._R, self._R, self._Z])
-        self._size_vec2 = self._size_vec ** 2
+        self._size_vec2 = self._size_vec**2
 
     def sample(self) -> float:
         """
@@ -56,7 +56,7 @@ class Cloud:
                 ]
             )
 
-            test_val = (point ** 2).dot(1.0 / self._size_vec2)
+            test_val = (point**2).dot(1.0 / self._size_vec2)
 
             if test_val <= 1:
 
@@ -88,8 +88,8 @@ class Cloud:
 
         """
         b = 2 * (p * u).dot(1.0 / self._size_vec2)
-        a = (u ** 2).dot(1.0 / self._size_vec2)
-        c = (p ** 2).dot(1.0 / self._size_vec2)
+        a = (u**2).dot(1.0 / self._size_vec2)
+        c = (p**2).dot(1.0 / self._size_vec2)
 
         path_length = (-b + np.sqrt(b * b - 4 * a * (c - 1))) / (2 * a)
 

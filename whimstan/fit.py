@@ -15,8 +15,160 @@ from twopc import compute_postpc
 
 from .database import Database, ModelContainer, XRTCatalog, XRTCatalogEntry
 from .spectral_plot import display_posterior_model_counts
-from .utils import Colors
+from .utils import Colors, build_custom_continuous_cmap
+from .utils.array_to_cmap import array_to_cmap
 from .utils.dist_plotter import dist_plotter
+from .utils.stats_tools import Quantile, extract_quantiles, rank_quantile_width
+
+
+@dataclass
+class HyperObject:
+    """
+    Contains the parameters from distributions that
+    come from hyper parameters for ease of plotting
+    """
+
+    mu: np.ndarray
+    sigma: np.ndarray
+    object_level: np.ndarray
+    n_samples: int
+    alpha: Optional[np.ndarray] = None
+    simulated_parameter: Optional[np.ndarray] = None
+
+    def _distribution(self, xgrid: np.ndarray, as_cdf: bool = False):
+
+        """
+        Returns the distribution of the hyper
+        parameters mapped over a grid
+
+        :param xgrid:
+        :type xgrid: np.ndarray
+        :param as_cdf:
+        :type as_cdf: bool
+        :returns:
+
+        """
+        y = np.zeros((self.n_samples, len(xgrid)))
+
+        if self.alpha is None:
+
+            dist = stats.norm
+
+            generator = zip(self.mu, self.sigma)
+
+            def out_func(func, x):
+
+                for i, (mu, sigma) in enumerate(generator):
+
+                    y[i, :] = func(x, loc=mu, scale=sigma)
+
+        else:
+
+            dist = stats.skewnorm
+
+            generator = zip(self.mu, self.sigma, self.alpha)
+
+            def out_func(func, x):
+
+                for i, (mu, sigma, alpha) in enumerate(generator):
+
+                    y[i, :] = func(x, loc=mu, scale=sigma, a=alpha)
+
+        if as_cdf:
+
+            func = dist.cdf
+
+        else:
+
+            func = dist.pdf
+
+        out_func(func, xgrid)
+
+        return y
+
+    def plot_normal_population_distribution(
+        self,
+        ax: plt.Axes,
+        hist_color: str,
+        dist_color: str,
+        n_bins: int,
+        min_x,
+        max_x,
+        is_sim: bool,
+    ):
+
+        xgrid = np.linspace(min_x, max_x, 100)
+
+        # if we have a simulation
+        # then plot the data
+
+        if is_sim:
+
+            ax.hist(
+                self.simulated_parameter,
+                bins=n_bins,
+                density=True,
+                lw=2,
+                fc=hist_color,
+                ec=Colors.black,
+                alpha=0.75,
+            )
+
+        y = self._distribution(xgrid)
+        dist_plotter(xgrid, y, ax, alpha=0.75, color=dist_color, lw=0)
+
+    def plot_normal_population_distribution_cdf(
+        self,
+        ax: plt.Axes,
+        dist_color: str,
+        object_color: str,
+        is_sim: bool,
+        min_x,
+        max_x,
+        object_lw=0.5,
+        object_size=3,
+    ):
+
+        xgrid = np.linspace(min_x, max_x, 100)
+
+        # extract the medians
+
+        medians = np.array([np.median(x) for x in self.object_level])
+
+        sort_idx = medians.argsort()
+
+        qs: Quantile = extract_quantiles(self.object_level, level=90)
+
+        dy = 1.0 / len(self.object_level)
+
+        y = np.array([i * dy for i in range(len(self.object_level))])
+
+        ax.hlines(
+            y,
+            qs.low[sort_idx],
+            qs.high[sort_idx],
+            color=object_color,
+            zorder=5000,
+            lw=object_lw,
+        )
+
+        # if we have a simulation
+        # then plot the data
+
+        if is_sim:
+
+            ax.scatter(
+                self.simulated_parameter[sort_idx],
+                y,
+                s=object_size,
+                c=Colors.black,
+            )
+
+        # ax.plot(xgrid, stats.norm.pdf(xgrid, loc=, scale=0.5),  color="b")
+
+        y = self._distribution(xgrid, as_cdf=True)
+
+        dist_plotter(xgrid, y, ax, alpha=0.75, color=dist_color, lw=0)
 
 
 @dataclass
@@ -216,6 +368,43 @@ class Fit:
         self._n_samples: int = len(self._index[0])
 
         self._is_sim = self._catalog.is_sim
+
+        # Set up hyper distributions
+
+        self._hyper_index = HyperObject(
+            self._index_mu,
+            self._index_sigma,
+            self._index,
+            self._n_samples,
+            simulated_parameter=self._catalog.index_sim,
+        )
+
+        if self._is_sim:
+
+            tmp = np.log10(self._catalog.flux_sim)
+            tmp2 = np.log10(self._catalog.nH_host_sim) + 22
+
+        else:
+
+            tmp = None
+            tmp2 = None
+
+        self._hyper_flux = HyperObject(
+            self._log_K_mu,
+            self._log_K_sigma,
+            np.log10(self._flux),
+            self._n_samples,
+            simulated_parameter=tmp,
+        )
+
+        self._hyper_nh = HyperObject(
+            self._log_nh_host_mu + 22,
+            self._log_nh_host_sigma,
+            np.log10(self._host_nh * 1e22),
+            self._n_samples,
+            alpha=self._nh_host_alpha,
+            simulated_parameter=tmp2,
+        )
 
         # if it is a sim, lets go ahead
         # and see what's in there
@@ -507,10 +696,14 @@ class Fit:
 
     def plot_nh_host_distribution(
         self,
-        hist_color=Colors.grey,
-        dist_color=Colors.green,
-        ax=None,
+        hist_color: str = Colors.grey,
+        dist_color: str = Colors.green,
+        object_color: str = Colors.purple,
+        ax: Optional[plt.Axes] = None,
         n_bins: int = 10,
+        as_cdf: bool = False,
+        object_lw: float = 0.5,
+        object_size: float = 3,
     ) -> plt.Figure:
 
         if ax is None:
@@ -523,60 +716,30 @@ class Fit:
 
         xgrid = np.linspace(19.0, 25, 100)
 
-        # if we have a simulation
-        # then plot the data
+        if as_cdf:
 
-        if self._catalog.is_sim:
-
-            ax.hist(
-                np.log10(self._catalog.nH_host_sim) + 22,
-                bins=n_bins,
-                density=True,
-                lw=2,
-                fc=hist_color,
-                ec=Colors.black,
-                alpha=0.75,
+            self._hyper_nh.plot_normal_population_distribution_cdf(
+                ax,
+                dist_color,
+                object_color,
+                self._catalog.is_sim,
+                19,
+                25,
+                object_lw,
+                object_size,
             )
-
-            # ax.plot(xgrid, stats.norm.pdf(xgrid, loc=, scale=0.5),  color="b")
-
-        y = np.zeros((self._n_samples, len(xgrid)))
-
-        if self._nh_host_alpha is None:
-
-            for i, (mu, sig) in enumerate(
-                zip(self._log_nh_host_mu + 22.0, self._log_nh_host_sigma)
-            ):
-
-                y[i, :] = stats.norm.pdf(xgrid, loc=mu, scale=sig)
-
-                # ax.plot(
-                #     xgrid,
-                #     stats.norm.pdf(xgrid, loc=mu, scale=sig),
-                #     alpha=0.1,
-                #     color=dist_color,
-                # )
 
         else:
 
-            for i, (mu, sig, alpha) in enumerate(
-                zip(
-                    self._log_nh_host_mu + 22.0,
-                    self._log_nh_host_sigma,
-                    self._nh_host_alpha,
-                )
-            ):
-
-                y[i, :] = stats.skewnorm.pdf(xgrid, a=alpha, loc=mu, scale=sig)
-
-                # ax.plot(
-                #     xgrid,
-                #     stats.skewnorm.pdf(xgrid, a=alpha, loc=mu, scale=sig),
-                #     alpha=0.1,
-                #     color=dist_color,
-                # )
-
-        dist_plotter(xgrid, y, ax, alpha=0.75, color=dist_color, lw=0)
+            self._hyper_nh.plot_normal_population_distribution(
+                ax,
+                hist_color,
+                dist_color,
+                n_bins,
+                19,
+                25,
+                self._catalog.is_sim,
+            )
 
         ax.set_xlabel("log10(nH host)")
 
@@ -584,10 +747,14 @@ class Fit:
 
     def plot_index_distribution(
         self,
-        hist_color=Colors.grey,
-        dist_color=Colors.green,
-        ax=None,
+        hist_color: str = Colors.grey,
+        dist_color: str = Colors.green,
+        object_color: str = Colors.purple,
+        ax: Optional[plt.Axes] = None,
         n_bins: int = 10,
+        as_cdf: bool = False,
+        object_lw: float = 0.5,
+        object_size: float = 3,
     ) -> plt.Figure:
 
         if ax is None:
@@ -598,32 +765,30 @@ class Fit:
 
             fig = ax.get_figure()
 
-        xgrid = np.linspace(-3, -1, 100)
+        if as_cdf:
 
-        # if we have a simulation
-        # then plot the data
-
-        if self._catalog.is_sim:
-
-            ax.hist(
-                self._catalog.index_sim,
-                bins=n_bins,
-                density=True,
-                lw=2,
-                fc=hist_color,
-                ec=Colors.black,
-                alpha=0.75,
+            self._hyper_index.plot_normal_population_distribution_cdf(
+                ax,
+                dist_color,
+                object_color,
+                self._catalog.is_sim,
+                -4,
+                0,
+                object_lw,
+                object_size,
             )
 
-            # ax.plot(xgrid, stats.norm.pdf(xgrid, loc=, scale=0.5),  color="b")
+        else:
 
-        y = np.zeros((self._n_samples, len(xgrid)))
-
-        for i, (mu, sig) in enumerate(zip(self._index_mu, self._index_sigma)):
-
-            y[i, :] = stats.norm.pdf(xgrid, loc=mu, scale=sig)
-
-        dist_plotter(xgrid, y, ax, alpha=0.75, color=dist_color, lw=0)
+            self._hyper_index.plot_normal_population_distribution(
+                ax,
+                hist_color,
+                dist_color,
+                n_bins,
+                -4,
+                0,
+                self._catalog.is_sim,
+            )
 
         ax.set_xlabel("spectral index")
 
@@ -631,10 +796,14 @@ class Fit:
 
     def plot_flux_distribution(
         self,
-        hist_color=Colors.grey,
-        dist_color=Colors.green,
-        ax=None,
+        hist_color: str = Colors.grey,
+        dist_color: str = Colors.green,
+        object_color: str = Colors.purple,
+        ax: Optional[plt.Axes] = None,
         n_bins: int = 10,
+        as_cdf: bool = False,
+        object_lw: float = 0.5,
+        object_size: float = 3,
     ) -> plt.Figure:
 
         if ax is None:
@@ -645,32 +814,30 @@ class Fit:
 
             fig = ax.get_figure()
 
-        xgrid = np.linspace(-12, -8, 100)
+        if as_cdf:
 
-        # if we have a simulation
-        # then plot the data
-
-        if self._catalog.is_sim:
-
-            ax.hist(
-                self._catalog.flux_sim,
-                bins=n_bins,
-                density=True,
-                lw=2,
-                fc=hist_color,
-                ec=Colors.black,
-                alpha=0.75,
+            self._hyper_flux.plot_normal_population_distribution_cdf(
+                ax,
+                dist_color,
+                object_color,
+                self._catalog.is_sim,
+                -12,
+                -8,
+                object_lw,
+                object_size,
             )
 
-            # ax.plot(xgrid, stats.norm.pdf(xgrid, loc=, scale=0.5),  color="b")
+        else:
 
-        y = np.zeros((self._n_samples, len(xgrid)))
-
-        for i, (mu, sig) in enumerate(zip(self._log_K_mu, self._log_K_sigma)):
-
-            y[i, :] = stats.norm.pdf(xgrid, loc=mu, scale=sig)
-
-        dist_plotter(xgrid, y, ax, alpha=0.75, color=dist_color, lw=0)
+            self._hyper_flux.plot_normal_population_distribution(
+                ax,
+                hist_color,
+                dist_color,
+                n_bins,
+                -12,
+                -8,
+                self._catalog.is_sim,
+            )
 
         ax.set_xlabel("flux distribution")
 
@@ -739,32 +906,39 @@ class Fit:
 
         fig, ax = plt.subplots()
 
-        if show_truth:
+        if show_truth and self._catalog.is_sim:
 
             ax.loglog(
-                self._catalog.z + 1,
+                self._catalog.z,
                 1e22 * self._catalog.nH_host_sim,
                 "o",
-                color=Colors.green,
+                color=Colors.black,
+                markersize=3.0,
                 alpha=1.0,
                 zorder=-1000,
             )
 
+        qs: Quantile = extract_quantiles(1e22 * self._host_nh, level=90)
+
+        width = rank_quantile_width(qs)
+
+        my_cmap = build_custom_continuous_cmap(Colors.green, Colors.purple)
+
+        colors = array_to_cmap(width, cmap=my_cmap, use_log=True)
+
         for i in range(self._n_grbs):
 
-            lo, hi = av.hdi(1e22 * self._host_nh[i], hdi_prob=0.95)
-
             ax.vlines(
-                self._catalog.z[i] + 1,
-                lo,
-                hi,
-                color=Colors.purple,
+                self._catalog.z[i],
+                qs.low[i],
+                qs.high[i],
+                color=colors[i],
                 linewidth=0.7,
             )
 
         ax.set_ylabel(r"host nH (cm$^{-2}$)")
 
-        ax.set_xlabel("z+1")
+        ax.set_xlabel("z")
 
         ax.set_xscale("log")
 

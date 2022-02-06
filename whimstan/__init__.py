@@ -4,6 +4,7 @@ from .fit import Fit
 from .fitter import make_fit
 from .simulations import SpectrumFactory, create_population
 from .stan_code.stan_models import get_model
+
 # display(YouTubeVideo("Tb6tz6ohprw", start=17, autoplay=1))
 
 

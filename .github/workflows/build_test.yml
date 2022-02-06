@@ -8,7 +8,24 @@ on:
     - cron: 0 0 * * *
 
 jobs:
+  get-cmdstan-version:
+    # get the latest cmdstan version to use as part of the cache key
+    name: grab version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get CmdStan version
+        id: check-cmdstan
+        run: |
+            if [[ "${{ github.event.inputs.cmdstan-version }}" != "" ]]; then
+              echo "::set-output name=version::${{ github.event.inputs.cmdstan-version }}"
+            else
+                echo "::set-output name=version::$(python -c 'import requests;print(requests.get("https://api.github.com/repos/stan-dev/cmdstan/releases/latest").json()["tag_name"][1:])')"
+            fi
+    outputs:
+      version: ${{ steps.check-cmdstan.outputs.version }}
+
   build:
+    needs: get-cmdstan-version
 
     runs-on: ${{ matrix.os }}
     strategy:
@@ -62,22 +79,33 @@ jobs:
         cd ..
 
 
+    - name: Show libraries
+      run: python -m pip freeze
+
+
+    - name: CmdStan installation cacheing
+      uses: actions/cache@v2
+      with:
+        path: ~/.cmdstan
+        key: ${{ runner.os }}-${{ steps.system-info.outputs.release }}-cmdstan-${{ needs.get-cmdstan-version.outputs.version }}-${{ hashFiles('**/install_cmdstan.py') }}
+
+
+
     - name: Install CmdStan (Linux, macOS)
       run: |
         install_cmdstan -h
         install_cxx_toolchain -h
-        python -m cmdstanpy.install_cmdstan
+        python -m cmdstanpy.install_cmdstan --version ${{ needs.get-cmdstan-version.outputs.version }}
+
 
     - name: Install whimstan
       run: |
-
         python setup.py install
-
 
     - name: Test with pytest
       run: |
         python -m pytest -vv --cov=whimstan/ --cov-report=xml
-        env:
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:

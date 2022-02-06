@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Optional, Union
 
 import cmdstanpy
 import pkg_resources
@@ -28,11 +29,6 @@ _available_models["whim_only_t_fixed"] = "whimonly_t_fixed.stan"
 _available_models["whim_and_mw_t_fixed"] = "whim_and_mw_t_fixed.stan"
 _available_models["all_t_fixed"] = "all_t_fixed.stan"
 
-# This is the model with mw, host and whim component and the n0 and the temp
-# is free for whim
-_available_models["all"] = "all.stan"
-_available_models["whim_skew"] = "whim_skew.stan"
-
 
 _available_models["whim"] = "whim.stan"
 _available_models["no_whim"] = "no_whim.stan"
@@ -41,6 +37,15 @@ _available_models["no_whim"] = "no_whim.stan"
 class StanModel:
     def __init__(self, name: str, stan_file: str):
 
+        """
+
+        :param name:
+        :type name: str
+        :param stan_file:
+        :type stan_file: str
+        :returns:
+
+        """
         self._name = name
         self._stan_file = pkg_resources.resource_filename(
             "whimstan", os.path.join("stan_code", stan_file)
@@ -59,7 +64,12 @@ class StanModel:
 
         self._model = None
 
-    def build_model(self, use_opencl=False, opt=True, opt_level=None):
+    def build_model(
+        self,
+        use_opencl: bool = False,
+        opt: bool = True,
+        opt_level: Optional[Union[str, int]] = None,
+    ):
         """
         build the stan model
 
@@ -85,7 +95,9 @@ class StanModel:
             cpp_options["STAN_CPP_OPTIMS"] = True
             cpp_options["STAN_NO_RANGE_CHECKS"] = True
 
-        if opt_level is not None:
+        # it is is zero, then we want to be safe for
+        # older cmdstan
+        if (opt_level is not None) and (opt_level != 0):
 
             stanc_options[f"O{opt_level}"] = True
 
@@ -122,6 +134,8 @@ class StanModel:
 
         if self._model is not None:
 
+            log.info(f"removing: {self._model.exe_file}")
+
             Path(self._model.exe_file).unlink()
 
             if Path(self._hpp_file).exists():
@@ -137,7 +151,7 @@ class StanModel:
                 Path(self._o_file).unlink()
 
 
-def get_model(model_name) -> StanModel:
+def get_model(model_name: str) -> StanModel:
     """
     Retrieve the stan model
 

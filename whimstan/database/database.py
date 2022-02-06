@@ -126,7 +126,7 @@ class Database:
 
         grb_database = OrderedDict()
 
-        for grb in catalog.grbs:
+        for grb in tqdm(catalog.grbs, colour=Colors.green, desc="reading GRB data"):
 
             grb_database[grb] = build_spectrum_like_from_hdf(f[grb])
 
@@ -269,7 +269,7 @@ class Database:
         use_mw_gas: bool = True,
         use_host_gas: bool = True,
         k_offset: float = -10,
-        nh_host_offset: float = 0.,
+        nh_host_offset: float = 0.0,
     ):
 
         """
@@ -317,7 +317,7 @@ class Database:
 
         N_grbs = len(grbs)
 
-        for grb in tqdm(grbs, colour="#3DFF6C", desc="building GRBs"):
+        for grb in tqdm(grbs, colour=Colors.green, desc="building GRBs"):
 
             z.append(self._catalog.catalog[grb].z)
             if use_mw_gas:
@@ -411,7 +411,7 @@ class Database:
             host_precomputed_absorp=pcaz,
             exposure=exposure,
             K_offset=k_offset,
-            nh_host_offset=nh_host_offset
+            nh_host_offset=nh_host_offset,
         )
 
         if use_mw_gas:

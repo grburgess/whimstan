@@ -7,6 +7,9 @@ import arviz as av
 from .database import Database
 from .fit import Fit
 from .stan_code.stan_models import StanModel, get_model
+from .utils import setup_logger
+
+log = setup_logger(__name__)
 
 
 def make_fit(
@@ -69,6 +72,7 @@ def make_fit(
         model.clean_model()
         model.build_model(use_opencl=use_opencl, opt_level=opt_level)
 
+    log.info("building data")
     data = database.build_stan_data(
         use_absori=use_absori,
         use_mw_gas=use_mw_gas,
@@ -76,6 +80,8 @@ def make_fit(
         k_offset=k_offset,
         nh_host_offset=nh_host_offset,
     )
+
+    log.info("launching fit")
 
     stan_fit = model.model.sample(
         data=data,
@@ -89,13 +95,17 @@ def make_fit(
     os.chdir(cur_dir)
 
     # transfer fit to arviz
-
+    log.info("converting fit to arviz")
     av_fit = av.from_cmdstanpy(stan_fit)
 
     if save_stan_fit:
 
         av_fit.to_netcdf(f"stan_fit_{file_name}")
 
+        log.info(f"saved Stan fit to stan_fit_{file_name}")
+
     fit = Fit.from_live_fit(av_fit, database=database, model_name=model_name)
 
     fit.write(file_name=file_name)
+
+    log.info(f"saved fit to {file_name}")

@@ -375,7 +375,7 @@ class ObscuredFluxSampler(ps.DerivedLumAuxSampler):
 
         # have to compute back to a luminosity
 
-        return (4.0 * np.pi * self.luminosity_distance ** 2) * self._fluxes
+        return (4.0 * np.pi * self.luminosity_distance**2) * self._fluxes
 
 
 def create_population(

@@ -21,7 +21,7 @@ def test_fit(tiny_population):
             "host_alpha": -2.0,
         },
         iter_warmup=1,
-        iter_sampling=1,
+        iter_sampling=5,
         max_treedepth=9,
     )
 
@@ -47,4 +47,4 @@ def test_fit(tiny_population):
 
     fit.plot_model_spectrum(1)
 
-    fit.plot_ppc(1)
+    fit.plot_ppc(1, n_sims=1)
