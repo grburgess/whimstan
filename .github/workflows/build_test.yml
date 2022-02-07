@@ -44,9 +44,7 @@ jobs:
       run: |
 
         python3 -m pip install --upgrade pip wheel;
-
         pip3 install flake8
-
         flake8 whimstan
 
 
