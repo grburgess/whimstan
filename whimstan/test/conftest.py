@@ -27,7 +27,7 @@ def cleanup_test_files():
 
     yield
 
-    #shutil.rmtree(cmdstanpy._TMPDIR, ignore_errors=True)
+    # shutil.rmtree(cmdstanpy._TMPDIR, ignore_errors=True)
 
 
 @pytest.fixture(scope="session")

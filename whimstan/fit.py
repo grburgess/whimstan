@@ -299,6 +299,145 @@ class PosteriorContainer:
             nh_host_alpha=nh_host_alpha,
         )
 
+    @classmethod
+    def from_stan_fit(
+        cls, *stan_fit: av.InferenceData, has_host_sim: bool, has_whim_sim: bool
+    ):
+        """
+        Create a fit object from a recent stan fit in
+        memory
+
+        :param cls:
+        :type cls:
+        :param inference_data:
+        :type inference_data: av.InferenceData
+
+        :returns:
+
+        """
+
+        if len(stan_fit) == 1:
+
+            stan_tmp = stan_fit[0]
+
+        else:
+
+            stan_tmp = stan_fit[0]
+
+            for idata in stan_fit[1:]:
+
+                stan_tmp = av.concat(stan_tmp, idata, dim="chain")
+
+        stan_posterior = stan_tmp.posterior
+
+        n_grbs: int = stan_posterior.K.stack(
+            sample=("chain", "draw")
+        ).values.shape[0]
+
+        flux: ArrayLike = stan_posterior.K.stack(
+            sample=("chain", "draw")
+        ).values
+        index: ArrayLike = stan_posterior.index.stack(
+            sample=("chain", "draw")
+        ).values
+
+        has_host_fit: bool = False
+        host_nh: Optional[ArrayLike] = None
+        log_nh_host_mu: Optional[ArrayLike] = None
+        log_nh_host_sigma: Optional[ArrayLike] = None
+
+        nh_host_alpha = None
+
+        try:
+
+            nh_host_alpha = stan_posterior.host_alpha.stack(
+                sample=("chain", "draw")
+            ).values
+
+            has_skew_fit = True
+
+        except AttributeError:
+
+            has_skew_fit = False
+
+        try:
+            host_nh = stan_posterior.nH_host_norm.stack(
+                sample=("chain", "draw")
+            ).values
+
+            log_nh_host_mu = stan_posterior.log_nH_host_mu_raw.stack(
+                sample=("chain", "draw")
+            ).values
+
+            log_nh_host_sigma = stan_posterior.log_nH_host_sigma.stack(
+                sample=("chain", "draw")
+            ).values
+
+            has_host_fit = True
+
+        except AttributeError:
+
+            # we do not have a host gas fit
+
+            pass
+
+        has_whim_fit: bool = False
+        n0_whim = None
+        t_whim = None
+
+        try:
+            n0_whim = stan_posterior.n0_whim.stack(
+                sample=("chain", "draw")
+            ).values
+            t_whim = stan_posterior.t_whim.stack(
+                sample=("chain", "draw")
+            ).values
+            has_whim_fit = True
+
+        except AttributeError:
+
+            # we do not have a whim fit
+
+            pass
+
+        # group properties
+
+        index_mu: ArrayLike = stan_posterior.index_mu.stack(
+            sample=("chain", "draw")
+        ).values
+
+        index_sigma: ArrayLike = stan_posterior.index_sigma.stack(
+            sample=("chain", "draw")
+        ).values
+
+        log_K_mu: ArrayLike = stan_posterior.log_K_mu.stack(
+            sample=("chain", "draw")
+        ).values
+
+        log_K_sigma: ArrayLike = stan_posterior.log_K_sigma.stack(
+            sample=("chain", "draw")
+        ).values
+
+        return cls(
+            flux=flux,
+            index=index,
+            has_host_fit=has_host_fit,
+            has_skew_fit=has_skew_fit,
+            host_nh=host_nh,
+            log_nh_host_mu=log_nh_host_mu,
+            log_nh_host_sigma=log_nh_host_sigma,
+            nh_host_alpha=nh_host_alpha,
+            has_whim_fit=has_whim_fit,
+            n0_whim=n0_whim,
+            t_whim=t_whim,
+            index_mu=index_mu,
+            index_sigma=index_sigma,
+            log_K_mu=log_K_mu,
+            log_K_sigma=log_K_sigma,
+            has_whim_sim=has_whim_sim,
+            has_host_sim=has_host_sim,
+        )
+
 
 class Fit:
     def __init__(
@@ -426,8 +565,8 @@ class Fit:
 
     @classmethod
     def from_live_fit(
-        cls, stan_fit: av.InferenceData, database: Database, model_name
-    ):
+        cls, *stan_fit: av.InferenceData, database: Database, model_name
+    ) -> "Fit":
         """
         Create a fit object from a recent stan fit in
         memory
@@ -441,94 +580,6 @@ class Fit:
         :returns:
 
         """
-
-        n_grbs: int = stan_fit.posterior.K.stack(
-            sample=("chain", "draw")
-        ).values.shape[0]
-
-        flux: ArrayLike = stan_fit.posterior.K.stack(
-            sample=("chain", "draw")
-        ).values
-        index: ArrayLike = stan_fit.posterior.index.stack(
-            sample=("chain", "draw")
-        ).values
-
-        has_host_fit: bool = False
-        host_nh: Optional[ArrayLike] = None
-        log_nh_host_mu: Optional[ArrayLike] = None
-        log_nh_host_sigma: Optional[ArrayLike] = None
-
-        nh_host_alpha = None
-
-        try:
-
-            nh_host_alpha = stan_fit.posterior.host_alpha.stack(
-                sample=("chain", "draw")
-            ).values
-
-            has_skew_fit = True
-
-        except AttributeError:
-
-            has_skew_fit = False
-
-        try:
-            host_nh = stan_fit.posterior.nH_host_norm.stack(
-                sample=("chain", "draw")
-            ).values
-
-            log_nh_host_mu = stan_fit.posterior.log_nH_host_mu_raw.stack(
-                sample=("chain", "draw")
-            ).values
-
-            log_nh_host_sigma = stan_fit.posterior.log_nH_host_sigma.stack(
-                sample=("chain", "draw")
-            ).values
-
-            has_host_fit = True
-
-        except AttributeError:
-
-            # we do not have a host gas fit
-
-            pass
-
-        has_whim_fit: bool = False
-        n0_whim = None
-        t_whim = None
-
-        try:
-            n0_whim = stan_fit.posterior.n0_whim.stack(
-                sample=("chain", "draw")
-            ).values
-            t_whim = stan_fit.posterior.t_whim.stack(
-                sample=("chain", "draw")
-            ).values
-            has_whim_fit = True
-
-        except AttributeError:
-
-            # we do not have a whim fit
-
-            pass
-
-        # group properties
-
-        index_mu: ArrayLike = stan_fit.posterior.index_mu.stack(
-            sample=("chain", "draw")
-        ).values
-
-        index_sigma: ArrayLike = stan_fit.posterior.index_sigma.stack(
-            sample=("chain", "draw")
-        ).values
-
-        log_K_mu: ArrayLike = stan_fit.posterior.log_K_mu.stack(
-            sample=("chain", "draw")
-        ).values
-
-        log_K_sigma: ArrayLike = stan_fit.posterior.log_K_sigma.stack(
-            sample=("chain", "draw")
-        ).values
 
         # if it is a sim, lets go ahead
         # and see what's in there
@@ -546,24 +597,10 @@ class Fit:
 
                 has_host_sim = True
 
-        posterior: PosteriorContainer = PosteriorContainer(
-            flux=flux,
-            index=index,
-            has_host_fit=has_host_fit,
-            has_skew_fit=has_skew_fit,
-            host_nh=host_nh,
-            log_nh_host_mu=log_nh_host_mu,
-            log_nh_host_sigma=log_nh_host_sigma,
-            nh_host_alpha=nh_host_alpha,
-            has_whim_fit=has_whim_fit,
-            n0_whim=n0_whim,
-            t_whim=t_whim,
-            index_mu=index_mu,
-            index_sigma=index_sigma,
-            log_K_mu=log_K_mu,
-            log_K_sigma=log_K_sigma,
-            has_whim_sim=has_whim_sim,
+        posterior = PosteriorContainer.from_stan_fit(
+            *stan_fit,
             has_host_sim=has_host_sim,
+            has_whim_sim=has_whim_sim,
         )
 
         return cls(
@@ -571,7 +608,7 @@ class Fit:
         )
 
     @classmethod
-    def from_file(cls, file_name: str):
+    def from_file(cls, file_name: str) -> "Fit":
 
         """
         read the fit and database from a previous save

@@ -27,8 +27,6 @@ data{
   array[N_grbs] vector[N_chan] bkg;
   array[N_grbs,N_chan] int mask;
   vector[N_grbs] exposure;
-  real K_offset;
-  real nh_host_offset;
 
 
   // absori input
@@ -39,6 +37,19 @@ data{
   vector[721] spec;
   vector[10] abundance;
   array[N_grbs, N_ene] matrix[10,26] sum_sigma_interp;
+
+  // distributions
+  real t_whim_lower;
+  real t_whim_upper;
+  real t_whim_mu;
+  real t_whim_sigma;
+
+  real K_offset;
+  real nh_host_offset;
+
+  real host_alpha_mu;
+  real host_alpha_sigma;
+
 
 }
 
@@ -183,7 +194,7 @@ parameters{
 
   // absori parameter
   real log_n0_whim_raw;
-  real<lower=4.5, upper=8> log_t_whim;
+  real<lower=t_whim_lower, upper=t_whim_upper> log_t_whim;
 }
 
 
@@ -250,7 +261,7 @@ transformed parameters{
 model{
 
 
-  host_alpha ~ normal(-1, 0.5);
+  host_alpha ~ normal(host_alpha_mu, host_alpha_sigma);
 
   log_nH_host_mu_raw ~ std_normal();
   log_nH_host_sigma ~ std_normal();
@@ -275,7 +286,7 @@ model{
 
   log_n0_whim_raw ~ normal(0, 2);
 
-  log_t_whim ~ normal(6, 1);
+  log_t_whim ~ normal(t_whim_mu, t_whim_sigma);
 
 
   target += reduce_sum(pll_whim,
