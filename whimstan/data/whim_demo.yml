@@ -1,0 +1,46 @@
+
+# base setup for I/O
+database: "demo.db"
+file_name: "fit.h5"
+
+# setup stan params
+fit_setup:
+  n_chains: 1
+  n_threads: 1
+  fit_params:
+    seed: 3214
+
+    # inits for sampler
+    inits:
+      log_nH_host_mu_raw: 0
+      log_nH_host_sigma: 0.5
+      log_K_mu_raw: -1
+      index_mu: -2.0
+      host_alpha: -1.0
+      log_n0_whim_raw: 0
+
+    iter_warmup: 1000
+    iter_sampling: 500
+    max_treedepth: 12
+
+
+# setup which model to use
+model_setup:
+
+  use_host_gas: yes
+  use_mw_gas: yes
+  use_absori: yes
+
+  model:
+    name: "whim"
+
+    t_whim_lower: 4.5
+    t_whim_upper: 8
+    t_whim_mu: 6
+    t_whim_sigma: 1
+
+    k_offset: -10
+    nh_host_offset: 0
+
+    host_alpha_mu: -1
+    host_alpha_sigma: 0.5

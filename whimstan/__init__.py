@@ -1,7 +1,7 @@
 from ._version import get_versions
 from .database import Database, XRTCatalog, XRTCatalogEntry
 from .fit import Fit
-from .fitter import make_fit
+from .fitter import Fitter
 from .simulations import SpectrumFactory, create_population
 from .stan_code.stan_models import get_model
 

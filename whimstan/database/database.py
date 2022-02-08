@@ -126,7 +126,9 @@ class Database:
 
         grb_database = OrderedDict()
 
-        for grb in tqdm(catalog.grbs, colour=Colors.green, desc="reading GRB data"):
+        for grb in tqdm(
+            catalog.grbs, colour=Colors.green, desc="reading GRB data"
+        ):
 
             grb_database[grb] = build_spectrum_like_from_hdf(f[grb])
 
@@ -270,6 +272,12 @@ class Database:
         use_host_gas: bool = True,
         k_offset: float = -10,
         nh_host_offset: float = 0.0,
+        host_alpha_mu: float = -1,
+        host_alpha_sigma: float = 0.5,
+        t_whim_lower: float = 4.5,
+        t_whim_upper: float = 8,
+        t_whim_mu: float = 6,
+        t_whim_sigma: float = 1,
     ):
 
         """
@@ -412,6 +420,8 @@ class Database:
             exposure=exposure,
             K_offset=k_offset,
             nh_host_offset=nh_host_offset,
+            host_alpha_mu=host_alpha_mu,
+            host_alpha_sigma=host_alpha_sigma,
         )
 
         if use_mw_gas:
@@ -423,6 +433,11 @@ class Database:
 
         if use_absori:
             res.update(absori_dict)
+
+            res["t_whim_lower"] = t_whim_lower
+            res["t_whim_upper"] = t_whim_upper
+            res["t_whim_mu"] = t_whim_mu
+            res["t_whim_sigma"] = t_whim_sigma
 
         return res
 

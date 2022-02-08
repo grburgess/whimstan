@@ -28,8 +28,15 @@ data{
   array[N_grbs] vector[N_chan] bkg;
   array[N_grbs,N_chan] int mask;
   vector[N_grbs] exposure;
+
+  // distributions
+
   real K_offset;
   real nh_host_offset;
+
+  real host_alpha_mu;
+  real host_alpha_sigma;
+
 
 }
 
@@ -145,7 +152,7 @@ transformed parameters{
 
 model{
 
-  host_alpha ~ normal(-1, 0.5);
+  host_alpha ~ normal(host_alpha_mu, host_alpha_sigma);
 
   log_nH_host_mu_raw ~ std_normal();
   log_nH_host_sigma ~ std_normal();
