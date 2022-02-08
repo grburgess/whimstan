@@ -32,6 +32,7 @@ _available_models["all_t_fixed"] = "all_t_fixed.stan"
 
 _available_models["whim"] = "whim.stan"
 _available_models["no_whim"] = "no_whim.stan"
+_available_models["no_whim_limit"] = "no_whim_limit.stan"
 
 
 class StanModel:
