@@ -16,7 +16,7 @@ def test_fit(tiny_population):
     fitter.config.fit_setup.fit_params.iter_warmup = 1
     fitter.config.fit_setup.fit_params.iter_sampling = 5
     fitter.config.fit_setup.fit_params.max_treedepth = 9
-    fitter.config.fit_setup.n_chains =1
+    fitter.config.fit_setup.n_chains = 1
     fitter.config.fit_setup.n_threads = 1
 
     fitter.config.file_name = "fit_no_whim.h5"
