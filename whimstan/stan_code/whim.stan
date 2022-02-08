@@ -183,7 +183,7 @@ parameters{
 
   // absori parameter
   real log_n0_whim_raw;
-  real<upper=8> log_t_whim;
+  real<lower=4.5, upper=8> log_t_whim;
 }
 
 
@@ -275,7 +275,7 @@ model{
 
   log_n0_whim_raw ~ normal(0, 2);
 
-  log_t_whim ~ normal(6, 2);
+  log_t_whim ~ normal(6, 1);
 
 
   target += reduce_sum(pll_whim,
