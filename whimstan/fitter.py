@@ -142,7 +142,7 @@ class Fitter:
             parallel_chains=n_chains,
             threads_per_chain=n_threads,
             show_progress=True,
-            **asdict(self._config.fit_setup.fit_params),
+            **self._config.fit_setup.fit_params,
         )
 
         os.chdir(cur_dir)
