@@ -86,7 +86,7 @@ class Fitter:
 
         file_input = OmegaConf.load(file_name)
 
-        cls(OmegaConf.merge(base_input, file_input))
+        return cls(OmegaConf.merge(base_input, file_input))
 
     def make_fit(
         self,
