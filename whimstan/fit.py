@@ -318,15 +318,17 @@ class PosteriorContainer:
 
         if len(stan_fit) == 1:
 
-            stan_posterior = stan_fit[0]
+            stan_tmp = stan_fit[0]
 
         else:
 
-            stan_posterior = stan_fit[0]
+            stan_tmp = stan_fit[0]
 
             for idata in stan_fit[1:]:
 
-                stan_posterior = av.concat(stan_posterior, idata, dim="chain")
+                stan_tmp = av.concat(stan_tmp, idata, dim="chain")
+
+        stan_posterior = stan_tmp.posterior
 
         n_grbs: int = stan_posterior.K.stack(
             sample=("chain", "draw")
