@@ -122,6 +122,7 @@ class Fitter:
             model.build_model(use_opencl=use_opencl, opt_level=opt_level)
 
         log.info("building data")
+
         data = database.build_stan_data(
             use_absori=self._config.model_setup.use_absori,
             use_mw_gas=self._config.model_setup.use_mw_gas,
@@ -132,6 +133,8 @@ class Fitter:
             t_whim_upper=self._config.model_setup.model.t_whim_upper,
             t_whim_mu=self._config.model_setup.model.t_whim_mu,
             t_whim_sigma=self._config.model_setup.model.t_whim_sigma,
+            host_alpha_mu=self._config.model_setup.model.host_alpha_mu,
+            host_alpha_sigma=self._config.model_setup.model.host_alpha_sigma
         )
 
         log.info("launching fit")

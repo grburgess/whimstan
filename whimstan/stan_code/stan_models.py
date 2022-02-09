@@ -14,10 +14,6 @@ _available_models = {}
 
 _available_models["simple_xrt"] = "simple_xrt.stan"
 
-# HBM with galaxy gas and plaw
-_available_models["hbm_xrt"] = "host_hbm.stan"
-
-_available_models["hbm_xrt_skew"] = "host_hbm_skew.stan"
 
 
 # HBM with ONLY plaw`
@@ -33,6 +29,7 @@ _available_models["all_t_fixed"] = "all_t_fixed.stan"
 _available_models["whim"] = "whim.stan"
 _available_models["no_whim"] = "no_whim.stan"
 _available_models["no_whim_limit"] = "no_whim_limit.stan"
+_available_models["whim_limit"] = "whim_limit.stan"
 
 
 class StanModel:
