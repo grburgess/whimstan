@@ -119,9 +119,14 @@ parameters{
   real<lower=0> index_sigma;
   vector[N_grbs] index_raw;
 
+  // real log_K_mu_raw;
+  // real<lower=0> log_K_sigma;
+  // vector<lower= (log_flux_limit - (log_K_mu_raw + K_offset))/log_K_sigma>[N_grbs] log_K_raw; // raw energy flux norm
+
+
   real log_K_mu_raw;
   real<lower=0> log_K_sigma;
-  vector<lower= (log_flux_limit - (log_K_mu_raw + K_offset))/log_K_sigma>[N_grbs] log_K_raw; // raw energy flux norm
+  vector<lower=log_flux_limit>[N_grbs] log_K; // raw energy flux norm
 
 
 }
@@ -129,7 +134,7 @@ parameters{
 
 transformed parameters{
   vector[N_grbs] index;
-  vector<lower=log_flux_limit>[N_grbs] log_K;
+  // vector<lower=log_flux_limit>[N_grbs] log_K;
   vector[N_grbs] K;
   vector[N_grbs] log_nH_host;
   vector[N_grbs] nH_host_norm;
@@ -143,7 +148,7 @@ transformed parameters{
 
   index = index_mu + index_raw * index_sigma;
 
-  log_K = log_K_mu + log_K_raw * log_K_sigma;
+  // log_K = log_K_mu + log_K_raw * log_K_sigma;
 
   K =  pow(10.,log_K);
 
@@ -166,6 +171,8 @@ model{
 
   log_K_mu_raw ~ std_normal();
   log_K_sigma ~ std_normal();
+
+  log_K ~ normal(log_K_mu, log_K_sigma) T[log_flux_limit, ];
 
   index_mu ~ normal(-2, .2);
   index_sigma ~ std_normal();
