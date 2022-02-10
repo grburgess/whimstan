@@ -264,7 +264,7 @@ model{
   host_alpha ~ normal(host_alpha_mu, host_alpha_sigma);
 
   log_nH_host_mu_raw ~ std_normal();
-  log_nH_host_sigma ~ std_normal();
+  log_nH_host_sigma ~ normal(0.5, 0.5);
 
   log_nH_host_raw ~ std_normal();
 
@@ -272,11 +272,11 @@ model{
 
 
   log_K_mu_raw ~ std_normal();
-  log_K_sigma ~ std_normal();
+  log_K_sigma ~ normal(0.5, 0.5);
 
 
   index_mu ~ normal(-2, .2);
-  index_sigma ~ std_normal();
+  index_sigma ~ normal(0.5, 0.5);
 
   index_raw ~ std_normal();
   log_K_raw ~ std_normal();

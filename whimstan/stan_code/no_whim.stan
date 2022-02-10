@@ -155,7 +155,7 @@ model{
   host_alpha ~ normal(host_alpha_mu, host_alpha_sigma);
 
   log_nH_host_mu_raw ~ std_normal();
-  log_nH_host_sigma ~ std_normal();
+  log_nH_host_sigma ~ normal(0.5, 0.5);
 
 
   log_nH_host_raw ~ std_normal();
@@ -163,10 +163,10 @@ model{
   target += normal_lcdf(host_alpha * log_nH_host_raw | 0, 1);
 
   log_K_mu_raw ~ std_normal();
-  log_K_sigma ~ std_normal();
+  log_K_sigma ~ normal(0.5, 0.5);
 
   index_mu ~ normal(-2, .2);
-  index_sigma ~ std_normal();
+  index_sigma ~ normal(0.5, 0.5);
 
   index_raw ~ std_normal();
   log_K_raw ~ std_normal();
@@ -197,9 +197,9 @@ model{
                        log_fact_bkg,
                        o_plus_b,
                        alpha_bkg_factor,
-		       zero_mask
+                       zero_mask
 
-		       );
+                       );
 
 }
 
