@@ -172,7 +172,6 @@ model{
   log_K_mu_raw ~ std_normal();
   log_K_sigma ~ std_normal();
 
-  log_K ~ normal(log_K_mu, log_K_sigma) T[log_flux_limit, ];
 
   index_mu ~ normal(-2, .2);
   index_sigma ~ std_normal();
@@ -180,7 +179,10 @@ model{
   index_raw ~ std_normal();
 
   for(n in 1:N_grbs) {
-    log_K_raw[n] ~ std_normal() T[(log_flux_limit - (log_K_mu_raw + K_offset))/log_K_sigma,];
+
+      log_K[n] ~ normal(log_K_mu, log_K_sigma) T[log_flux_limit, ];
+
+      //    log_K_raw[n] ~ std_normal() T[(log_flux_limit - (log_K_mu_raw + K_offset))/log_K_sigma,];
   }
 
   target += reduce_sum(pll_no_whim,
