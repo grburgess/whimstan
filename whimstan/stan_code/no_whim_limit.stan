@@ -124,7 +124,7 @@ parameters{
   // vector<lower= (log_flux_limit - (log_K_mu_raw + K_offset))/log_K_sigma>[N_grbs] log_K_raw; // raw energy flux norm
 
 
-  real log_K_mu_raw;
+  real<lower=-3> log_K_mu_raw;
   real<lower=0> log_K_sigma;
   vector<lower=log_flux_limit>[N_grbs] log_K; // raw energy flux norm
 
@@ -140,7 +140,6 @@ transformed parameters{
   vector[N_grbs] nH_host_norm;
   real log_K_mu = log_K_mu_raw + K_offset;
   real log_nH_host_mu_tmp = log_nH_host_mu_raw + nh_host_offset;
-
 
   // non centered parameterizartion
 
@@ -179,10 +178,7 @@ model{
   index_raw ~ std_normal();
 
   for(n in 1:N_grbs) {
-
       log_K[n] ~ normal(log_K_mu, log_K_sigma) T[log_flux_limit, ];
-
-      //    log_K_raw[n] ~ std_normal() T[(log_flux_limit - (log_K_mu_raw + K_offset))/log_K_sigma,];
   }
 
   target += reduce_sum(pll_no_whim,
@@ -211,7 +207,6 @@ model{
                        o_plus_b,
                        alpha_bkg_factor,
 		       zero_mask
-
 		       );
 
 }
