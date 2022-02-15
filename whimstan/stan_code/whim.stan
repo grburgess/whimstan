@@ -63,8 +63,8 @@ transformed data{
   array[N_grbs] vector[N_chan] alpha_bkg_factor;
   array[N_grbs] vector[N_chan] zero_mask;
 
-  real log_t4_raw_lower = log_t_whim_lower -6;
-  real log_t4_raw_upper = log_t_whim_upper -6;
+  real log_t4_raw_lower = t_whim_lower - 6;
+  real log_t4_raw_upper = t_whim_upper - 6;
 
 
   int num_energy_base=size(sigma[1,1]);
