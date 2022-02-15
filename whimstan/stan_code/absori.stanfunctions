@@ -85,8 +85,9 @@ matrix calc_num(
 
 
 vector calc_num_vec(
-                    real temp,
-                    real xi,
+                    //real temp,
+		    t4,
+		    real xi,
                     array[] int atomicnumber,
                     //array[,,] real sigma,
                     array[,,] real ion,
@@ -111,7 +112,7 @@ vector calc_num_vec(
   real y;
   real s;
 
-  real t4=0.0001*temp;
+  //real t4=0.0001*temp;
   real tfact=1.033e-3/sqrt(t4);
   real xil=log(xi);
 

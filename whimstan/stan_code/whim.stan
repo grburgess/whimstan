@@ -63,6 +63,10 @@ transformed data{
   array[N_grbs] vector[N_chan] alpha_bkg_factor;
   array[N_grbs] vector[N_chan] zero_mask;
 
+  real log_t4_raw_lower = log_t_whim_lower -6;
+  real log_t4_raw_upper = log_t_whim_upper -6;
+
+
   int num_energy_base=size(sigma[1,1]);
   int num_atomicnumber=size(atomicnumber);
   int max_atomicnumber=max(atomicnumber);
@@ -194,7 +198,9 @@ parameters{
 
   // absori parameter
   real log_n0_whim_raw;
+
   real<lower=t_whim_lower, upper=t_whim_upper> log_t_whim;
+  real<lower=t_whim_lower, upper=t_whim_upper> log_t4_whim_raw;
 }
 
 
@@ -203,6 +209,8 @@ transformed parameters{
   vector[N_grbs] log_K; // log eflux
   vector[N_grbs] K;
   vector[N_grbs] log_nH_host;
+
+  real t4 = pow(10., log_t4_whim_raw +2);
 
   vector[N_grbs] nH_host_norm;
 
@@ -217,10 +225,10 @@ transformed parameters{
 
   vector[num_size] num;
 
-  real t_whim=pow(10,log_t_whim);
+  //  real t_whim=pow(10,log_t_whim);
 
 
-  num = calc_num_vec(t_whim,
+  num = calc_num_vec(t4,
                      xi,
                      atomicnumber,
                      ion,
@@ -284,9 +292,10 @@ model{
 
   //absori
 
-  log_n0_whim_raw ~ normal(0, 2);
+  log_n0_whim_raw ~ normal(0, 1);
 
-  log_t_whim ~ normal(t_whim_mu, t_whim_sigma);
+  // log_t_whim ~ normal(t_whim_mu, t_whim_sigma);
+  log_t4_whim_raw ~ std_normal();
 
 
   target += reduce_sum(pll_whim,
@@ -326,5 +335,8 @@ model{
 generated quantities {
 
   real log_nH_host_mu = log_nH_host_mu_tmp + 22;
-
+  real log_t4 = log_t4_whim_raw + 2;
+  real log_t_whim = log_t4 + 4;
+  real t_whim = pow(10, log_t_whim);
+  
 }
