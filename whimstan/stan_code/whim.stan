@@ -199,8 +199,8 @@ parameters{
   // absori parameter
   real log_n0_whim_raw;
 
-  real<lower=t_whim_lower, upper=t_whim_upper> log_t_whim;
-  real<lower=t_whim_lower, upper=t_whim_upper> log_t4_whim_raw;
+  //  real<lower=t_whim_lower, upper=t_whim_upper> log_t_whim;
+  real<lower=log_t4_raw_lower, upper=log_t4_raw_upper> log_t4_whim_raw;
 }
 
 
