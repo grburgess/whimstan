@@ -210,8 +210,6 @@ transformed parameters{
   vector[N_grbs] K;
   vector[N_grbs] log_nH_host;
 
-  real t4 = pow(10., log_t4_whim_raw +2);
-
   vector[N_grbs] nH_host_norm;
 
   real log_n0_whim = log_n0_whim_raw -7;
@@ -228,7 +226,7 @@ transformed parameters{
   //  real t_whim=pow(10,log_t_whim);
 
 
-  num = calc_num_vec(t4,
+  num = calc_num_vec(pow(10., log_t4_whim_raw +2),
                      xi,
                      atomicnumber,
                      ion,

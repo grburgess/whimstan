@@ -86,7 +86,7 @@ matrix calc_num(
 
 vector calc_num_vec(
                     //real temp,
-		    t4,
+		    real t4,
 		    real xi,
                     array[] int atomicnumber,
                     //array[,,] real sigma,
