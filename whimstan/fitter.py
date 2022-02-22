@@ -136,7 +136,7 @@ class Fitter:
         )
 
         if self._config.fit_setup.use_advi:
-
+            inits = {}
             log.info("launching ADVI initialization")
 
             vb_fit = model.model.variational(
@@ -147,7 +147,17 @@ class Fitter:
 
                 log.info(f"{k}: {v}")
 
-            self._config.fit_setup.fit_params.inits = vb_fit.stan_variables()
+                if isinstance(v, np.ndarray):
+
+                    inits[k] = v.tolist()
+
+                else:
+
+                    inits[k] = v
+
+                inits[k]
+
+            self._config.fit_setup.fit_params.inits = inits
 
         log.info("launching fit")
 
