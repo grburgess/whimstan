@@ -56,7 +56,7 @@ class FitParams:
 
 @dataclass
 class FitSetup:
-    use_advi: bool False
+    use_advi: bool = False
     n_chains: int = 2
     n_threads: Optional[int] = None
     fit_params: FitParams = FitParams()
