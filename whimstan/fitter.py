@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
 import arviz as av
+import numpy as np
 from omegaconf import MISSING, OmegaConf
 
 from .database import Database
@@ -40,7 +41,7 @@ class ModelSetup:
 @dataclass
 class FitParams:
     seed: int = 1234
-    inits: Optional[Dict[str, float]] = field(
+    inits: Optional[Dict[str, Any]] = field(
         default_factory=lambda: {
             "log_nH_host_mu_raw": 0,
             "log_nH_host_sigma": 0.5,
@@ -134,20 +135,19 @@ class Fitter:
             t_whim_sigma=self._config.model_setup.model.t_whim_sigma,
         )
 
-
         if self._config.fit_setup.use_advi:
 
             log.info("launching ADVI initialization")
 
-            vb_fit = model.model.variational(data=data,
-                              require_converged=False, seed=123)
+            vb_fit = model.model.variational(
+                data=data, require_converged=False, seed=123
+            )
 
-            for k,v in vb_fit.stan_variables().items():
+            for k, v in vb_fit.stan_variables().items():
 
                 log.info(f"{k}: {v}")
 
             self._config.fit_setup.fit_params.inits = vb_fit.stan_variables()
-        
 
         log.info("launching fit")
 
