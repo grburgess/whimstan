@@ -89,7 +89,6 @@ vector calc_num_vec(
 		    real t4,
 		    real xi,
                     array[] int atomicnumber,
-                    //array[,,] real sigma,
                     array[,,] real ion,
                     vector zero_matrix,
                     vector zero_vector,
@@ -104,7 +103,7 @@ vector calc_num_vec(
   real mult;
   real ratsum;
   int Ne;
-  //  real intgral;
+
   real e1;
   real e2;
   real arec;

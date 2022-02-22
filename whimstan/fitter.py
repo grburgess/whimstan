@@ -56,7 +56,7 @@ class FitParams:
 
 @dataclass
 class FitSetup:
-
+    use_advi: bool False
     n_chains: int = 2
     n_threads: Optional[int] = None
     fit_params: FitParams = FitParams()
@@ -133,6 +133,21 @@ class Fitter:
             t_whim_mu=self._config.model_setup.model.t_whim_mu,
             t_whim_sigma=self._config.model_setup.model.t_whim_sigma,
         )
+
+
+        if self._config.fit_setup.use_advi:
+
+            log.info("launching ADVI initialization")
+
+            vb_fit = model.variational(data=data,
+                              require_converged=False, seed=123)
+
+            for k,v in vb_fit.stan_variables():
+
+                log.info(f"{k}: {v}")
+
+            self._config.fit_setup.fit_params.inits = vb_fit.stan_variables()
+        
 
         log.info("launching fit")
 
