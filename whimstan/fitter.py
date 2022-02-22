@@ -142,7 +142,7 @@ class Fitter:
             vb_fit = model.model.variational(data=data,
                               require_converged=False, seed=123)
 
-            for k,v in vb_fit.stan_variables():
+            for k,v in vb_fit.stan_variables().items():
 
                 log.info(f"{k}: {v}")
 
