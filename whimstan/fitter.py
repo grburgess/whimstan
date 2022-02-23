@@ -140,7 +140,10 @@ class Fitter:
             log.info("launching ADVI initialization")
 
             vb_fit = model.model.variational(
-                data=data, require_converged=False, seed=123
+                data=data,
+                require_converged=False,
+                seed=123,
+                inits=self._config.fit_setup.fit_params.inits,
             )
 
             for k, v in vb_fit.stan_variables().items():
