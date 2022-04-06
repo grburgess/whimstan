@@ -55,7 +55,7 @@ data{
 
 
 transformed data{
-  int all_N[N_grbs];
+  array[N_grbs] int all_N;
 
   array[N_grbs] vector[N_chan] log_fact_obs;
   array[N_grbs] vector[N_chan] log_fact_bkg;
