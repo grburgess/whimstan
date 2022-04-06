@@ -95,11 +95,14 @@ class Fitter:
         clean_model: bool = False,
         use_opencl: bool = False,
         opt_level: Union[int, str] = 0,
+        database: Optional[Database] = None,
     ):
 
         """ """
 
-        database = Database.read(self._config.database)
+        if database is None:
+
+            database = Database.read(self._config.database)
 
         if self._config.fit_setup.n_threads is None:
 
