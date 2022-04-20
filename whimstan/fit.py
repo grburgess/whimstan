@@ -1240,7 +1240,7 @@ class Fit:
                 ax.loglog(
                     ene,
                     model_container.model_all.get_point_source_fluxes(0, ene),
-                    color=Colors.light_grey,
+                    color=Colors.lightgrey,
                     lw=0.5,
                 )
 
