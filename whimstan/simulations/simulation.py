@@ -184,6 +184,14 @@ class SpectrumFactory:
 
         #        self._spectra = []
 
+        # unpack here to avoid serialization issues
+
+        eflux = population.fluxes.latent.view(np.ndarray)
+        index = population.spec_idx.latent.view(np.ndarray)
+        ra = population.ra.latent.view(np.ndarray)
+        dec = population.dec.latent.view(np.ndarray)
+        distances = population.distances.latent.view(np.ndarray)
+
         def _gen_one_spectrum(i):
             name = f"grb00{i}"
 
@@ -207,11 +215,11 @@ class SpectrumFactory:
 
             sg = SpectrumGenerator(
                 name=name,
-                eflux=population.fluxes_latent[i],
-                index=population.spec_idx[i],
-                ra=population.ra[i],
-                dec=population.dec[i],
-                z=population.distances[i],
+                eflux=eflux[i],
+                index=index[i],
+                ra=ra[i],
+                dec=dec[i],
+                z=distances[i],
                 host_nh=host_nh,
                 mw_nh=mw_nh,
                 whim_n0=whim_n0,
@@ -223,13 +231,24 @@ class SpectrumFactory:
 
             return sg
 
-        self._spectra: List[SpectrumGenerator] = Parallel(n_jobs=n_jobs)(
-            delayed(_gen_one_spectrum)(i)
-            for i in progress_bar(
-                range(population.n_objects),
-                desc="Calculating the simulated datasets",
+        if n_jobs > 1:
+
+            self._spectra: List[SpectrumGenerator] = Parallel(n_jobs=n_jobs)(
+                delayed(_gen_one_spectrum)(i)
+                for i in progress_bar(
+                    range(population.n_objects),
+                    desc="calculating the simulated datasets",
+                )
             )
-        )
+        else:
+
+            self._spectra: List[SpectrumGenerator] = [
+                _gen_one_spectrum(i)
+                for i in progress_bar(
+                    range(population.n_objects),
+                    desc="calculating the simulated datasets",
+                )
+            ]
 
     def write_data(self, path="data", catalog_name="sim_cat.h5"):
 
