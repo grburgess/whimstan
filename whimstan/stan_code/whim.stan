@@ -66,6 +66,10 @@ transformed data{
   real log_t4_raw_lower = t_whim_lower - 6;
   real log_t4_raw_upper = t_whim_upper - 6;
 
+  real log_n0_whim_raw = 0;
+  real log_t4_whim_raw = 0;
+
+
 
   int num_energy_base=size(sigma[1,1]);
   int num_atomicnumber=size(atomicnumber);
@@ -172,8 +176,6 @@ transformed data{
 
   }
 
-  real log_n0_whim_raw = 0;
-  real log_t4_whim_raw = 0;
 
 }
 
@@ -292,10 +294,10 @@ model{
 
   //absori
 
-  log_n0_whim_raw ~ std_normal();
+  //  log_n0_whim_raw ~ std_normal();
 
   // log_t_whim ~ normal(t_whim_mu, t_whim_sigma);
-  log_t4_whim_raw ~ std_normal();
+  //log_t4_whim_raw ~ std_normal();
 
 
   target += reduce_sum(pll_whim,

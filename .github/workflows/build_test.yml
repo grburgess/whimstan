@@ -59,7 +59,7 @@ jobs:
         fi
 
 
-        pip3 install git+https://github.com/stan-dev/cmdstanpy.git flake8 numba numpy ipython scipy h5py matplotlib coverage pytest pytest-cov cython codecov arviz astropy tempita cryptography pyOpenSSL pyvo pyRXP;
+        pip3 install git+https://github.com/stan-dev/cmdstanpy.git flake8 numba numpy ipython scipy h5py matplotlib coverage pytest pytest-cov cython codecov arviz astropy tempita cryptography pyOpenSSL pyvo pyRXP ipython_genutils;
 
 
 
