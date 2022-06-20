@@ -188,7 +188,7 @@ parameters{
   real<lower=0> log_nH_host_sigma;
   vector[N_grbs] log_nH_host_raw;
 
-  real index_mu;
+  real<lower=-5, upper=0> index_mu;
   real<lower=0> index_sigma;
   vector[N_grbs] index_raw;
 
