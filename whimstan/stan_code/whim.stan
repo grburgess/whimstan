@@ -66,8 +66,8 @@ transformed data{
   real log_t4_raw_lower = t_whim_lower - 6;
   real log_t4_raw_upper = t_whim_upper - 6;
 
-  real log_n0_whim_raw = 0;
-  real log_t4_whim_raw = 0;
+  // real log_n0_whim_raw = 0;
+  // real log_t4_whim_raw = 0;
 
 
 
@@ -199,11 +199,11 @@ parameters{
 
   vector[N_grbs] log_K_raw; // raw energy flux norm
 
-  // // absori parameter
-  // real log_n0_whim_raw;
+  // absori parameter
+  real log_n0_whim_raw;
 
   // //  real<lower=t_whim_lower, upper=t_whim_upper> log_t_whim;
-  // real<lower=log_t4_raw_lower, upper=log_t4_raw_upper> log_t4_whim_raw;
+  real<lower=log_t4_raw_lower, upper=log_t4_raw_upper> log_t4_whim_raw;
 
 }
 
@@ -294,10 +294,10 @@ model{
 
   //absori
 
-  //  log_n0_whim_raw ~ std_normal();
+   log_n0_whim_raw ~ std_normal();
 
   // log_t_whim ~ normal(t_whim_mu, t_whim_sigma);
-  //log_t4_whim_raw ~ std_normal();
+  log_t4_whim_raw ~ std_normal();
 
 
   target += reduce_sum(pll_whim,
