@@ -7,7 +7,7 @@ import astropy.io.fits as fits
 import h5py
 import numpy as np
 import threeML
-from astromodels import Log_uniform_prior, Uniform_prior
+from astromodels import Log_uniform_prior, Uniform_prior, TemplateModel
 from astromodels.utils.data_files import _get_data_file_path
 from threeML.plugins.DispersionSpectrumLike import DispersionSpectrumLike
 from threeML.plugins.OGIPLike import OGIPLike
@@ -446,6 +446,7 @@ class Database:
         id: int,
         with_whim: bool = False,
         integration_method: str = "trapz",
+        whim_as_table: bool = True,
     ) -> threeML.BayesianAnalysis:
 
         grb: str = self._catalog.grbs[id]
@@ -457,7 +458,7 @@ class Database:
         plugin.model_integrate_method = integration_method
 
         model_container = self._catalog.catalog[grb].get_spectrum(
-            with_host=True, with_whim=with_whim
+            with_host=True, with_whim=with_whim, whim_as_table=whim_as_table
         )
 
         if with_whim:
@@ -465,17 +466,33 @@ class Database:
             model = model_container.model_all
             model_name = "all"
 
-            model.point_sources[
-                model_name
-            ].spectrum.main.composite.n0_4.prior = Log_uniform_prior(
-                lower_bound=1e-9, upper_bound=1e-4
-            )
+            if whim_as_table:
 
-            model.point_sources[
-                model_name
-            ].spectrum.main.composite.temp_4.prior = Log_uniform_prior(
-                lower_bound=1e4, upper_bound=1e7
-            )
+                model.point_sources[
+                    model_name
+                ].spectrum.main.composite.log_n0_4.prior = Uniform_prior(
+                    lower_bound=-9, upper_bound=-4
+                )
+
+                model.point_sources[
+                    model_name
+                ].spectrum.main.composite.log_temp_4.prior = Uniform_prior(
+                    lower_bound=4, upper_bound=7
+                )
+
+            else:
+
+                model.point_sources[
+                    model_name
+                ].spectrum.main.composite.n0_4.prior = Log_uniform_prior(
+                    lower_bound=1e-9, upper_bound=1e-4
+                )
+
+                model.point_sources[
+                    model_name
+                ].spectrum.main.composite.temp_4.prior = Log_uniform_prior(
+                    lower_bound=1e4, upper_bound=1e7
+                )
 
         else:
 
@@ -492,6 +509,14 @@ class Database:
         ].spectrum.main.composite.index_1.prior = Uniform_prior(
             lower_bound=-3, upper_bound=-1
         )
+
+        model.point_sources[
+            model_name
+        ].spectrum.main.composite.NH_2.prior = Log_uniform_prior(
+            lower_bound=1.0e19 / 1.0e22, upper_bound=1.0e26 / 1.0e22
+        )
+
+
         model.point_sources[
             model_name
         ].spectrum.main.composite.NH_3.prior = Log_uniform_prior(

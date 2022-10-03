@@ -6,7 +6,7 @@ import h5py
 import healpy as hp
 import matplotlib.pyplot as plt
 import numpy as np
-from astromodels import Model, PointSource, Powerlaw_Eflux, TbAbs
+from astromodels import Model, PointSource, Powerlaw_Eflux, TbAbs, TemplateModel
 from astropy.coordinates import SkyCoord
 from bb_astromodels import Integrate_Absori
 from threeML.plugins.DispersionSpectrumLike import DispersionSpectrumLike
@@ -132,7 +132,10 @@ class XRTCatalogEntry:
         return np.array(tmp)
 
     def get_spectrum(
-        self, with_whim: bool = True, with_host: bool = True
+        self,
+        with_whim: bool = True,
+        with_host: bool = True,
+        whim_as_table: bool = True,
     ) -> ModelContainer:
         """
 
@@ -157,20 +160,42 @@ class XRTCatalogEntry:
                 n0 = self.n0_sim
                 temp = self.temp_sim
 
-            spec_all = (
-                Powerlaw_Eflux(a=0.4, b=15)
-                * TbAbs(NH=self.nH_mw)
-                * TbAbs(redshift=self.z)
-                * Integrate_Absori(redshift=self.z, n0=n0, temp=temp)
-            )
+            if whim_as_table:
 
-            # fix the things we do not vary
+                tbm = TemplateModel("whim")
+                tbm.K.fix = True
+                tbm.scale.fix=True
+                tbm.zz = self.z
+                tbm.zz.fix = True
+                tbm.log_n0 = np.log10(n0)
+                tbm.log_temp = np.log10(temp)
 
-            spec_all.NH_2.fix = True
-            spec_all.xi_4.fix = True
-            spec_all.gamma_4.fix = True
-            spec_all.abundance_4.fix = True
-            spec_all.fe_abundance_4.fix = True
+
+
+                spec_all = (
+                    Powerlaw_Eflux(a=0.4, b=15)
+                    * TbAbs(NH=self.nH_mw)
+                    * TbAbs(redshift=self.z)
+                    * tbm
+                )
+
+
+            else:
+
+                spec_all = (
+                    Powerlaw_Eflux(a=0.4, b=15)
+                    * TbAbs(NH=self.nH_mw)
+                    * TbAbs(redshift=self.z)
+                    * Integrate_Absori(redshift=self.z, n0=n0, temp=temp)
+                )
+
+                # fix the things we do not vary
+
+                spec_all.NH_2.fix = True
+                spec_all.xi_4.fix = True
+                spec_all.gamma_4.fix = True
+                spec_all.abundance_4.fix = True
+                spec_all.fe_abundance_4.fix = True
 
             # kill all the bounds
 
