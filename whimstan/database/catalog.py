@@ -191,12 +191,13 @@ class XRTCatalogEntry:
 
                 # fix the things we do not vary
 
-                spec_all.NH_2.fix = True
+
                 spec_all.xi_4.fix = True
                 spec_all.gamma_4.fix = True
                 spec_all.abundance_4.fix = True
                 spec_all.fe_abundance_4.fix = True
 
+            spec_all.NH_2.fix = True
             # kill all the bounds
 
             for k, v in spec_all.parameters.items():

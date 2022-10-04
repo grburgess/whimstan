@@ -512,13 +512,6 @@ class Database:
 
         model.point_sources[
             model_name
-        ].spectrum.main.composite.NH_2.prior = Log_uniform_prior(
-            lower_bound=1.0e19 / 1.0e22, upper_bound=1.0e26 / 1.0e22
-        )
-
-
-        model.point_sources[
-            model_name
         ].spectrum.main.composite.NH_3.prior = Log_uniform_prior(
             lower_bound=1.0e19 / 1.0e22, upper_bound=1.0e26 / 1.0e22
         )
