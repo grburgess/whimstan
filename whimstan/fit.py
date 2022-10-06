@@ -15,8 +15,9 @@ from twopc import compute_postpc
 
 from .database import Database, ModelContainer, XRTCatalog, XRTCatalogEntry
 from .spectral_plot import display_posterior_model_counts
-from .utils import Colors, build_custom_continuous_cmap
+from .utils import build_custom_continuous_cmap
 from .utils.array_to_cmap import array_to_cmap
+from .utils.configuration import whim_stan_config
 from .utils.dist_plotter import dist_plotter
 from .utils.stats_tools import Quantile, extract_quantiles, rank_quantile_width
 
@@ -110,7 +111,7 @@ class HyperObject:
                 density=True,
                 lw=2,
                 fc=hist_color,
-                ec=Colors.black,
+                ec=whim_stan_config.plotting.colors.black,
                 alpha=0.75,
             )
 
@@ -161,7 +162,7 @@ class HyperObject:
                 self.simulated_parameter[sort_idx],
                 y,
                 s=object_size,
-                c=Colors.black,
+                c=whim_stan_config.plotting.colors.black,
             )
 
         # ax.plot(xgrid, stats.norm.pdf(xgrid, loc=, scale=0.5),  color="b")
@@ -733,9 +734,9 @@ class Fit:
 
     def plot_nh_host_distribution(
         self,
-        hist_color: str = Colors.grey,
-        dist_color: str = Colors.green,
-        object_color: str = Colors.purple,
+        hist_color: str = whim_stan_config.plotting.colors.grey,
+        dist_color: str = whim_stan_config.plotting.colors.green,
+        object_color: str = whim_stan_config.plotting.colors.purple,
         ax: Optional[plt.Axes] = None,
         n_bins: int = 10,
         as_cdf: bool = False,
@@ -784,9 +785,9 @@ class Fit:
 
     def plot_index_distribution(
         self,
-        hist_color: str = Colors.grey,
-        dist_color: str = Colors.green,
-        object_color: str = Colors.purple,
+        hist_color: str = whim_stan_config.plotting.colors.grey,
+        dist_color: str = whim_stan_config.plotting.colors.green,
+        object_color: str = whim_stan_config.plotting.colors.purple,
         ax: Optional[plt.Axes] = None,
         n_bins: int = 10,
         as_cdf: bool = False,
@@ -833,9 +834,9 @@ class Fit:
 
     def plot_flux_distribution(
         self,
-        hist_color: str = Colors.grey,
-        dist_color: str = Colors.green,
-        object_color: str = Colors.purple,
+        hist_color: str = whim_stan_config.plotting.colors.grey,
+        dist_color: str = whim_stan_config.plotting.colors.green,
+        object_color: str = whim_stan_config.plotting.colors.purple,
         ax: Optional[plt.Axes] = None,
         n_bins: int = 10,
         as_cdf: bool = False,
@@ -939,7 +940,11 @@ class Fit:
 
         return fig
 
-    def plot_nH_z(self, show_truth: bool = False) -> plt.Figure:
+    def plot_nH_z(
+        self,
+        show_truth: bool = False,
+        truth_color: str = whim_stan_config.plotting.colors.black,
+    ) -> plt.Figure:
 
         fig, ax = plt.subplots()
 
@@ -949,7 +954,7 @@ class Fit:
                 self._catalog.z,
                 1e22 * self._catalog.nH_host_sim,
                 "o",
-                color=Colors.black,
+                color=truth_color,
                 markersize=3.0,
                 alpha=1.0,
                 zorder=-1000,
@@ -959,7 +964,10 @@ class Fit:
 
         width = rank_quantile_width(qs)
 
-        my_cmap = build_custom_continuous_cmap(Colors.green, Colors.purple)
+        my_cmap = build_custom_continuous_cmap(
+            whim_stan_config.plotting.colors.green,
+            whim_stan_config.plotting.colors.purple,
+        )
 
         colors = array_to_cmap(width, cmap=my_cmap, use_log=True)
 
@@ -1079,8 +1087,11 @@ class Fit:
         fig = ppc.grb.plot(
             bkg_subtract=True,
             levels=[95, 68],
-            colors=[Colors.purple, Colors.dark_purple],
-            lc=Colors.green,
+            colors=[
+                whim_stan_config.plotting.colors.purple,
+                whim_stan_config.plotting.colors.dark_purple,
+            ],
+            lc=whim_stan_config.plotting.colors.green,
             min_rate=min_rate,
         )
 
@@ -1094,8 +1105,8 @@ class Fit:
         self,
         id: int,
         min_rate: float = -99,
-        model_color=Colors.green,
-        data_color=Colors.purple,
+        model_color=whim_stan_config.plotting.colors.green,
+        data_color=whim_stan_config.plotting.colors.purple,
         thin=2,
     ) -> plt.Figure:
 
@@ -1169,10 +1180,21 @@ class Fit:
         labels = []
         if self._has_whim_fit:
             labels.append("Host and whim posterior")
-            custom_lines.append(Line2D([0], [0], color=Colors.purple, lw=2))
+            custom_lines.append(
+                Line2D(
+                    [0],
+                    [0],
+                    color=whim_stan_config.plotting.colors.purple,
+                    lw=2,
+                )
+            )
         if self._has_host_fit:
             labels.append("Host posterior")
-            custom_lines.append(Line2D([0], [0], color=Colors.green, lw=2))
+            custom_lines.append(
+                Line2D(
+                    [0], [0], color=whim_stan_config.plotting.colors.green, lw=2
+                )
+            )
 
         samples = self._extract_samples(id)
 
@@ -1214,15 +1236,33 @@ class Fit:
 
         # plotting
 
-        dist_plotter(ene, y[0], ax, color=Colors.yellow, alpha=0.5)
+        dist_plotter(
+            ene,
+            y[0],
+            ax,
+            color=whim_stan_config.plotting.colors.yellow,
+            alpha=0.5,
+        )
 
         if self._has_host_fit:
 
-            dist_plotter(ene, y[1], ax, color=Colors.green, alpha=0.5)
+            dist_plotter(
+                ene,
+                y[1],
+                ax,
+                color=whim_stan_config.plotting.colors.green,
+                alpha=0.5,
+            )
 
         if self._has_whim_fit:
 
-            dist_plotter(ene, y[2], ax, color=Colors.purple, alpha=0.5)
+            dist_plotter(
+                ene,
+                y[2],
+                ax,
+                color=whim_stan_config.plotting.colors.purple,
+                alpha=0.5,
+            )
 
         if self._catalog.is_sim and show_sim:
 
@@ -1232,7 +1272,14 @@ class Fit:
 
                 # ok, we have some whim
                 labels.append("Total Simualted")
-                custom_lines.append(Line2D([0], [0], color=Colors.black, lw=2))
+                custom_lines.append(
+                    Line2D(
+                        [0],
+                        [0],
+                        color=whim_stan_config.plotting.colors.black,
+                        lw=2,
+                    )
+                )
                 model_container.model_all.set_free_parameters(
                     simulated_parameters
                 )
@@ -1240,7 +1287,7 @@ class Fit:
                 ax.loglog(
                     ene,
                     model_container.model_all.get_point_source_fluxes(0, ene),
-                    color=Colors.lightgrey,
+                    color=whim_stan_config.plotting.colors.lightgrey,
                     lw=0.5,
                 )
 
@@ -1248,7 +1295,14 @@ class Fit:
 
                 # ok, we have some host gas (MW as well)
                 labels.append("Simulation Host included")
-                custom_lines.append(Line2D([0], [0], color=Colors.grey, lw=2))
+                custom_lines.append(
+                    Line2D(
+                        [0],
+                        [0],
+                        color=whim_stan_config.plotting.colors.grey,
+                        lw=2,
+                    )
+                )
                 # labels.append("Simulation MW included")
                 # custom_lines.append(Line2D([0], [0], color=red, lw=2))
                 model_container.model_mw.set_free_parameters(
@@ -1265,7 +1319,7 @@ class Fit:
                 ax.loglog(
                     ene,
                     model_container.model_host.get_point_source_fluxes(0, ene),
-                    color=Colors.grey,
+                    color=whim_stan_config.plotting.colors.grey,
                     lw=0.5,
                 )
 
@@ -1276,7 +1330,7 @@ class Fit:
             ax.loglog(
                 ene,
                 model_container.model_pl.get_point_source_fluxes(0, ene),
-                color=Colors.black,
+                color=whim_stan_config.plotting.colors.black,
                 lw=0.5,
             )
 

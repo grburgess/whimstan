@@ -11,8 +11,9 @@ from astropy.coordinates import SkyCoord
 from bb_astromodels import Integrate_Absori
 from threeML.plugins.DispersionSpectrumLike import DispersionSpectrumLike
 
+from whimstan.utils.configuration import whim_stan_config
+
 from ..utils import (
-    Colors,
     build_custom_continuous_cmap,
     get_path_of_data_file,
     hex_to_rgb,
@@ -135,7 +136,7 @@ class XRTCatalogEntry:
         self,
         with_whim: bool = True,
         with_host: bool = True,
-        whim_as_table: bool = True,
+        whim_as_table: bool = False,
     ) -> ModelContainer:
         """
 
@@ -164,13 +165,11 @@ class XRTCatalogEntry:
 
                 tbm = TemplateModel("whim")
                 tbm.K.fix = True
-                tbm.scale.fix=True
+                tbm.scale.fix = True
                 tbm.zz = self.z
                 tbm.zz.fix = True
                 tbm.log_n0 = np.log10(n0)
                 tbm.log_temp = np.log10(temp)
-
-
 
                 spec_all = (
                     Powerlaw_Eflux(a=0.4, b=15)
@@ -178,7 +177,6 @@ class XRTCatalogEntry:
                     * TbAbs(redshift=self.z)
                     * tbm
                 )
-
 
             else:
 
@@ -190,7 +188,6 @@ class XRTCatalogEntry:
                 )
 
                 # fix the things we do not vary
-
 
                 spec_all.xi_4.fix = True
                 spec_all.gamma_4.fix = True
@@ -572,10 +569,11 @@ class XRTCatalog:
         ax.grid()
 
         new_cmap = build_custom_continuous_cmap(
-            hex_to_rgb(Colors.black), hex_to_rgb(Colors.purple)
+            hex_to_rgb(whim_stan_config.plotting.colors.black),
+            hex_to_rgb(whim_stan_config.plotting.colors.purple),
         )
 
-        new_cmap.set_under(Colors.black)
+        new_cmap.set_under(whim_stan_config.plotting.colors.black)
 
         ax.imshow_hpx(gas_mask.filled(-999), cmap=new_cmap, vmin=0)
 
@@ -585,7 +583,7 @@ class XRTCatalog:
             cc.galactic.l.deg,
             cc.galactic.b.deg,
             transform=ax.get_transform("galactic"),
-            c=Colors.green,
+            c=whim_stan_config.plotting.colors.green,
             s=5,
         )
 

@@ -7,13 +7,13 @@ import astropy.io.fits as fits
 import h5py
 import numpy as np
 import threeML
-from astromodels import Log_uniform_prior, Uniform_prior, TemplateModel
+from astromodels import Log_uniform_prior, Uniform_prior
 from astromodels.utils.data_files import _get_data_file_path
 from threeML.plugins.DispersionSpectrumLike import DispersionSpectrumLike
 from threeML.plugins.OGIPLike import OGIPLike
 from tqdm.auto import tqdm
 
-from whimstan.utils.colors import Colors
+from whimstan.utils.configuration import whim_stan_config
 
 from ..utils import setup_logger
 from ..utils.absori_precalc import AbsoriCalculations, sum_sigma_interp_precalc
@@ -127,7 +127,9 @@ class Database:
         grb_database = OrderedDict()
 
         for grb in tqdm(
-            catalog.grbs, colour=Colors.green, desc="reading GRB data"
+            catalog.grbs,
+            colour=whim_stan_config.plotting.colors.green,
+            desc="reading GRB data",
         ):
 
             grb_database[grb] = build_spectrum_like_from_hdf(f[grb])
@@ -193,7 +195,11 @@ class Database:
 
         with h5py.File(file_name, "w") as f:
 
-            for grb in tqdm(grbs, colour=Colors.green, desc="Reading GRBs"):
+            for grb in tqdm(
+                grbs,
+                colour=whim_stan_config.plotting.colors.green,
+                desc="Reading GRBs",
+            ):
 
                 cat_path = Path(cat_path)
                 bpath = cat_path / f"grb{grb}"
@@ -325,7 +331,11 @@ class Database:
 
         N_grbs = len(grbs)
 
-        for grb in tqdm(grbs, colour=Colors.green, desc="building GRBs"):
+        for grb in tqdm(
+            grbs,
+            colour=whim_stan_config.plotting.colors.green,
+            desc="building GRBs",
+        ):
 
             z.append(self._catalog.catalog[grb].z)
             if use_mw_gas:
