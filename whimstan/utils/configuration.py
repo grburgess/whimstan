@@ -36,7 +36,7 @@ class Colors:
 @dataclass
 class Plotting:
     colors: Colors = Colors()
-
+    use_legends: bool = True
 
 @dataclass
 class WHIMStanConfig:

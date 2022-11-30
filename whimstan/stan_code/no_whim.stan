@@ -72,7 +72,6 @@ transformed data{
 
   for (n in 1:N_grbs) {
 
-
     log_fact_obs[n] = logfactorial(counts[n]);
     log_fact_bkg[n] = logfactorial(bkg[n]);
 
@@ -109,7 +108,7 @@ transformed data{
 parameters{
 
   real log_nH_host_mu_raw;
-  real<upper=0> host_alpha; // skew normal paramter
+  //real<upper=0> host_alpha; // skew normal paramter
   real<lower=0> log_nH_host_sigma;
   vector[N_grbs] log_nH_host_raw;
 
@@ -152,7 +151,7 @@ transformed parameters{
 
 model{
 
-  host_alpha ~ normal(host_alpha_mu, host_alpha_sigma);
+  //host_alpha ~ normal(host_alpha_mu, host_alpha_sigma);
 
   log_nH_host_mu_raw ~ std_normal();
   log_nH_host_sigma ~ normal(0.5, 0.5);
@@ -160,7 +159,7 @@ model{
 
   log_nH_host_raw ~ std_normal();
 
-  target += normal_lcdf(host_alpha * log_nH_host_raw | 0, 1);
+  //target += normal_lcdf(host_alpha * log_nH_host_raw | 0, 1);
 
   log_K_mu_raw ~ std_normal();
   log_K_sigma ~ normal(0.5, 0.5);

@@ -118,6 +118,7 @@ class HyperObject:
         y = self._distribution(xgrid)
         dist_plotter(xgrid, y, ax, alpha=0.75, color=dist_color, lw=0)
 
+
     def plot_normal_population_distribution_cdf(
         self,
         ax: plt.Axes,
@@ -170,6 +171,7 @@ class HyperObject:
         y = self._distribution(xgrid, as_cdf=True)
 
         dist_plotter(xgrid, y, ax, alpha=0.75, color=dist_color, lw=0)
+
 
 
 @dataclass
