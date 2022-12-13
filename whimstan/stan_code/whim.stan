@@ -47,8 +47,8 @@ data{
   real K_offset;
   real nh_host_offset;
 
-  real host_alpha_mu;
-  real host_alpha_sigma;
+  //real host_alpha_mu;
+  //real host_alpha_sigma;
 
 
 }
@@ -183,7 +183,7 @@ parameters{
 
   //vector<upper=0>[N_grbs] index;
   real log_nH_host_mu_raw;
-  real<upper=0> host_alpha; // skew normal paramter
+  //  real<upper=0> host_alpha; // skew normal paramter
 
   real<lower=0> log_nH_host_sigma;
   vector[N_grbs] log_nH_host_raw;
@@ -271,14 +271,14 @@ transformed parameters{
 model{
 
 
-  host_alpha ~ normal(host_alpha_mu, host_alpha_sigma);
+  //  host_alpha ~ normal(host_alpha_mu, host_alpha_sigma);
 
   log_nH_host_mu_raw ~ std_normal();
   log_nH_host_sigma ~ normal(0.5, 0.5);
 
   log_nH_host_raw ~ std_normal();
 
-  target += normal_lcdf(host_alpha * log_nH_host_raw | 0, 1);
+  //  target += normal_lcdf(host_alpha * log_nH_host_raw | 0, 1);
 
 
   log_K_mu_raw ~ std_normal();
