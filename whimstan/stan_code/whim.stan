@@ -50,6 +50,7 @@ data{
   //real host_alpha_mu;
   //real host_alpha_sigma;
 
+  real test_n0 = -9.;
 
 }
 
@@ -200,7 +201,7 @@ parameters{
   vector[N_grbs] log_K_raw; // raw energy flux norm
 
   // absori parameter
-  real log_n0_whim_raw;
+  //  real log_n0_whim_raw;
 
   // //  real<lower=t_whim_lower, upper=t_whim_upper> log_t_whim;
   real<lower=log_t4_raw_lower, upper=log_t4_raw_upper> log_t4_whim_raw;
@@ -216,8 +217,8 @@ transformed parameters{
 
   vector[N_grbs] nH_host_norm;
 
-  real log_n0_whim = log_n0_whim_raw - 7;
-
+  //real log_n0_whim = log_n0_whim_raw - 7;
+  real log_n0_whim= test_n0;
 
   real log_K_mu = log_K_mu_raw + K_offset;
   real log_nH_host_mu_tmp = log_nH_host_mu_raw + nh_host_offset;
@@ -294,7 +295,7 @@ model{
 
   //absori
 
-   log_n0_whim_raw ~ std_normal();
+  //   log_n0_whim_raw ~ std_normal();
 
   // log_t_whim ~ normal(t_whim_mu, t_whim_sigma);
   log_t4_whim_raw ~ std_normal();
