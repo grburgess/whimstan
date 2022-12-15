@@ -50,7 +50,7 @@ data{
   //real host_alpha_mu;
   //real host_alpha_sigma;
 
-  real test_n0 = -9.;
+
 
 }
 
@@ -64,6 +64,7 @@ transformed data{
   array[N_grbs] vector[N_chan] alpha_bkg_factor;
   array[N_grbs] vector[N_chan] zero_mask;
 
+    real test_n0 = -9.;
   real log_t4_raw_lower = t_whim_lower - 6;
   real log_t4_raw_upper = t_whim_upper - 6;
 
