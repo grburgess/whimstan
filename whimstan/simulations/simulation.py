@@ -179,6 +179,7 @@ class SpectrumFactory:
         whim_T: Optional[float] = None,
         use_mw_gas: bool = True,
         use_host_gas: bool = True,
+        variable_whim: bool = False,
         n_jobs: int = 8,
     ):
 
@@ -192,6 +193,11 @@ class SpectrumFactory:
         dec = population.dec.latent.view(np.ndarray)
         distances = population.distances.latent.view(np.ndarray)
 
+        if variable_whim:
+
+            whim_T_values = population.whim_T.latent.view(np.ndarray)
+            whim_n0_values = population.whim_n0.latent.view(np.ndarray)
+
         def _gen_one_spectrum(i):
             name = f"grb00{i}"
 
@@ -204,6 +210,12 @@ class SpectrumFactory:
                 host_nh = population.host_nh[i] / 1.0e22
             else:
                 host_nh = None
+
+            if variable_whim:
+
+                whim_T = whim_T_values[i]
+                whim_n0 = whim_n0_values[i]
+
 
             try:
 
