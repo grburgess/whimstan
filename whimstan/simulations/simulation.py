@@ -212,10 +212,11 @@ class SpectrumFactory:
                 host_nh = None
 
             if variable_whim:
-
-                whim_T = whim_T_values[i]
-                whim_n0 = whim_n0_values[i]
-
+                whim_T_val = whim_T_values[i]
+                whim_n0_val = whim_n0_values[i]
+            else:
+                whim_T_val = whim_T
+                whim_n0_val = whim_n0
 
             try:
 
@@ -234,8 +235,8 @@ class SpectrumFactory:
                 z=distances[i],
                 host_nh=host_nh,
                 mw_nh=mw_nh,
-                whim_n0=whim_n0,
-                whim_T=whim_T,
+                whim_n0=whim_n0_val,
+                whim_T=whim_T_val,
                 use_mw_gas=use_mw_gas,
                 use_host_gas=use_host_gas,
                 exposure=exposure,
