@@ -126,6 +126,7 @@ class Fitter:
             model.build_model(use_opencl=use_opencl, opt_level=opt_level)
 
         log.info("building data")
+
         data = database.build_stan_data(
             use_absori=self._config.model_setup.use_absori,
             use_mw_gas=self._config.model_setup.use_mw_gas,
@@ -173,6 +174,7 @@ class Fitter:
             parallel_chains=n_chains,
             threads_per_chain=n_threads,
             show_progress=True,
+            refresh=5,
             **self._config.fit_setup.fit_params,
         )
 
