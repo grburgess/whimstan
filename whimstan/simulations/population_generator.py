@@ -238,6 +238,7 @@ class ObscuredFluxSampler(ps.DerivedLumAuxSampler):
         whim_T: Optional[float] = None,
         use_mw_gas: bool = True,
         use_host_gas: bool = True,
+        variable_whim: bool = False,
         plugin_for_counts: Optional[OGIPLike] = None,
     ):
         """
@@ -258,6 +259,7 @@ class ObscuredFluxSampler(ps.DerivedLumAuxSampler):
 
         self._use_mw_gas = use_mw_gas
         self._use_host_gas = use_host_gas
+        self._variable_whim: bool = variable_whim
 
         self._plugin_for_counts: Optional[OGIPLike] = plugin_for_counts
 
@@ -315,11 +317,23 @@ class ObscuredFluxSampler(ps.DerivedLumAuxSampler):
             # add on the WHIM if needed
             if (self._whim_n0 is not None) and (self._whim_T is not None):
 
-                spec = spec * Integrate_Absori(
-                    n0=self._whim_n0,
-                    temp=self._whim_T,
-                    redshift=self._distance[i],
-                )
+                if self._variable_whim:
+
+                    spec = spec * Integrate_Absori(
+                        n0=10.0
+                        ** self._secondary_samplers["whim_n0"].true_values[i],
+                        temp=10.0
+                        ** self._secondary_samplers["whim_T"].true_values[i],
+                        redshift=self._distance[i],
+                    )
+
+                else:
+
+                    spec = spec * Integrate_Absori(
+                        n0=self._whim_n0,
+                        temp=self._whim_T,
+                        redshift=self._distance[i],
+                    )
 
             # now compute the energy integral.
             # using the slower quad here because
@@ -400,6 +414,9 @@ def create_population(
     use_host_gas: bool = True,
     whim_n0: Optional[float] = None,
     whim_T: Optional[float] = None,
+    variable_whim: Optional[bool] = False,
+    whim_n0_sigma: Optional[float] = 0.5,
+    whim_T_sigma: Optional[float] = 0.5,
     demo_plugin: Optional[OGIPLike] = None,
     counts_limit: Optional[float] = None,
     exposure_high: Optional[float] = None,
@@ -465,6 +482,7 @@ def create_population(
     :returns:
 
     """
+
     if use_host_gas:
         if use_clouds:
 
@@ -533,6 +551,23 @@ def create_population(
     powerlaw.Lmin = Lmin
     powerlaw.alpha = alpha
 
+    # if we have variable WHIM then we need to create the
+    # variable WHIM sampler
+
+    if variable_whim:
+
+        whim_T_sampler = ps.aux_samplers.NormalAuxSampler(
+            name="whim_T", observed=False
+        )
+        whim_T_sampler.mu = np.log10(whim_T)
+        whim_T_sampler.sigma = whim_T_sigma
+
+        whim_n0_sampler = ps.aux_samplers.NormalAuxSampler(
+            name="whim_n0", observed=False
+        )
+        whim_n0_sampler.mu = np.log10(whim_n0)
+        whim_n0_sampler.sigma = whim_n0_sigma
+
     # now we compute the "obscured" luminosity
     # that would lead to the flux actually observed
     # by the XRT
@@ -544,6 +579,7 @@ def create_population(
         whim_T=whim_T,
         use_mw_gas=use_mw_gas,
         use_host_gas=use_host_gas,
+        variable_whim=variable_whim,
         plugin_for_counts=demo_plugin,
     )
 
@@ -553,6 +589,11 @@ def create_population(
         ls.set_secondary_sampler(host_nh)
     if use_mw_gas:
         ls.set_secondary_sampler(mw_nh)
+
+    if variable_whim:
+
+        ls.set_secondary_sampler(whim_T_sampler)
+        ls.set_secondary_sampler(whim_n0_sampler)
 
     if demo_plugin is not None:
 
