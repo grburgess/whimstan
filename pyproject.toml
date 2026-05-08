@@ -70,7 +70,12 @@ include = ["whimstan/", "tests/", "docs/", "tools/", "README.md", "LICENSE"]
 [tool.ruff]
 line-length = 88
 target-version = "py311"
-extend-exclude = ["whimstan/_version.py"]
+extend-exclude = [
+  "whimstan/_version.py",
+  "external",
+  "docs/conf.py",
+  "docs/notebooks",
+]
 
 [tool.ruff.lint]
 select = [
@@ -103,7 +108,7 @@ exclude = ["whimstan/_version.py", "tests/", "docs/"]
 plugins = []
 
 [[tool.mypy.overrides]]
-module = ["jaxspec.*", "healpy.*", "gdpyc.*", "h5py.*"]
+module = ["jax.*", "jaxspec.*", "healpy.*", "gdpyc.*", "h5py.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
