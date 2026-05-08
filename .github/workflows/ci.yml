@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [master, "rewrite/**", "vari-whim"]
+  pull_request:
+    branches: [master]
+  schedule:
+    - cron: "0 4 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ matrix.os }} / py${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install ${{ matrix.python }}
+
+      - name: Install
+        run: uv sync --extra dev
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Format check
+        run: uv run ruff format --check .
+
+      - name: Type check
+        run: uv run mypy whimstan/
+
+      - name: Test (fast)
+        if: github.event_name != 'schedule'
+        run: uv run pytest -m "not slow and not needs_grid" --cov=whimstan --cov-report=xml
+
+      - name: Test (full, nightly)
+        if: github.event_name == 'schedule'
+        run: uv run pytest --cov=whimstan --cov-report=xml
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
