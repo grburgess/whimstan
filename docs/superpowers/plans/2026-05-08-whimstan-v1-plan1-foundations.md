@@ -995,13 +995,13 @@ def test_observation_holds_counts() -> None:
         static=static,
         counts=jnp.array([10, 12]),
         bkg_counts=jnp.array([2, 3]),
-        bkg_exposure=jnp.float64(1000.0),
+        bkg_scale=jnp.array([0.05, 0.05]),
         ra_deg=0.0,
         dec_deg=0.0,
     )
     assert obs.name == "GRB000000"
     assert obs.counts.dtype == jnp.int32 or obs.counts.dtype == jnp.int64
-    assert obs.bkg_exposure_ratio == pytest.approx(1.0)
+    assert obs.bkg_scale.shape == (2,)
 ```
 
 - [ ] **Step 2: Run; expect import failure**
@@ -1114,13 +1114,19 @@ class Observation:
 
     Not a JAX PyTree; carries Python-side fields. Use `static` to access
     the JAX-side state for the forward model.
+
+    `bkg_scale` is the per-channel scaling factor α = effective_source_exposure
+    / effective_background_exposure (jaxspec's `folded_backratio`); used
+    directly by the Wachter+ 1979 W-stat profile likelihood. We do NOT carry
+    a scalar bkg_exposure because real OGIP files have channel-dependent
+    BACKSCAL/AREASCAL.
     """
 
     name: str
     static: ObservationStatic
     counts: Array            # (N_chan,) int
-    bkg_counts: Array        # (N_chan,) int
-    bkg_exposure: Array      # scalar, seconds
+    bkg_counts: Array        # (N_chan,) int — folded_background_unscaled
+    bkg_scale: Array         # (N_chan,) float — folded_backratio
     ra_deg: float
     dec_deg: float
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -1129,11 +1135,7 @@ class Observation:
         # Counts are integers; preserve their dtype but ensure they are JAX arrays.
         object.__setattr__(self, "counts", jnp.asarray(self.counts))
         object.__setattr__(self, "bkg_counts", jnp.asarray(self.bkg_counts))
-        object.__setattr__(self, "bkg_exposure", _as_f64(self.bkg_exposure))
-
-    @property
-    def bkg_exposure_ratio(self) -> float:
-        return float(self.bkg_exposure / self.static.exposure)
+        object.__setattr__(self, "bkg_scale", _as_f64(self.bkg_scale))
 ```
 
 - [ ] **Step 5: Run tests**
@@ -1168,7 +1170,21 @@ git commit -m "feat(data): Observation and ObservationStatic dataclasses, JAX Py
 - Create: `whimstan/data/ogip.py`
 - Create: `tests/data/test_ogip.py`
 
-**API note from Task 5 spike:** Update with the actual jaxspec attribute names. The pseudocode below assumes `ObsConfiguration.from_pha_file` and attributes `folded_counts`, `folded_background`, `exposure`, `transfer_matrix`, `in_energies`, `out_energies`. Adjust to match the recorded findings.
+**API findings from Task 5 spike (jaxspec 0.2.0):**
+- `ObsConfiguration.from_pha_file(pha_path, rmf_path, arf_path, bkg_path, low_energy, high_energy)` → xarray-backed obj
+- Attributes (all `xr.DataArray` unless noted):
+  - `folded_counts`: shape `(N_chan,)` int64 — observed source counts per channel
+  - `folded_background_unscaled`: shape `(N_chan,)` int64 — observed bkg counts (raw)
+  - `folded_background`: shape `(N_chan,)` float64 — bkg scaled by backratio (do not use directly for W-stat)
+  - `folded_backratio`: shape `(N_chan,)` float64 — per-channel α = source-effective / bkg-effective. Use this for W-stat scaling.
+  - `exposure`: scalar float64 (seconds)
+  - `transfer_matrix`: shape `(N_chan, N_ene)` float64 — RMF
+  - `area`: shape `(N_ene,)` float64 — ARF
+  - `in_energies`: numpy `ndarray` shape `(2, N_ene)` float64 — `[0,:]`=lo, `[1,:]`=hi (NOT `(N, 2)`)
+  - `out_energies`: numpy `ndarray` shape `(2, N_chan)` float64 — same convention
+- No `bkg_exposure` attribute. Use `folded_backratio` directly as W-stat α (per-channel) — preferred over a scalar exposure because real OGIP files have per-channel BACKSCAL/AREASCAL.
+
+**Implication for Task 11 dataclass:** Replace the scalar `bkg_exposure` with a per-channel `bkg_scale` array (`folded_backratio`). The `bkg_exposure_ratio` scalar property becomes irrelevant; remove it. Update tests accordingly.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1222,9 +1238,12 @@ def test_load_swift_xrt_observation(swift_xrt_dir: Path) -> None:
     assert obs.bkg_counts.shape == (obs.static.n_chan,)
     assert int(obs.bkg_counts.min()) >= 0
 
+    # Per-channel bkg scale (W-stat alpha) is positive and well-formed
+    assert obs.bkg_scale.shape == (obs.static.n_chan,)
+    assert float(obs.bkg_scale.min()) > 0
+
     # Exposure positive
     assert float(obs.static.exposure) > 0
-    assert float(obs.bkg_exposure) > 0
 
     # Metadata round-trip
     assert obs.name == "apc"
@@ -1332,21 +1351,20 @@ def load_swift_xrt_observation(
         high_energy=e_hi,
     )
 
-    # Map jaxspec attributes onto our schema.
-    # If the spike (Task 5) revealed different attribute names, change
-    # only this block.
-    counts = jnp.asarray(cfg.folded_counts)
-    bkg_counts = jnp.asarray(cfg.folded_background)
-    exposure = jnp.asarray(cfg.exposure)
-    bkg_exposure = jnp.asarray(getattr(cfg, "bkg_exposure", cfg.exposure))
+    # Map jaxspec 0.2.0 attributes onto our schema. Layout: in_energies
+    # and out_energies are shape (2, N) with [0,:] = lo and [1,:] = hi.
+    counts = jnp.asarray(cfg.folded_counts.values)
+    bkg_counts = jnp.asarray(cfg.folded_background_unscaled.values)
+    bkg_scale = jnp.asarray(cfg.folded_backratio.values)
+    exposure = jnp.asarray(cfg.exposure.values)
 
-    in_lo = jnp.asarray(cfg.in_energies[..., 0]).reshape(-1)
-    in_hi = jnp.asarray(cfg.in_energies[..., 1]).reshape(-1)
-    out_lo = jnp.asarray(cfg.out_energies[..., 0]).reshape(-1)
-    out_hi = jnp.asarray(cfg.out_energies[..., 1]).reshape(-1)
+    in_lo = jnp.asarray(cfg.in_energies[0, :])
+    in_hi = jnp.asarray(cfg.in_energies[1, :])
+    out_lo = jnp.asarray(cfg.out_energies[0, :])
+    out_hi = jnp.asarray(cfg.out_energies[1, :])
 
-    rmf = jnp.asarray(cfg.transfer_matrix)
-    arf = jnp.asarray(cfg.area)
+    rmf = jnp.asarray(cfg.transfer_matrix.values)
+    arf = jnp.asarray(cfg.area.values)
 
     static = ObservationStatic(
         ene_lo=in_lo,
@@ -1364,7 +1382,7 @@ def load_swift_xrt_observation(
         static=static,
         counts=counts,
         bkg_counts=bkg_counts,
-        bkg_exposure=bkg_exposure,
+        bkg_scale=bkg_scale,
         ra_deg=ra_deg,
         dec_deg=dec_deg,
     )
