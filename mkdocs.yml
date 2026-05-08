@@ -1,0 +1,44 @@
+site_name: whimstan
+site_description: Hierarchical Bayesian WHIM search in Swift-XRT GRB afterglows.
+repo_url: https://github.com/grburgess/whimstan
+docs_dir: docs
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: indigo
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_root_heading: true
+            show_source: false
+            docstring_style: numpy
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.arithmatex:
+      generic: true
+  - toc:
+      permalink: true
+
+extra_javascript:
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+nav:
+  - Home: index.md
+  - Specs:
+      - v1.0 design: superpowers/specs/2026-05-08-whimstan-v1-design.md
+  - Plans:
+      - "Plan 1 — Foundations": superpowers/plans/2026-05-08-whimstan-v1-plan1-foundations.md
