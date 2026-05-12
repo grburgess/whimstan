@@ -38,5 +38,6 @@ repos:
         additional_dependencies:
           - "numpy>=1.26"
           - "types-PyYAML"
+          - "rich>=13.7,<15"
         args: ["--config-file=pyproject.toml"]
         files: ^whimstan/
