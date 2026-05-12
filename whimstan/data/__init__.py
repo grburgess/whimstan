@@ -8,11 +8,13 @@ from whimstan.data.catalog import (
     load_catalog,
     load_packaged_catalog,
 )
+from whimstan.data.dataset import Dataset
 from whimstan.data.ogip import load_swift_xrt_observation
 from whimstan.data.types import Observation, ObservationStatic
 
 __all__ = [
     "CatalogEntry",
+    "Dataset",
     "Observation",
     "ObservationStatic",
     "filter_catalog",
