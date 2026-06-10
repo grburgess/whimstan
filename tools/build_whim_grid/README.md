@@ -40,7 +40,8 @@ Z for a future study.
 
 ## Output format
 
-`whim_opacity_grid_v1.h5` contains a single dataset `tau` of shape
-`(N_z, N_T, N_nH, N_E)` plus coordinate axes `redshift`, `log_T`, `log_nH`, and
-`energy_keV`.  The JAX trilinear interpolator in `whimstan/physics/whim_grid.py`
-loads this file at inference time.
+`whim_opacity_grid_v1.h5` contains a float32 dataset `tau` of shape
+`(N_T, N_n, N_z, N_E)` plus coordinate axes `log_T`, `log_n_H`, `z`, and
+`E_obs_keV`, and a `metadata` group of provenance attributes.  The JAX trilinear
+interpolator `WhimGrid.load` in `whimstan/physics/whim.py` loads this file at
+inference time.
