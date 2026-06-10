@@ -132,3 +132,9 @@ dmypy.json
 yapf*.py
 /docs/md/.virtual_documents/
 /docs/md/*.ipynb
+
+# CLOUDY build + grid pipeline outputs (regenerable via tools/build_whim_grid/Makefile)
+tools/build_whim_grid/c23.*/
+tools/build_whim_grid/*.tar.gz
+tools/build_whim_grid/runs/
+tools/build_whim_grid/dist/
